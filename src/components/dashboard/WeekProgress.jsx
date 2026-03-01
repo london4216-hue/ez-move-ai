@@ -19,20 +19,14 @@ export default function WeekProgress({ user }) {
 
   return (
     <div className="mx-3 mb-3 bg-white rounded-2xl p-4 shadow-sm">
-      <div className="flex items-start justify-between mb-3">
-        <div>
-          <p className="text-xs text-[#6B7280] font-medium uppercase tracking-wider">Current Phase</p>
-          <p className="text-lg font-bold text-[#1A1A2E]">
-            Week {currentWeek} — {WEEKS[currentWeek - 1]?.label}
-          </p>
-        </div>
-        {daysLeft !== null && (
-          <div className="text-right">
+      {daysLeft !== null && (
+        <div className="flex items-center justify-center mb-3">
+          <div className="text-center">
             <p className="text-2xl font-bold text-[#F97316]">{daysLeft}</p>
             <p className="text-xs text-[#6B7280]">days to close</p>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Progress bar */}
       <div className="w-full h-2 bg-[#F3F4F6] rounded-full overflow-hidden mb-3">
