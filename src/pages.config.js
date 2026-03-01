@@ -49,6 +49,7 @@
  */
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
@@ -59,4 +60,5 @@ export const PAGES = {
 export const pagesConfig = {
     mainPage: "Register",
     Pages: PAGES,
+    Layout: __Layout,
 };
