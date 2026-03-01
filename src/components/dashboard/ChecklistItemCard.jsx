@@ -180,5 +180,6 @@ export default function ChecklistItemCard({ item, completed, skipped, onComplete
     {showInventory && (
       <InventoryWalkthrough user={user} onClose={() => setShowInventory(false)} />
     )}
+    </>
   );
 }
