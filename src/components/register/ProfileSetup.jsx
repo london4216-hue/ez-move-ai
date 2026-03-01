@@ -1,20 +1,54 @@
-import { useState } from "react";
-import { format, parse } from "date-fns";
+import { useState, useEffect } from "react";
+import { format } from "date-fns";
+import { base44 } from "@/api/base44Client";
 
 export default function ProfileSetup({ onComplete }) {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [homeAddress, setHomeAddress] = useState("");
   const [user_type, setUserType] = useState("seller");
   const [close_date, setCloseDate] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const user = await base44.auth.me();
+        if (user?.full_name) {
+          const [first, ...rest] = user.full_name.split(" ");
+          setFirstName(first || "");
+          setLastName(rest.join(" ") || "");
+        }
+        if (user?.home_address) setHomeAddress(user.home_address);
+      } catch (e) {
+        console.error("Failed to load user:", e);
+      }
+    };
+    loadUser();
+  }, []);
 
   const handleSubmit = async () => {
-    if (!close_date) return;
+    if (!close_date || !homeAddress) {
+      setError("Please fill in all required fields");
+      return;
+    }
+    setError("");
     setSubmitting(true);
-    const today = new Date();
-    await onComplete({
-      user_type,
-      close_date,
-      registration_date: format(today, "yyyy-MM-dd")
-    });
+    try {
+      const today = new Date();
+      await onComplete({
+        first_name: firstName,
+        last_name: lastName,
+        home_address: homeAddress,
+        user_type,
+        close_date,
+        registration_date: format(today, "yyyy-MM-dd")
+      });
+    } catch (e) {
+      setError("Failed to save profile. Please try again.");
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -26,11 +60,56 @@ export default function ProfileSetup({ onComplete }) {
           </div>
           <span className="text-xl font-semibold text-[#1A1A2E] tracking-tight">EZ Move <span className="text-[#C85A17]">AI</span></span>
         </div>
-        <h1 className="text-2xl font-bold text-[#1A1A2E] mb-1">Almost there</h1>
-        <p className="text-sm text-[#6B7280]">Just need your closing date</p>
+        <h1 className="text-2xl font-bold text-[#1A1A2E] mb-1">Your profile</h1>
+        <p className="text-sm text-[#6B7280]">Verify your info and add closing details</p>
       </div>
 
-      <div className="space-y-5">
+      <div className="space-y-4">
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-3">
+            <p className="text-sm text-red-600">{error}</p>
+          </div>
+        )}
+
+        {/* Name Fields */}
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider block mb-1.5">First Name</label>
+            <input
+              type="text"
+              value={firstName}
+              onChange={e => setFirstName(e.target.value)}
+              placeholder="First name"
+              className="w-full px-4 py-3 rounded-xl border border-[#E5E7EB] bg-white text-[#1A1A2E] text-sm focus:outline-none focus:border-[#C85A17]"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider block mb-1.5">Last Name</label>
+            <input
+              type="text"
+              value={lastName}
+              onChange={e => setLastName(e.target.value)}
+              placeholder="Last name"
+              className="w-full px-4 py-3 rounded-xl border border-[#E5E7EB] bg-white text-[#1A1A2E] text-sm focus:outline-none focus:border-[#C85A17]"
+            />
+          </div>
+        </div>
+
+        {/* Home Address */}
+        <div>
+          <label className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider block mb-1.5">
+            Home Address <span className="text-[#C85A17]">*</span>
+          </label>
+          <input
+            type="text"
+            value={homeAddress}
+            onChange={e => setHomeAddress(e.target.value)}
+            placeholder="Street address, city, state, zip"
+            className="w-full px-4 py-3 rounded-xl border border-[#E5E7EB] bg-white text-[#1A1A2E] text-sm focus:outline-none focus:border-[#C85A17]"
+          />
+          <p className="text-[11px] text-[#9CA3AF] mt-1">Used to find local services near you</p>
+        </div>
+
         {/* Buyer / Seller */}
         <div>
           <p className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider mb-2">I am a</p>
@@ -59,14 +138,14 @@ export default function ProfileSetup({ onComplete }) {
             type="date"
             value={close_date}
             onChange={e => setCloseDate(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-[#E5E7EB] bg-white text-[#1A1A2E] text-sm focus:outline-none focus:border-[#C85A17] focus:shadow-[0_0_0_3px_rgba(200,90,23,0.15)]"
+            className="w-full px-4 py-3 rounded-xl border border-[#E5E7EB] bg-white text-[#1A1A2E] text-sm focus:outline-none focus:border-[#C85A17]"
           />
           <p className="text-[11px] text-[#9CA3AF] mt-2">Today: {format(new Date(), "MMM d, yyyy")}</p>
         </div>
 
         <button
           onClick={handleSubmit}
-          disabled={!close_date || submitting}
+          disabled={!close_date || !homeAddress || submitting}
           className="w-full py-4 rounded-2xl bg-[#C85A17] text-white font-semibold text-base
             disabled:opacity-40 active:scale-[0.98] transition-all mt-4 shadow-[0_8px_24px_rgba(200,90,23,0.3)]"
         >
