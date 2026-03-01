@@ -110,7 +110,23 @@ export default function ContactsRow({ user, refreshKey }) {
           style={{ paddingLeft: canScrollLeft ? 24 : 0, paddingRight: canScrollRight ? 24 : 0 }}
         >
           {all.map((c, i) => (
-            <div key={i} className={`flex-shrink-0 flex items-center gap-2 rounded-xl px-2.5 py-1.5 ${c.primary ? "bg-[#FFF7ED] border border-[#FED7AA]" : "bg-[#F5F3EF]"}`}>
+            <div key={i} className={`flex-shrink-0 flex items-center gap-2 rounded-xl px-2.5 py-1.5 relative group ${c.primary ? "bg-[#FFF7ED] border border-[#FED7AA]" : "bg-[#F5F3EF]"}`}>
+              {!c.primary && (
+                <div className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                  <button
+                    onClick={() => openEditModal(savedProviders[i - (realtorContact ? 1 : 0)])}
+                    className="w-5 h-5 bg-[#F97316] text-white rounded-full flex items-center justify-center"
+                  >
+                    <Edit2 className="w-2.5 h-2.5" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(savedProviders[i - (realtorContact ? 1 : 0)].id)}
+                    className="w-5 h-5 bg-[#EF4444] text-white rounded-full flex items-center justify-center"
+                  >
+                    <X className="w-2.5 h-2.5" />
+                  </button>
+                </div>
+              )}
               <div
                 className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0"
                 style={{ backgroundColor: c.color }}
@@ -128,6 +144,12 @@ export default function ContactsRow({ user, refreshKey }) {
               </div>
             </div>
           ))}
+          <button
+            onClick={openAddModal}
+            className="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-[#F5F3EF] hover:bg-[#F97316] text-[#6B7280] hover:text-white transition-all"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
         </div>
         {canScrollRight && (
           <button
