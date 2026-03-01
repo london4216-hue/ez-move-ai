@@ -169,21 +169,20 @@ function ItemList({ items, listColor, listBg, onRemove, onEmail, sending, sent, 
   
   return (
     <div className="flex flex-col gap-2">
-        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-          <div className="divide-y divide-[#F3F4F6] max-h-64 overflow-y-auto">
-            {items.map((item, idx) => (
-              <div key={idx} className="flex items-center gap-2 px-3 py-2.5">
-                <div className="flex-1 min-w-0">
-                  <p className="text-[11px] font-bold text-[#1A1A2E]">{item.name}</p>
-                  <p className={`text-[9px] font-semibold ${listColor}`}>{SIZE_LABELS[item.size]}: {item.sizeLabel}</p>
-                  <p className="text-[9px] text-[#9CA3AF]">{item.room}</p>
-                </div>
-                <button onClick={() => onRemove(idx)} className="text-[#D1D5DB] hover:text-[#EF4444] text-xs px-1">✕</button>
+      <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+        <div className="divide-y divide-[#F3F4F6] max-h-64 overflow-y-auto">
+          {items.map((item, idx) => (
+            <div key={idx} className="flex items-center gap-2 px-3 py-2.5">
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] font-bold text-[#1A1A2E]">{item.name}</p>
+                <p className={`text-[9px] font-semibold ${listColor}`}>{SIZE_LABELS[item.size]}: {item.sizeLabel}</p>
+                <p className="text-[9px] text-[#9CA3AF]">{item.room}</p>
               </div>
-            ))}
-          </div>
+              <button onClick={() => onRemove(idx)} className="text-[#D1D5DB] hover:text-[#EF4444] text-xs px-1">✕</button>
+            </div>
+          ))}
         </div>
-      )}
+      </div>
 
       <div className="bg-white rounded-2xl shadow-sm px-4 py-3">
         {sent ? (
