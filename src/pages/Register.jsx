@@ -18,6 +18,19 @@ export default function Register() {
 
   const handleProfileComplete = async (data) => {
     setError("");
+    try {
+      // Save profile data to user
+      await base44.auth.updateMe({
+        first_name: data.first_name,
+        last_name: data.last_name,
+        home_address: data.home_address,
+        user_type: data.user_type,
+        estimated_close_date: data.estimated_close_date,
+        registration_date: data.registration_date
+      });
+    } catch (e) {
+      console.error("Profile save error:", e);
+    }
     setStep("week1");
   };
 
@@ -25,10 +38,10 @@ export default function Register() {
     setError("");
     try {
       await base44.auth.updateMe({ onboarded: true });
+      setTimeout(() => navigate(createPageUrl("Dashboard")), 100);
     } catch (e) {
-      // Continue regardless
+      navigate(createPageUrl("Dashboard"));
     }
-    navigate(createPageUrl("Dashboard"));
   };
 
   return (
