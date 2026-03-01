@@ -53,7 +53,6 @@ export default function WeekProgress({ user }) {
             >
               {w.week <= currentWeek - 1 ? "✓" : w.week}
             </div>
-            <p className="text-[10px] font-semibold text-[#1A1A2E]">{w.label}</p>
           </div>
         ))}
       </div>
