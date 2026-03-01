@@ -227,6 +227,8 @@ export default function InventoryTab({ user }) {
   const [movingItems, setMovingItems] = useState([]);
   const [sendingMoving, setSendingMoving] = useState(false);
   const [sentMoving, setSentMoving] = useState(false);
+  const [draggedItem, setDraggedItem] = useState(null);
+  const [draggedSource, setDraggedSource] = useState(null);
 
   // Junk/Donation list state
   const [donateItems, setDonateItems] = useState([]);
@@ -234,6 +236,20 @@ export default function InventoryTab({ user }) {
   const [sentDonate, setSentDonate] = useState(false);
 
   const truck = estimateTruck(movingItems);
+
+  const handleMove = (idx, targetList) => {
+    if (draggedSource === "moving" && targetList === "donate") {
+      const item = movingItems[idx];
+      setMovingItems(prev => prev.filter((_, i) => i !== idx));
+      setDonateItems(prev => [...prev, item]);
+    } else if (draggedSource === "donate" && targetList === "moving") {
+      const item = donateItems[idx];
+      setDonateItems(prev => prev.filter((_, i) => i !== idx));
+      setMovingItems(prev => [...prev, item]);
+    }
+    setDraggedItem(null);
+    setDraggedSource(null);
+  };
 
   const handleEmailMoving = async () => {
     setSendingMoving(true);
