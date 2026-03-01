@@ -7,10 +7,12 @@ import ContactsRow from "@/components/dashboard/ContactsSidebar";
 import ChecklistPanel from "@/components/dashboard/ChecklistPanel";
 import MessagesCorner from "@/components/dashboard/MessagesCorner";
 import WeekProgress from "@/components/dashboard/WeekProgress";
+import AppointmentCalendar from "@/components/dashboard/AppointmentCalendar";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [contactsRefresh, setContactsRefresh] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -55,13 +57,14 @@ export default function Dashboard() {
       {/* Week progress steps */}
       <WeekProgress user={user} />
 
-      {/* Checklist */}
-      <div className="flex-1 px-3 pb-2 flex flex-col gap-3">
-        <ChecklistPanel user={user} />
+      {/* Checklist + Calendar */}
+      <div className="flex-1 px-3 pb-2 flex flex-col gap-3 overflow-y-auto">
+        <ChecklistPanel user={user} onProviderSaved={() => setContactsRefresh(r => r + 1)} />
+        <AppointmentCalendar user={user} />
       </div>
 
       {/* Key Contacts — compact bottom bar */}
-      <ContactsRow user={user} />
+      <ContactsRow user={user} refreshKey={contactsRefresh} />
     </div>
   );
 }
