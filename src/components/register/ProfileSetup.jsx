@@ -36,20 +36,15 @@ export default function ProfileSetup({ onComplete }) {
     }
     setError("");
     setSubmitting(true);
-    try {
-      const today = new Date();
-      await onComplete({
-        first_name: firstName,
-        last_name: lastName,
-        home_address: homeAddress,
-        user_type,
-        close_date,
-        registration_date: format(today, "yyyy-MM-dd")
-      });
-    } catch (e) {
-      setError("Failed to save profile. Please try again.");
-      setSubmitting(false);
-    }
+    const today = new Date();
+    await onComplete({
+      first_name: firstName,
+      last_name: lastName,
+      home_address: homeAddress,
+      user_type,
+      close_date,
+      registration_date: format(today, "yyyy-MM-dd")
+    });
   };
 
   return (
