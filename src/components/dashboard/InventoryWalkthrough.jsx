@@ -130,7 +130,7 @@ export default function InventoryWalkthrough({ user, onClose, selectedRooms }) {
           <>
             {/* Room list */}
             <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
-              {ROOMS.map(room => {
+              {activeRooms.map(room => {
                 const isOpen = expandedRoom === room.id;
                 const items = rooms[room.id];
                 return (
