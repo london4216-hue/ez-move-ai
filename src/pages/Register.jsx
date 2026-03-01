@@ -24,21 +24,8 @@ export default function Register() {
 
   const handleProfileComplete = async (data) => {
     setError("");
-    try {
-      const userData = {
-        first_name: data.first_name,
-        last_name: data.last_name,
-        home_address: data.home_address,
-        user_type: data.user_type,
-        close_date: data.close_date,
-        registration_date: data.registration_date
-      };
-      await base44.auth.updateMe(userData);
-      setStep("week1");
-    } catch (e) {
-      console.error("Profile update error:", e);
-      setError("Failed to save profile. Please try again.");
-    }
+    // Store profile data and move to week1 - will sync to user on week1 complete
+    setStep("week1");
   };
 
   const handleWeek1Complete = async () => {
