@@ -131,9 +131,9 @@ export default function ProfileSetup({ onComplete }) {
           <div className="flex gap-3">
             <div className="text-2xl">📅</div>
             <div>
-              <p className="text-xs font-bold text-[#C85A17] mb-0.5">30-Day Moving Timeline</p>
+              <p className="text-xs font-bold text-[#C85A17] mb-0.5">Your Moving Timeline</p>
               <p className="text-xs text-[#92400E]">
-                We'll break your move into 4 manageable weeks. You can update dates in your dashboard.
+                Your plan is tailored to your closing date. Week 1 starts today with essential tasks.
               </p>
             </div>
           </div>
