@@ -8,6 +8,7 @@ import ChecklistPanel from "@/components/dashboard/ChecklistPanel";
 import MessagesCorner from "@/components/dashboard/MessagesCorner";
 import WeekProgress from "@/components/dashboard/WeekProgress";
 import CalendarSheet from "@/components/dashboard/CalendarSheet.jsx";
+import InventoryTab from "@/components/dashboard/InventoryTab.jsx";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
