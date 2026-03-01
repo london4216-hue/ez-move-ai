@@ -163,16 +163,25 @@ function ItemPicker({ listType, onAdd }) {
   );
 }
 
-// List display + email
-function ItemList({ items, listColor, listBg, onRemove, onEmail, sending, sent, user, emptyLabel }) {
+// List display + email + drag & drop
+function ItemList({ items, listColor, listBg, onRemove, onEmail, sending, sent, user, emptyLabel, listType, onMove, otherItems }) {
   if (items.length === 0) return null;
+  
+  const [draggedIdx, setDraggedIdx] = useState(null);
   
   return (
     <div className="flex flex-col gap-2">
       <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
         <div className="divide-y divide-[#F3F4F6] max-h-64 overflow-y-auto">
           {items.map((item, idx) => (
-            <div key={idx} className="flex items-center gap-2 px-3 py-2.5">
+            <div 
+              key={idx} 
+              draggable
+              onDragStart={() => setDraggedIdx(idx)}
+              onDragEnd={() => setDraggedIdx(null)}
+              className={`flex items-center gap-2 px-3 py-2.5 cursor-move transition-all ${draggedIdx === idx ? "opacity-50 bg-[#F3F4F6]" : ""}`}
+            >
+              <GripHorizontal className="w-4 h-4 text-[#D1D5DB] flex-shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="text-[11px] font-bold text-[#1A1A2E]">{item.name}</p>
                 <p className={`text-[9px] font-semibold ${listColor}`}>{SIZE_LABELS[item.size]}: {item.sizeLabel}</p>
@@ -181,6 +190,15 @@ function ItemList({ items, listColor, listBg, onRemove, onEmail, sending, sent, 
               <button onClick={() => onRemove(idx)} className="text-[#D1D5DB] hover:text-[#EF4444] text-xs px-1">✕</button>
             </div>
           ))}
+        </div>
+        
+        {/* Drop zone for items from other list */}
+        <div 
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={() => onMove(draggedIdx, listType)}
+          className="border-t-2 border-dashed border-[#E5E7EB] px-3 py-3 text-center bg-[#FAFAFA] hover:bg-[#F3F4F6] transition-colors"
+        >
+          <p className="text-[10px] text-[#9CA3AF] font-semibold">Drop items here to {listType === "moving" ? "keep moving" : "donate/junk"}</p>
         </div>
       </div>
 
