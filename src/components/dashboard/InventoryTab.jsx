@@ -354,6 +354,9 @@ export default function InventoryTab({ user }) {
             sent={sentMoving}
             user={user}
             emptyLabel="Tap items above to build your moving list"
+            listType="moving"
+            onMove={handleMove}
+            otherItems={donateItems}
           />
         </>
       )}
@@ -372,6 +375,9 @@ export default function InventoryTab({ user }) {
             sent={sentDonate}
             user={user}
             emptyLabel="Add items to donate, sell, or junk-haul"
+            listType="donate"
+            onMove={handleMove}
+            otherItems={movingItems}
           />
         </>
       )}
