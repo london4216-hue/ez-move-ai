@@ -28,7 +28,7 @@ export default function CalendarSheet({ user }) {
   const [selected, setSelected] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [editingAppt, setEditingAppt] = useState(null);
-  const [form, setForm] = useState({ title: "", provider_name: "", phone: "", date: "", time: "", notes: "", status: "tentative" });
+  const [form, setForm] = useState({ title: "", provider_name: "", phone: "", date: "", time: "", notes: "", status: "tentative", reminder_times: [{ value: 24, type: "email" }] });
 
   const load = async () => {
     if (!user) return;
@@ -104,13 +104,13 @@ export default function CalendarSheet({ user }) {
 
   const openNew = (day) => {
     setEditingAppt(null);
-    setForm({ title: "", provider_name: "", phone: "", date: format(day, "yyyy-MM-dd"), time: "", notes: "", status: "tentative" });
+    setForm({ title: "", provider_name: "", phone: "", date: format(day, "yyyy-MM-dd"), time: "", notes: "", status: "tentative", reminder_times: [{ value: 24, type: "email" }] });
     setShowForm(true);
   };
 
   const openEdit = (appt) => {
     setEditingAppt(appt);
-    setForm({ title: appt.title, provider_name: appt.provider_name || "", phone: appt.phone || "", date: appt.date, time: appt.time || "", notes: appt.notes || "", status: appt.status || "tentative" });
+    setForm({ title: appt.title, provider_name: appt.provider_name || "", phone: appt.phone || "", date: appt.date, time: appt.time || "", notes: appt.notes || "", status: appt.status || "tentative", reminder_times: appt.reminder_times || [{ value: 24, type: "email" }] });
     setShowForm(true);
     setSelected(null);
   };
