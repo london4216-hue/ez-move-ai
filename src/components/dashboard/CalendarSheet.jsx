@@ -13,9 +13,18 @@ const statusColors = {
   cancelled: "#EF4444"
 };
 
+// Week data for auto-placement
+const WEEK_DATA = {
+  1: { title: "Week 1 — Foundation Week", items: ["Confirm what stays vs. goes", "Estate sale decision", "Request mover quotes", "Start donation / sell pile"] },
+  2: { title: "Week 2 — Clearing & Logistics", items: ["Finalize mover", "Schedule estate sale", "Order packing supplies", "Begin packing non-essentials", "Utility planning"] },
+  3: { title: "Week 3 — Home Prep Week", items: ["Painting (if needed)", "Junk removal", "Deep cleaning", "Patch & repair checklist"] },
+  4: { title: "Week 4 — Final Move & Close", items: ["Final packing", "Move-out day guidance", "Utility transfers", "Final clean", "Closing day checklist"] }
+};
+
 export default function CalendarSheet({ user }) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [appointments, setAppointments] = useState([]);
+  const [autoPlaced, setAutoPlaced] = useState(new Set());
   const [selected, setSelected] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [editingAppt, setEditingAppt] = useState(null);
@@ -25,6 +34,40 @@ export default function CalendarSheet({ user }) {
     if (!user) return;
     const data = await base44.entities.Appointment.filter({ user_id: user.id });
     setAppointments(data);
+    
+    // Auto-place week tasks if not already placed
+    if (user.close_date && data.length === 0) {
+      autoPlaceWeekTasks(user);
+    }
+  };
+
+  const autoPlaceWeekTasks = (userData) => {
+    if (!userData.close_date) return;
+    const closeDate = parseISO(userData.close_date);
+    const tasks = [];
+    
+    // Calculate week start dates working backwards from close date
+    for (let week = 4; week >= 1; week--) {
+      const weekStart = addDays(closeDate, -(5 - week) * 7);
+      const weekItems = WEEK_DATA[week]?.items || [];
+      
+      weekItems.forEach((title, idx) => {
+        const taskDate = addDays(weekStart, idx);
+        tasks.push({
+          title,
+          date: format(taskDate, "yyyy-MM-dd"),
+          user_id: userData.id,
+          status: "tentative",
+          alert_sent: false
+        });
+      });
+    }
+    
+    // Create appointments for auto-placed tasks
+    if (tasks.length > 0) {
+      tasks.forEach(task => base44.entities.Appointment.create(task).catch(() => {}));
+      setAutoPlaced(new Set(tasks.map(t => t.title)));
+    }
   };
 
   useEffect(() => { load(); }, [user]);
