@@ -55,10 +55,12 @@ export default function Dashboard() {
 
       {/* Three-zone layout */}
       <div className="flex-1 px-3 pb-6 flex flex-col gap-3">
-        {/* Top row: Contacts + Messages */}
-        <div className="flex gap-3 h-52">
+        {/* Top row: Contacts + Messages icon */}
+        <div className="flex gap-3 items-start">
           <ContactsSidebar user={user} />
-          <MessagesCorner user={user} />
+          <div className="flex items-center justify-end flex-1 pt-1">
+            <MessagesCorner user={user} />
+          </div>
         </div>
 
         {/* Main checklist */}
