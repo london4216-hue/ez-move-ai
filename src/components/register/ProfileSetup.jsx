@@ -97,19 +97,14 @@ export default function ProfileSetup({ onComplete }) {
         </div>
 
         {/* Home Address */}
-        <div>
-          <label className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider block mb-1.5">
-            Home Address <span className="text-[#C85A17]">*</span>
-          </label>
-          <input
-            type="text"
-            value={homeAddress}
-            onChange={e => setHomeAddress(e.target.value)}
-            placeholder="Street address, city, state, zip"
-            className="w-full px-4 py-3 rounded-xl border border-[#E5E7EB] bg-white text-[#1A1A2E] text-sm focus:outline-none focus:border-[#C85A17]"
-          />
-          <p className="text-[11px] text-[#9CA3AF] mt-1">Used to find local services near you</p>
-        </div>
+        <AddressAutocomplete
+          label="Home Address"
+          value={homeAddress}
+          onChange={setHomeAddress}
+          placeholder="Street address, city, state, zip"
+          required
+        />
+        <p className="text-[11px] text-[#9CA3AF] -mt-3">Used to find local services near you</p>
 
         {/* Buyer / Seller */}
         <div>
