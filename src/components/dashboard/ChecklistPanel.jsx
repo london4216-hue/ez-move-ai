@@ -8,7 +8,7 @@ const WEEK_DATA = {
     subtitle: "Get clarity + line up the big moving pieces early.",
     emoji: "🟦",
     items: [
-      { id: "w1-1", title: "Confirm what stays vs. goes", description: "Furniture, appliances, personal items", ai_search_query: null },
+      { id: "w1-1", title: "Confirm what stays vs. goes", description: "Furniture, appliances, personal items", ai_search_query: null, inventory_walkthrough: true },
       { id: "w1-2", title: "Estate sale decision", description: "Find local estate sale professionals", ai_search_query: "top rated estate sale professionals near me" },
       { id: "w1-3", title: "Request mover quotes", description: "Compare 3 top-rated movers side by side", ai_search_query: "top rated local movers near me" },
       { id: "w1-4", title: "Start donation / sell pile", description: "What's worth selling vs. donating", ai_search_query: null },
@@ -117,6 +117,7 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
             onSkip={() => handleSkip(item.id)}
             userAddress={user?.current_address}
             onProviderSaved={onProviderSaved}
+            user={user}
           />
         ))}
       </div>
