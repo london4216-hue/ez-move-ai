@@ -36,17 +36,15 @@ export default function WeekProgress({ user }) {
         />
       </div>
 
-      {/* Week dots */}
+      {/* Week indicators */}
       <div className="flex items-center justify-between">
         {WEEKS.map(w => (
-          <div key={w.week} className="flex flex-col items-center gap-1">
+          <div key={w.week} className="flex flex-col items-center">
             <div
-              className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all
-                ${w.week <= currentWeek ? "text-white shadow-md" : "text-[#9CA3AF] bg-[#F3F4F6]"}`}
+              className={`w-2 h-2 rounded-full transition-all
+                ${w.week <= currentWeek ? "shadow-md" : "bg-[#D1D5DB]"}`}
               style={w.week <= currentWeek ? { backgroundColor: w.color } : {}}
-            >
-              {w.week <= currentWeek - 1 ? "✓" : w.week}
-            </div>
+            />
           </div>
         ))}
       </div>
