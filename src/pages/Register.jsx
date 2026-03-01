@@ -3,15 +3,30 @@ import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
 import CodeEntry from "@/components/register/CodeEntry";
+import NamePhoneEntry from "@/components/register/NamePhoneEntry";
+import TextApproval from "@/components/register/TextApproval";
 import ProfileSetup from "@/components/register/ProfileSetup";
-import Week1Setup from "@/components/register/Week1Setup";
 
 export default function Register() {
-  const [step, setStep] = useState("code"); // code | profile | week1
+  const [step, setStep] = useState("code"); // code | namePhone | textApproval | profile
   const [error, setError] = useState("");
+  const [phone, setPhone] = useState("");
+  const [userData, setUserData] = useState({});
   const navigate = useNavigate();
 
   const handleCodeVerified = async () => {
+    setError("");
+    setStep("namePhone");
+  };
+
+  const handleNamePhoneComplete = (data) => {
+    setError("");
+    setPhone(data.phone);
+    setUserData(data);
+    setStep("textApproval");
+  };
+
+  const handleTextApprovalComplete = () => {
     setError("");
     setStep("profile");
   };
@@ -19,10 +34,10 @@ export default function Register() {
   const handleProfileComplete = async (data) => {
     setError("");
     try {
-      // Save profile data to user
       await base44.auth.updateMe({
-        first_name: data.first_name,
-        last_name: data.last_name,
+        first_name: userData.firstName,
+        last_name: userData.lastName,
+        phone: userData.phone,
         home_address: data.home_address,
         user_type: data.user_type,
         estimated_close_date: data.estimated_close_date,
@@ -31,11 +46,6 @@ export default function Register() {
     } catch (e) {
       console.error("Profile save error:", e);
     }
-    setStep("week1");
-  };
-
-  const handleWeek1Complete = async () => {
-    setError("");
     navigate(createPageUrl("Dashboard"));
   };
 
@@ -47,8 +57,9 @@ export default function Register() {
         </div>
       )}
       {step === "code" && <CodeEntry onVerified={handleCodeVerified} />}
+      {step === "namePhone" && <NamePhoneEntry onComplete={handleNamePhoneComplete} />}
+      {step === "textApproval" && <TextApproval phone={phone} onComplete={handleTextApprovalComplete} />}
       {step === "profile" && <ProfileSetup onComplete={handleProfileComplete} />}
-      {step === "week1" && <Week1Setup onComplete={handleWeek1Complete} />}
     </div>
   );
 }
