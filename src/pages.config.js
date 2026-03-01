@@ -49,12 +49,14 @@
  */
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import Home from './pages/Home';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "Register": Register,
     "Dashboard": Dashboard,
+    "Home": Home,
 }
 
 export const pagesConfig = {
