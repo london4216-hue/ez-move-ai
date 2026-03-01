@@ -72,49 +72,20 @@ export default function ProfileSetup({ onComplete }) {
           </div>
         ))}
 
-        {/* Current Address */}
-        <div className="relative">
-          <label className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider block mb-1.5">
-            Current Home Address <span className="text-[#4F7EFF]">*</span>
-          </label>
-          <input
-            type="text"
-            placeholder="Start typing your address..."
-            value={form.current_address}
-            onChange={e => handleAddressInput(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-[#E5E7EB] bg-white text-[#1A1A2E] text-sm focus:outline-none focus:border-[#4F7EFF] focus:shadow-[0_0_0_3px_rgba(79,126,255,0.1)]"
-          />
-          {loadingAddress && (
-            <div className="absolute right-3 top-10 w-4 h-4 border-2 border-[#4F7EFF] border-t-transparent rounded-full animate-spin" />
-          )}
-          {addressSuggestions.length > 0 && (
-            <div className="absolute z-10 w-full mt-1 bg-white rounded-xl shadow-xl border border-[#E5E7EB] overflow-hidden">
-              {addressSuggestions.map((s, i) => (
-                <button
-                  key={i}
-                  onClick={() => { setForm(f => ({ ...f, current_address: s })); setAddressSuggestions([]); }}
-                  className="w-full text-left px-4 py-3 text-sm text-[#1A1A2E] hover:bg-[#F5F3EF] transition-colors border-b border-[#F3F4F6] last:border-0"
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        <AddressAutocomplete
+          label="Current Home Address"
+          value={form.current_address}
+          onChange={val => setForm(f => ({ ...f, current_address: val }))}
+          placeholder="Start typing your address..."
+          required
+        />
 
-        {/* Destination Address */}
-        <div>
-          <label className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider block mb-1.5">
-            New Destination Address <span className="text-[#9CA3AF] font-normal">(optional)</span>
-          </label>
-          <input
-            type="text"
-            placeholder="For mileage calculation"
-            value={form.destination_address}
-            onChange={e => setForm(f => ({ ...f, destination_address: e.target.value }))}
-            className="w-full px-4 py-3 rounded-xl border border-[#E5E7EB] bg-white text-[#1A1A2E] text-sm focus:outline-none focus:border-[#4F7EFF] focus:shadow-[0_0_0_3px_rgba(79,126,255,0.1)]"
-          />
-        </div>
+        <AddressAutocomplete
+          label="New Destination Address"
+          value={form.destination_address}
+          onChange={val => setForm(f => ({ ...f, destination_address: val }))}
+          placeholder="For mileage calculation (optional)"
+        />
 
         <button
           onClick={handleSubmit}
