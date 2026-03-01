@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import AddressAutocomplete from "@/components/register/AddressAutocomplete";
 
 export default function ProfileSetup({ onComplete }) {
   const [form, setForm] = useState({
