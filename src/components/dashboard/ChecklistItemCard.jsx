@@ -107,11 +107,6 @@ export default function ChecklistItemCard({ item, completed, skipped, onComplete
             )}
           </div>
           <p className="text-[11px] text-[#6B7280]">{item.description}</p>
-          {!completed && (
-            <button onClick={onSkip} className="text-[10px] text-[#9CA3AF] underline mt-0.5 text-left">
-              Not applicable
-            </button>
-          )}
         </div>
 
         <div className="flex items-center gap-1">
@@ -139,13 +134,6 @@ export default function ChecklistItemCard({ item, completed, skipped, onComplete
               className="px-2 py-1 rounded-lg bg-[#FFF7ED] text-[#F97316] text-[10px] font-bold whitespace-nowrap"
             >
               {expanded ? "Close" : "Find Local"}
-            </button>
-          )}
-          {!completed && (
-            <button onClick={onSkip} className="p-1 text-[#D1D5DB] hover:text-[#9CA3AF]">
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
             </button>
           )}
         </div>
