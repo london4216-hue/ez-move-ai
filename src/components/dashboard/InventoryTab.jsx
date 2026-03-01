@@ -97,11 +97,11 @@ const SIZE_COLORS = {
 // Shared item picker used by both tabs
 function ItemPicker({ listType, onAdd }) {
   const [activeRoom, setActiveRoom] = useState(ALL_ROOMS[0]);
-  const [pendingItem, setPendingItem] = useState(null);
+  const [selectingItem, setSelectingItem] = useState(null);
 
   const addItem = (item, size) => {
     onAdd({ room: activeRoom, name: item.name, size, sizeLabel: item[size] });
-    setPendingItem(null);
+    setSelectingItem(null);
   };
 
   return (
@@ -111,7 +111,7 @@ function ItemPicker({ listType, onAdd }) {
         {ALL_ROOMS.map(room => (
           <button
             key={room}
-            onClick={() => { setActiveRoom(room); setPendingItem(null); }}
+            onClick={() => { setActiveRoom(room); setSelectingItem(null); }}
             className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold transition-all
               ${activeRoom === room ? "bg-[#F97316] text-white" : "bg-white text-[#6B7280] border border-[#E5E7EB]"}`}
           >
@@ -120,45 +120,47 @@ function ItemPicker({ listType, onAdd }) {
         ))}
       </div>
 
-      {/* Item grid */}
-      <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-        <div className="px-3 py-2 border-b border-[#F3F4F6]">
-          <p className="text-[10px] font-bold text-[#1A1A2E]">
-            {activeRoom} — tap item → pick size
-          </p>
-        </div>
-        <div className="px-3 py-2 flex flex-wrap gap-1.5">
-          {ROOM_CATALOG[activeRoom].map(item => (
-            <button
-              key={item.name}
-              onClick={() => setPendingItem(pendingItem?.name === item.name ? null : item)}
-              className={`text-[10px] px-2.5 py-1 rounded-full font-semibold border transition-all
-                ${pendingItem?.name === item.name
-                  ? "bg-[#1A1A2E] text-white border-[#1A1A2E]"
-                  : "bg-[#F5F3EF] text-[#374151] border-[#E5E7EB]"}`}
-            >
-              {item.name}
-            </button>
-          ))}
-        </div>
-
-        {pendingItem && (
-          <div className="px-3 pb-3 pt-2 border-t border-[#F3F4F6] bg-[#FAFAFA] space-y-1.5">
-            <p className="text-[10px] font-bold text-[#1A1A2E]">Size of {pendingItem.name}:</p>
+      {/* Size selection modal */}
+      {selectingItem ? (
+        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+          <div className="px-4 py-3 border-b border-[#F3F4F6] bg-[#FAFAFA]">
+            <button onClick={() => setSelectingItem(null)} className="text-[12px] text-[#6B7280] mb-2">← Back</button>
+            <p className="text-[12px] font-bold text-[#1A1A2E]">Select size for {selectingItem.name}</p>
+          </div>
+          <div className="px-4 py-3 space-y-2">
             {["s", "m", "l"].map(sz => (
               <button
                 key={sz}
-                onClick={() => addItem(pendingItem, sz)}
-                className={`w-full flex items-center gap-2 rounded-xl border px-3 py-2.5 text-left transition-all ${SIZE_COLORS[sz].pill} hover:opacity-80`}
+                onClick={() => addItem(selectingItem, sz)}
+                className={`w-full flex items-center gap-3 rounded-xl border-2 px-4 py-3 text-left transition-all ${SIZE_COLORS[sz].pill} hover:opacity-90`}
               >
-                <span className="text-[10px] font-black uppercase tracking-wide w-14 flex-shrink-0">{SIZE_LABELS[sz]}</span>
-                <span className="text-[10px] opacity-80 flex-1">— {pendingItem[sz]}</span>
-                <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${SIZE_COLORS[sz].active}`}>Add +</span>
+                <span className="text-[11px] font-bold uppercase tracking-wide w-16 flex-shrink-0">{SIZE_LABELS[sz]}</span>
+                <span className="text-[10px] flex-1 text-[#4B5563]">{selectingItem[sz]}</span>
               </button>
             ))}
           </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        /* Item grid */
+        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+          <div className="px-3 py-2 border-b border-[#F3F4F6]">
+            <p className="text-[10px] font-bold text-[#1A1A2E]">
+              {activeRoom} — tap item to add
+            </p>
+          </div>
+          <div className="px-3 py-2 flex flex-wrap gap-1.5">
+            {ROOM_CATALOG[activeRoom].map(item => (
+              <button
+                key={item.name}
+                onClick={() => setSelectingItem(item)}
+                className="text-[10px] px-2.5 py-1 rounded-full font-semibold border bg-[#F5F3EF] text-[#374151] border-[#E5E7EB] hover:bg-[#1A1A2E] hover:text-white transition-all"
+              >
+                {item.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
