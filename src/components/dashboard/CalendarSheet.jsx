@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import {
   format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval,
-  isSameDay, addMonths, subMonths, isPast, isToday
+  isSameDay, addMonths, subMonths, isPast, isToday, addDays, getISOWeek, startOfWeek, endOfWeek
 } from "date-fns";
 import { ChevronLeft, ChevronRight, Plus, X, Pencil, Trash2 } from "lucide-react";
 
