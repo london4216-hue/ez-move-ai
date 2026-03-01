@@ -284,13 +284,13 @@ export default function CalendarSheet({ user }) {
       )}
 
       {/* Upcoming section */}
-      {futureAppts.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+      {upcomingAndOverdue.filter(a => a.status !== "completed" && a.status !== "cancelled").length > 0 && (
+        <div className="bg-white rounded-2xl shadow-sm overflow-hidden flex flex-col">
           <div className="px-4 py-2 border-b border-[#F3F4F6]">
-            <p className="text-xs font-bold text-[#1A1A2E]">Upcoming</p>
+            <p className="text-xs font-bold text-[#1A1A2E]">Upcoming Tasks ({upcomingAndOverdue.filter(a => a.status !== "completed" && a.status !== "cancelled").length})</p>
           </div>
-          <div className="divide-y divide-[#F3F4F6]">
-            {futureAppts.map(a => (
+          <div className="divide-y divide-[#F3F4F6] max-h-96 overflow-y-auto">
+            {upcomingAndOverdue.filter(a => a.status !== "completed" && a.status !== "cancelled").map(a => (
               <div key={a.id} className="flex items-center gap-3 px-4 py-3">
                 <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: statusColors[a.status] || "#F97316" }} />
                 <div className="flex-1 min-w-0">
