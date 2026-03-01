@@ -14,13 +14,7 @@ export default function Register() {
   const handleCodeVerified = async () => {
     setError("");
     try {
-      const u = await base44.auth.me();
-      if (u?.onboarded) {
-        navigate(createPageUrl("Dashboard"));
-        return;
-      }
-      // Mark that code has been verified
-      await base44.auth.updateMe({ code_verified: true });
+      // Just move to profile setup - let profile handle auth updates
       setStep("profile");
     } catch (e) {
       console.error("Code verification error:", e);
