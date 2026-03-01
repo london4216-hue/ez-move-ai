@@ -167,8 +167,6 @@ function ItemPicker({ listType, onAdd }) {
 function ItemList({ items, listColor, listBg, onRemove, onEmail, sending, sent, user, emptyLabel, listType, onMove, otherItems }) {
   if (items.length === 0) return null;
   
-  const [draggedIdx, setDraggedIdx] = useState(null);
-  
   return (
     <div className="flex flex-col gap-2">
       <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
