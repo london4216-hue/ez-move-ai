@@ -2,9 +2,9 @@ import { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
-import CodeEntry from "../components/register/CodeEntry";
-import ProfileSetup from "../components/register/ProfileSetup";
-import Week1Setup from "../components/register/Week1Setup";
+import CodeEntry from "@/components/register/CodeEntry";
+import ProfileSetup from "@/components/register/ProfileSetup";
+import Week1Setup from "@/components/register/Week1Setup";
 
 export default function Register() {
   const [step, setStep] = useState("code"); // code | profile | week1

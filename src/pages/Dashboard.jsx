@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
-import StatusBar from "../components/dashboard/StatusBar";
-import ContactsSidebar from "../components/dashboard/ContactsSidebar";
-import ChecklistPanel from "../components/dashboard/ChecklistPanel";
-import MessagesCorner from "../components/dashboard/MessagesCorner";
-import WeekProgress from "../components/dashboard/WeekProgress";
+import StatusBar from "@/components/dashboard/StatusBar";
+import ContactsSidebar from "@/components/dashboard/ContactsSidebar";
+import ChecklistPanel from "@/components/dashboard/ChecklistPanel";
+import MessagesCorner from "@/components/dashboard/MessagesCorner";
+import WeekProgress from "@/components/dashboard/WeekProgress";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
