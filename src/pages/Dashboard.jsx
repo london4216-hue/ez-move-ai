@@ -71,6 +71,20 @@ export default function Dashboard() {
         {activeTab === "inventory" && <InventoryTab user={user} />}
       </div>
 
+      {/* Email & Clear controls */}
+      <div className="px-3 py-2 flex gap-2">
+        <button className="flex-1 bg-[#F97316] text-white py-2.5 rounded-xl text-[11px] font-bold hover:opacity-90 transition-opacity">
+          ✉️ Email
+        </button>
+        <select className="flex-1 bg-white border border-[#E5E7EB] py-2.5 rounded-xl text-[10px] font-semibold text-[#374151]">
+          <option value="moving">📦 Moving List</option>
+          <option value="donation">🫶 Donation List</option>
+        </select>
+        <button className="flex-1 bg-white border border-[#E5E7EB] text-[#9CA3AF] py-2.5 rounded-xl text-[10px] font-bold hover:text-[#EF4444] transition-colors">
+          Clear
+        </button>
+      </div>
+
       {/* Key Contacts — compact bottom bar */}
       <ContactsRow user={user} refreshKey={contactsRefresh} />
 
