@@ -55,13 +55,13 @@ export default function Dashboard() {
       {/* Week progress steps */}
       <WeekProgress user={user} />
 
-      {/* Key Contacts row */}
-      <ContactsRow user={user} />
-
       {/* Checklist */}
-      <div className="flex-1 px-3 pb-6 flex flex-col gap-3">
+      <div className="flex-1 px-3 pb-2 flex flex-col gap-3">
         <ChecklistPanel user={user} />
       </div>
+
+      {/* Key Contacts — compact bottom bar */}
+      <ContactsRow user={user} />
     </div>
   );
 }
