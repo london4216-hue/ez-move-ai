@@ -35,33 +35,36 @@ export default function CalendarSheet({ user }) {
     const data = await base44.entities.Appointment.filter({ user_id: user.id });
     setAppointments(data);
     
-    // Auto-place week tasks if not already placed
+    // Auto-place current week tasks if not already placed
     if (user.close_date && data.length === 0) {
-      autoPlaceWeekTasks(user);
+      autoPlaceCurrentWeekTasks(user);
     }
   };
 
-  const autoPlaceWeekTasks = (userData) => {
-    if (!userData.close_date) return;
+  const autoPlaceCurrentWeekTasks = (userData) => {
+    if (!userData.close_date || !userData.current_week) return;
     const closeDate = parseISO(userData.close_date);
+    const currentWeek = userData.current_week;
     const tasks = [];
     
-    // Calculate week start dates working backwards from close date
-    for (let week = 4; week >= 1; week--) {
-      const weekStart = addDays(closeDate, -(5 - week) * 7);
-      const weekItems = WEEK_DATA[week]?.items || [];
-      
-      weekItems.forEach((title, idx) => {
-        const taskDate = addDays(weekStart, idx);
-        tasks.push({
-          title,
-          date: format(taskDate, "yyyy-MM-dd"),
-          user_id: userData.id,
-          status: "tentative",
-          alert_sent: false
-        });
+    // Calculate current week start date
+    const weekStart = addDays(closeDate, -(5 - currentWeek) * 7);
+    const weekItems = WEEK_DATA[currentWeek]?.items || [];
+    
+    // Spread tasks across the week
+    const weekDays = 7;
+    const tasksPerDay = Math.ceil(weekItems.length / weekDays);
+    
+    weekItems.forEach((title, idx) => {
+      const dayOffset = Math.floor(idx / tasksPerDay);
+      const taskDate = addDays(weekStart, Math.min(dayOffset, 6)); // Cap at day 6 (last day of week)
+      tasks.push({
+        title,
+        date: format(taskDate, "yyyy-MM-dd"),
+        user_id: userData.id,
+        status: "tentative"
       });
-    }
+    });
     
     // Create appointments for auto-placed tasks
     if (tasks.length > 0) {
