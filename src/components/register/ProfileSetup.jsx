@@ -61,13 +61,13 @@ export default function ProfileSetup({ onComplete }) {
         ].map(({ key, label, required }) => (
           <div key={key}>
             <label className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider block mb-1.5">
-              {label} {required && <span className="text-[#4F7EFF]">*</span>}
+              {label} {required && <span className="text-[#F97316]">*</span>}
             </label>
             <input
               type="date"
               value={form[key]}
               onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
-              className="w-full px-4 py-3 rounded-xl border border-[#E5E7EB] bg-white text-[#1A1A2E] text-sm focus:outline-none focus:border-[#4F7EFF] focus:shadow-[0_0_0_3px_rgba(79,126,255,0.1)]"
+              className="w-full px-4 py-3 rounded-xl border border-[#E5E7EB] bg-white text-[#1A1A2E] text-sm focus:outline-none focus:border-[#F97316] focus:shadow-[0_0_0_3px_rgba(249,115,22,0.15)]"
             />
           </div>
         ))}
@@ -90,8 +90,8 @@ export default function ProfileSetup({ onComplete }) {
         <button
           onClick={handleSubmit}
           disabled={!isValid || submitting}
-          className="w-full py-4 rounded-2xl bg-[#4F7EFF] text-white font-semibold text-base
-            disabled:opacity-40 active:scale-[0.98] transition-all mt-2 shadow-[0_8px_24px_rgba(79,126,255,0.3)]"
+          className="w-full py-4 rounded-2xl bg-[#F97316] text-white font-semibold text-base
+            disabled:opacity-40 active:scale-[0.98] transition-all mt-2 shadow-[0_8px_24px_rgba(249,115,22,0.3)]"
         >
           {submitting ? "Setting up..." : "Continue to Week 1 Setup"}
         </button>

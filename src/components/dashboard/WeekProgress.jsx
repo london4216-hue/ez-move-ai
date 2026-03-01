@@ -1,10 +1,10 @@
 import { differenceInDays, parseISO, format } from "date-fns";
 
 const WEEKS = [
-  { week: 1, label: "Foundation", color: "#4F7EFF" },
-  { week: 2, label: "Logistics", color: "#7C3AED" },
-  { week: 3, label: "Home Prep", color: "#059669" },
-  { week: 4, label: "Close & Move", color: "#D97706" },
+  { week: 1, label: "Foundation", color: "#F97316" },
+  { week: 2, label: "Logistics", color: "#EF4444" },
+  { week: 3, label: "Home Prep", color: "#F59E0B" },
+  { week: 4, label: "Close & Move", color: "#DC2626" },
 ];
 
 export default function WeekProgress({ user }) {
@@ -38,7 +38,7 @@ export default function WeekProgress({ user }) {
       <div className="w-full h-2 bg-[#F3F4F6] rounded-full overflow-hidden mb-3">
         <div
           className="h-full rounded-full transition-all duration-500"
-          style={{ width: `${progress}%`, background: "linear-gradient(90deg, #4F7EFF, #7C3AED)" }}
+          style={{ width: `${progress}%`, background: "linear-gradient(90deg, #F97316, #EF4444)" }}
         />
       </div>
 

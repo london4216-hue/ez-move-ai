@@ -91,13 +91,13 @@ export default function ChecklistPanel({ user }) {
       <div className="px-4 pt-3 pb-2">
         <div className="flex items-center justify-between mb-1">
           <h2 className="text-sm font-bold text-[#1A1A2E]">{weekData.title}</h2>
-          <span className="text-xs font-semibold text-[#4F7EFF]">{progress}%</span>
+          <span className="text-xs font-semibold text-[#F97316]">{progress}%</span>
         </div>
         <p className="text-xs text-[#6B7280] mb-2">{weekData.subtitle}</p>
         <div className="w-full h-1.5 bg-[#F3F4F6] rounded-full overflow-hidden">
           <div
             className="h-full rounded-full transition-all duration-500"
-            style={{ width: `${progress}%`, background: "linear-gradient(90deg, #4F7EFF, #7C3AED)" }}
+            style={{ width: `${progress}%`, background: "linear-gradient(90deg, #F97316, #EF4444)" }}
           />
         </div>
         {progress === 100 && (
