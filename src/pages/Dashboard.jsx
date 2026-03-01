@@ -7,11 +7,13 @@ import ContactsRow from "@/components/dashboard/ContactsSidebar";
 import ChecklistPanel from "@/components/dashboard/ChecklistPanel";
 import MessagesCorner from "@/components/dashboard/MessagesCorner";
 import WeekProgress from "@/components/dashboard/WeekProgress";
+import CalendarSheet from "@/components/dashboard/CalendarSheet";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [contactsRefresh, setContactsRefresh] = useState(0);
+  const [activeTab, setActiveTab] = useState("checklist");
   const navigate = useNavigate();
 
   useEffect(() => {
