@@ -1,131 +1,126 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Trash2, Mail, Loader2, CheckCircle2, Truck } from "lucide-react";
+import { Plus, Mail, Loader2, CheckCircle2, X } from "lucide-react";
 
-// Real mover item catalog with sizes movers care about
+// Mover-aligned catalog: each item has S/M/L meaning real movers use
+// Size labels match industry standard for weight/truck-space estimation
 const ROOM_CATALOG = {
   "Living Room": [
-    { name: "Sofa", sizes: ["Loveseat (sm)", "Sofa 3-seat (md)", "Sectional (lg)", "Sleeper Sofa (xl)"] },
-    { name: "Coffee Table", sizes: ["Small", "Medium", "Large", "Ottoman"] },
-    { name: "TV", sizes: ['Under 40"', '40–55"', '55–75"', '75"+ (xl)'] },
-    { name: "TV Stand / Console", sizes: ["Small", "Medium", "Large/Hutch"] },
-    { name: "Bookcase", sizes: ["Small (2-shelf)", "Medium (4-shelf)", "Large (6-shelf)", "Wall Unit (xl)"] },
-    { name: "Armchair / Recliner", sizes: ["Armchair (sm)", "Recliner (md)", "Oversized Recliner (lg)"] },
-    { name: "Lamp", sizes: ["Table Lamp (sm)", "Floor Lamp (md)", "Arc Lamp (lg)"] },
-    { name: "Rug", sizes: ["5x7 (sm)", "8x10 (md)", "9x12 (lg)", "Runner"] },
-    { name: "Side Table", sizes: ["Small", "Medium"] },
-    { name: "Entertainment Center", sizes: ["Medium", "Large", "Full Wall Unit (xl)"] },
+    { name: "Sofa", s: "Loveseat", m: "3-Seat Sofa", l: "Sectional / Sleeper" },
+    { name: "Coffee Table", s: "Small Ottoman", m: "Standard Table", l: "Large/Storage Table" },
+    { name: "TV", s: 'Under 43"', m: '43–65"', l: '65"+ / Wall Mount' },
+    { name: "TV Stand", s: "Open Console", m: "Standard Cabinet", l: "Hutch / Wall Unit" },
+    { name: "Bookcase", s: "2–3 Shelf", m: "4–5 Shelf", l: "6+ Shelf / Wide" },
+    { name: "Armchair", s: "Accent Chair", m: "Armchair", l: "Oversized Recliner" },
+    { name: "Lamp", s: "Table Lamp", m: "Floor Lamp", l: "Arc / Tall Lamp" },
+    { name: "Rug", s: "5×7 or smaller", m: "8×10", l: "9×12 or larger" },
+    { name: "Side Table", s: "Small", m: "Standard", l: "Large w/ Shelves" },
+    { name: "Entertainment Center", s: "Corner Unit (sm)", m: "Standard Center", l: "Full Wall Unit" },
   ],
   "Kitchen": [
-    { name: "Refrigerator", sizes: ["Mini Fridge (sm)", "Standard (md)", "French Door (lg)", "Side-by-Side (xl)"] },
-    { name: "Dishwasher", sizes: ["Countertop (sm)", "Standard 24\" (md)", "Wide 30\" (lg)"] },
-    { name: "Microwave", sizes: ["Countertop (sm)", "Over-Range (md)", "Drawer (lg)"] },
-    { name: "Kitchen Table", sizes: ["2-seat (sm)", "4-seat (md)", "6-seat (lg)", "8+ seat (xl)"] },
-    { name: "Kitchen Chairs", sizes: ["Set of 2 (sm)", "Set of 4 (md)", "Set of 6 (lg)"] },
-    { name: "Bar Stools", sizes: ["Counter Height 2x", "Counter Height 4x", "Bar Height 2x", "Bar Height 4x"] },
-    { name: "Kitchen Island", sizes: ["Small Cart", "Medium Island", "Large Island (xl)"] },
-    { name: "Small Appliances (box)", sizes: ["1 box (sm)", "2 boxes (md)", "3+ boxes (lg)"] },
+    { name: "Refrigerator", s: "Mini / Bar Fridge", m: "Standard 30\"", l: "French Door / Side-by-Side" },
+    { name: "Dishwasher", s: "Countertop", m: "Standard 24\"", l: "Wide 30\"+" },
+    { name: "Microwave", s: "Countertop", m: "Over-Range", l: "Built-in Drawer" },
+    { name: "Kitchen Table", s: "2–3 Person", m: "4–5 Person", l: "6–8+ Person" },
+    { name: "Kitchen Chairs", s: "2 Chairs", m: "4 Chairs", l: "6+ Chairs" },
+    { name: "Bar Stools", s: "2 Counter-Height", m: "4 Counter-Height", l: "4+ Bar-Height" },
+    { name: "Kitchen Island", s: "Rolling Cart", m: "Medium Island", l: "Large Fixed Island" },
+    { name: "Appliance Boxes", s: "1 Box", m: "2–3 Boxes", l: "4+ Boxes" },
   ],
   "Master Bedroom": [
-    { name: "Bed Frame", sizes: ["Twin", "Full", "Queen", "King", "Cal King"] },
-    { name: "Mattress", sizes: ["Twin", "Full", "Queen", "King", "Cal King"] },
-    { name: "Dresser", sizes: ["Small 4-drawer", "Medium 6-drawer", "Large 8-drawer", "Double Dresser (xl)"] },
-    { name: "Nightstand", sizes: ["Small", "Medium (with drawer)", "Large Chest"] },
-    { name: "Wardrobe / Armoire", sizes: ["Small", "Medium", "Large", "Extra Large"] },
-    { name: "Vanity / Mirror", sizes: ["Tabletop (sm)", "Standing (md)", "Full Vanity Set (lg)"] },
-    { name: "Chest of Drawers", sizes: ["3-drawer (sm)", "5-drawer (md)", "7-drawer (lg)"] },
+    { name: "Bed Frame", s: "Twin / Full", m: "Queen", l: "King / Cal King" },
+    { name: "Mattress", s: "Twin / Full", m: "Queen", l: "King / Cal King" },
+    { name: "Dresser", s: "3–4 Drawer", m: "5–6 Drawer", l: "7–8 Drawer / Double" },
+    { name: "Nightstand", s: "Small / Floating", m: "Standard w/ Drawer", l: "Large Chest" },
+    { name: "Wardrobe", s: "Small Armoire", m: "Standard Wardrobe", l: "Large / Walk-in Unit" },
+    { name: "Vanity", s: "Tabletop Vanity", m: "Standing Vanity", l: "Full Vanity Set" },
+    { name: "Mirror", s: "Small Hanging", m: "Full-Length Standing", l: "Large Framed" },
   ],
   "Bedroom 2 / 3": [
-    { name: "Bed Frame", sizes: ["Twin", "Full", "Queen", "King"] },
-    { name: "Mattress", sizes: ["Twin", "Full", "Queen", "King"] },
-    { name: "Dresser", sizes: ["Small 4-drawer", "Medium 6-drawer", "Large 8-drawer"] },
-    { name: "Desk", sizes: ["Small Writing Desk", "Standard Desk", "L-Shaped (lg)", "Standing Desk"] },
-    { name: "Desk Chair", sizes: ["Basic (sm)", "Ergonomic (md)", "Executive (lg)"] },
-    { name: "Bookcase", sizes: ["Small (2-shelf)", "Medium (4-shelf)", "Large (6-shelf)"] },
+    { name: "Bed Frame", s: "Twin / Bunk", m: "Full", l: "Queen / King" },
+    { name: "Mattress", s: "Twin / Bunk", m: "Full", l: "Queen / King" },
+    { name: "Dresser", s: "3–4 Drawer", m: "5–6 Drawer", l: "7–8 Drawer" },
+    { name: "Desk", s: "Small Writing Desk", m: "Standard Desk", l: "L-Shaped / Standing" },
+    { name: "Desk Chair", s: "Basic / Folding", m: "Standard Ergonomic", l: "Large Executive" },
+    { name: "Bookcase", s: "2-Shelf", m: "4-Shelf", l: "6-Shelf / Wide" },
+    { name: "Toy Chest / Storage", s: "Small Bin", m: "Medium Chest", l: "Large Unit" },
   ],
   "Bathroom": [
-    { name: "Vanity Cabinet", sizes: ["Single Sink (sm)", "Double Sink (lg)"] },
-    { name: "Medicine Cabinet", sizes: ["Small", "Medium", "Large"] },
-    { name: "Shelving Unit", sizes: ["Small Over-Toilet", "Freestanding (md)", "Large (lg)"] },
-    { name: "Towel Rack / Bar", sizes: ["Single Bar", "Double Bar", "Tower (lg)"] },
+    { name: "Vanity Cabinet", s: "Pedestal / Small", m: "Single Sink 24–36\"", l: "Double Sink 48\"+" },
+    { name: "Medicine Cabinet", s: "Surface Mount", m: "Recessed Single", l: "Large Double" },
+    { name: "Shelving", s: "Over-Toilet Rack", m: "Freestanding Tower", l: "Large Freestanding" },
+    { name: "Linen Cabinet", s: "Narrow Tall", m: "Standard Cabinet", l: "Wide Double-Door" },
   ],
-  "Office / Den": [
-    { name: "Desk", sizes: ["Small Writing Desk", "Standard Desk", "L-Shaped (lg)", "Standing Desk (xl)"] },
-    { name: "Office Chair", sizes: ["Basic (sm)", "Ergonomic (md)", "Executive (lg)"] },
-    { name: "Filing Cabinet", sizes: ["2-drawer (sm)", "4-drawer lateral (md)", "5-drawer (lg)"] },
-    { name: "Bookcase", sizes: ["Small", "Medium", "Large", "Wall Unit (xl)"] },
-    { name: "Computer Setup (boxes)", sizes: ["Laptop only (sm)", "Desktop setup (md)", "Full workstation (lg)"] },
+  "Office": [
+    { name: "Desk", s: "Small Writing Desk", m: "Standard 60\"", l: "L-Shaped / Standing" },
+    { name: "Office Chair", s: "Basic / Task", m: "Mid-Back Ergonomic", l: "High-Back Executive" },
+    { name: "Filing Cabinet", s: "2-Drawer Vertical", m: "4-Drawer Vertical", l: "Lateral Wide" },
+    { name: "Bookcase", s: "2–3 Shelf", m: "4–5 Shelf", l: "6+ Shelf / Wide" },
+    { name: "Printer / Equipment", s: "Inkjet Printer", m: "Laser / All-in-One", l: "Large Printer / Copier" },
   ],
   "Garage / Storage": [
-    { name: "Workbench", sizes: ["Small", "Large"] },
-    { name: "Shelving Unit", sizes: ["Small", "Medium", "Large", "Heavy-Duty (xl)"] },
-    { name: "Lawn Mower", sizes: ["Push Mower (sm)", "Self-Propelled (md)", "Riding Mower (xl)"] },
-    { name: "Bike", sizes: ["Kids Bike (sm)", "Adult Bike (md)", "E-Bike (lg)"] },
-    { name: "Storage Bins (lot)", sizes: ["1–5 bins", "6–10 bins", "10+ bins"] },
-    { name: "Tool Chest", sizes: ["Small Cabinet", "Medium Roll-Away", "Large Pro (xl)"] },
-    { name: "Boxes (miscellaneous)", sizes: ["10 boxes (sm)", "20 boxes (md)", "30+ boxes (lg)"] },
+    { name: "Workbench", s: "Small Portable", m: "Standard Fixed", l: "Large w/ Storage" },
+    { name: "Shelving Unit", s: "Light-Duty (2-shelf)", m: "Standard (4-shelf)", l: "Heavy-Duty (5+ shelf)" },
+    { name: "Lawn Mower", s: "Electric / Push", m: "Self-Propelled Gas", l: "Riding Mower" },
+    { name: "Bike", s: "Kids Bike", m: "Adult Bike", l: "E-Bike / Cargo" },
+    { name: "Tool Chest", s: "Small Portable Box", m: "Mid-Size Roll-Away", l: "Large Pro Unit" },
+    { name: "Storage Bins", s: "1–5 Bins", m: "6–15 Bins", l: "16+ Bins" },
+    { name: "Miscellaneous Boxes", s: "1–10 Boxes", m: "11–25 Boxes", l: "25+ Boxes" },
   ],
   "Outdoor / Patio": [
-    { name: "Patio Table", sizes: ["Bistro 2-seat (sm)", "4-seat (md)", "6-seat (lg)", "8+ seat (xl)"] },
-    { name: "Patio Chairs", sizes: ["Set of 2", "Set of 4", "Set of 6"] },
-    { name: "Grill", sizes: ["Tabletop (sm)", "2-burner (md)", "4-burner (lg)", "6-burner (xl)"] },
-    { name: "Outdoor Sofa / Sectional", sizes: ["Loveseat (sm)", "3-piece (md)", "Large Sectional (lg)"] },
-    { name: "Umbrella / Gazebo", sizes: ["Patio Umbrella (sm)", "Cantilever (md)", "Gazebo (lg)"] },
-    { name: "Planters", sizes: ["Small x3", "Medium x3", "Large x2", "Oversized"] },
+    { name: "Patio Table", s: "Bistro 2-seat", m: "4-Seat Round/Square", l: "6–8 Seat Rectangular" },
+    { name: "Patio Chairs", s: "2 Chairs", m: "4 Chairs", l: "6+ Chairs" },
+    { name: "Grill", s: "Tabletop / Small", m: "3–4 Burner Gas", l: "5+ Burner / Smoker" },
+    { name: "Outdoor Sofa", s: "Loveseat", m: "3-Piece Set", l: "Large Sectional" },
+    { name: "Umbrella / Shade", s: "Patio Umbrella", m: "Cantilever Umbrella", l: "Pergola / Gazebo" },
   ],
 };
 
-// Truck size estimator based on cubic feet
-const ITEM_CUFT = {
-  "Loveseat (sm)": 40, "Sofa 3-seat (md)": 60, "Sectional (lg)": 90, "Sleeper Sofa (xl)": 80,
-  "Twin": 25, "Full": 35, "Queen": 45, "King": 55, "Cal King": 55,
-  "Small 4-drawer": 15, "Medium 6-drawer": 25, "Large 8-drawer": 35, "Double Dresser (xl)": 40,
-  "Standard (md)": 30, "French Door (lg)": 40, "Side-by-Side (xl)": 45, "Mini Fridge (sm)": 10,
-};
+// Cubic feet approximations for truck estimate
+const SIZE_CUFT = { s: 8, m: 20, l: 40 };
 
 function estimateTruck(items) {
-  let cuft = items.reduce((sum, item) => sum + (ITEM_CUFT[item.size] || 10), 0);
-  if (cuft < 100) return { label: "Small Van / Cargo Van", icon: "🚐", desc: "~100 cu ft — Studio or 1-room move" };
-  if (cuft < 300) return { label: "10–14 ft Truck", icon: "🚚", desc: "~300 cu ft — 1 bedroom apartment" };
-  if (cuft < 500) return { label: "15–17 ft Truck", icon: "🚛", desc: "~500 cu ft — 2 bedroom home" };
-  if (cuft < 800) return { label: "20–22 ft Truck", icon: "🚛", desc: "~800 cu ft — 3 bedroom home" };
-  return { label: "24–26 ft Truck (or two trips)", icon: "🚛🚛", desc: "~1200+ cu ft — Large home" };
+  const cuft = items.filter(i => i.list === "moving").reduce((sum, item) => sum + (SIZE_CUFT[item.size] || 15), 0);
+  if (cuft === 0) return null;
+  if (cuft < 100) return { label: "Cargo Van / Small Truck", icon: "🚐", truck: "~100 cu ft", rooms: "Studio / 1-room" };
+  if (cuft < 300) return { label: "10–14 ft Truck", icon: "🚚", truck: "~300 cu ft", rooms: "1–2 Bedroom Apt" };
+  if (cuft < 550) return { label: "15–17 ft Truck", icon: "🚛", truck: "~500 cu ft", rooms: "2–3 Bedroom Home" };
+  if (cuft < 850) return { label: "20–22 ft Truck", icon: "🚛", truck: "~800 cu ft", rooms: "3–4 Bedroom Home" };
+  return { label: "26 ft Truck (or 2 trips)", icon: "🚛🚛", truck: "1200+ cu ft", rooms: "Large Home / Estate" };
 }
 
 const ALL_ROOMS = Object.keys(ROOM_CATALOG);
+const SIZE_LABELS = { s: "Small", m: "Medium", l: "Large" };
+const SIZE_COLORS = {
+  s: { btn: "bg-[#EFF6FF] text-[#3B82F6] border-[#BFDBFE]", active: "bg-[#3B82F6] text-white border-[#3B82F6]" },
+  m: { btn: "bg-[#FFF7ED] text-[#F97316] border-[#FED7AA]", active: "bg-[#F97316] text-white border-[#F97316]" },
+  l: { btn: "bg-[#FDF4FF] text-[#A855F7] border-[#E9D5FF]", active: "bg-[#A855F7] text-white border-[#A855F7]" },
+};
 
 export default function InventoryTab({ user }) {
-  // Each item: { room, name, size, list: 'moving'|'donate' }
   const [items, setItems] = useState([]);
   const [activeRoom, setActiveRoom] = useState(ALL_ROOMS[0]);
-  const [addingItem, setAddingItem] = useState(null); // { name, sizes }
-  const [selectedSize, setSelectedSize] = useState("");
-  const [customItem, setCustomItem] = useState("");
-  const [activeList, setActiveList] = useState("moving"); // for the side-by-side view toggle on mobile
+  const [pendingItem, setPendingItem] = useState(null); // { name, s, m, l }
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
 
-  const addItem = (name, size, list) => {
-    setItems(prev => [...prev, { room: activeRoom, name, size, list }]);
-    setAddingItem(null);
-    setSelectedSize("");
+  const addItem = (item, size, list) => {
+    setItems(prev => [...prev, { room: activeRoom, name: item.name, size, sizeLabel: item[size], list }]);
+    setPendingItem(null);
   };
 
   const removeItem = (idx) => setItems(prev => prev.filter((_, i) => i !== idx));
-
-  const moveToList = (idx, list) => {
-    setItems(prev => prev.map((item, i) => i === idx ? { ...item, list } : item));
-  };
+  const moveToList = (idx, list) => setItems(prev => prev.map((item, i) => i === idx ? { ...item, list } : item));
 
   const movingItems = items.filter(i => i.list === "moving");
   const donateItems = items.filter(i => i.list === "donate");
-  const truck = estimateTruck(movingItems);
+  const truck = estimateTruck(items);
 
   const handleEmail = async () => {
     setSending(true);
-    const movingList = movingItems.map(i => `• ${i.name} (${i.size}) — ${i.room}`).join("\n");
-    const donateList = donateItems.map(i => `• ${i.name} (${i.size}) — ${i.room}`).join("\n");
-    const body = `Hi ${user?.full_name || "there"},\n\nMoving Inventory\n================\n${movingList || "(none)"}\n\nEstimated Truck: ${truck.label}\n\nDonation / Sell List\n====================\n${donateList || "(none)"}\n\nGenerated by EZ Move AI`;
+    const movingList = movingItems.map(i => `• ${i.name} — ${SIZE_LABELS[i.size]}: ${i.sizeLabel} (${i.room})`).join("\n");
+    const donateList = donateItems.map(i => `• ${i.name} — ${SIZE_LABELS[i.size]}: ${i.sizeLabel} (${i.room})`).join("\n");
+    const body = `Moving Inventory\n================\n${movingList || "(none)"}\n\nEstimated Truck: ${truck?.label || "TBD"}\n\nDonation / Sell List\n====================\n${donateList || "(none)"}\n\nGenerated by EZ Move AI`;
     await base44.integrations.Core.SendEmail({ to: user?.email, subject: "My Moving & Donation Inventory", body });
     setSending(false);
     setSent(true);
@@ -133,17 +128,35 @@ export default function InventoryTab({ user }) {
 
   return (
     <div className="flex flex-col gap-3 pb-20">
+
       {/* Truck Estimate Banner */}
-      <div className="bg-[#1A1A2E] rounded-2xl px-4 py-3 flex items-center gap-3">
-        <span className="text-2xl">{truck.icon}</span>
-        <div className="flex-1">
-          <p className="text-white text-xs font-bold">{truck.label}</p>
-          <p className="text-[#9CA3AF] text-[10px]">{truck.desc}</p>
+      {truck ? (
+        <div className="bg-[#1A1A2E] rounded-2xl px-4 py-3 flex items-center gap-3">
+          <span className="text-2xl">{truck.icon}</span>
+          <div className="flex-1">
+            <p className="text-white text-xs font-bold">{truck.label}</p>
+            <p className="text-[#9CA3AF] text-[10px]">{truck.truck} · {truck.rooms}</p>
+          </div>
+          <div className="text-right">
+            <p className="text-[#F97316] text-base font-bold">{movingItems.length}</p>
+            <p className="text-[#9CA3AF] text-[9px]">items</p>
+          </div>
         </div>
-        <div className="text-right">
-          <p className="text-[#F97316] text-base font-bold">{movingItems.length}</p>
-          <p className="text-[#9CA3AF] text-[9px]">items</p>
+      ) : (
+        <div className="bg-[#1A1A2E] rounded-2xl px-4 py-3">
+          <p className="text-white text-xs font-bold">🚛 Estimated Truck Size</p>
+          <p className="text-[#9CA3AF] text-[10px]">Add items below to get your estimate</p>
         </div>
+      )}
+
+      {/* Size Legend */}
+      <div className="flex gap-2">
+        {Object.entries(SIZE_LABELS).map(([key, label]) => (
+          <div key={key} className={`flex-1 rounded-xl border px-2 py-1.5 text-center ${SIZE_COLORS[key].btn}`}>
+            <p className="text-[10px] font-bold">{label}</p>
+            <p className="text-[9px] opacity-70">mover size</p>
+          </div>
+        ))}
       </div>
 
       {/* Room selector */}
@@ -151,7 +164,7 @@ export default function InventoryTab({ user }) {
         {ALL_ROOMS.map(room => (
           <button
             key={room}
-            onClick={() => { setActiveRoom(room); setAddingItem(null); }}
+            onClick={() => { setActiveRoom(room); setPendingItem(null); }}
             className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold transition-all
               ${activeRoom === room ? "bg-[#F97316] text-white" : "bg-white text-[#6B7280]"}`}
           >
@@ -160,94 +173,72 @@ export default function InventoryTab({ user }) {
         ))}
       </div>
 
-      {/* Item picker for active room */}
+      {/* Item picker */}
       <div className="bg-white rounded-2xl overflow-hidden shadow-sm">
         <div className="px-3 py-2.5 border-b border-[#F3F4F6]">
-          <p className="text-xs font-bold text-[#1A1A2E]">{activeRoom} — Tap to add</p>
+          <p className="text-xs font-bold text-[#1A1A2E]">{activeRoom} — tap item, then pick Small / Medium / Large</p>
         </div>
         <div className="px-3 py-2 flex flex-wrap gap-1.5">
           {ROOM_CATALOG[activeRoom].map(item => (
             <button
               key={item.name}
-              onClick={() => { setAddingItem(item); setSelectedSize(""); }}
+              onClick={() => setPendingItem(pendingItem?.name === item.name ? null : item)}
               className={`text-[10px] px-2.5 py-1 rounded-full font-semibold border transition-all
-                ${addingItem?.name === item.name
-                  ? "bg-[#F97316] text-white border-[#F97316]"
-                  : "bg-[#F5F3EF] text-[#374151] border-[#E5E7EB] hover:border-[#F97316] hover:text-[#F97316]"}`}
+                ${pendingItem?.name === item.name
+                  ? "bg-[#1A1A2E] text-white border-[#1A1A2E]"
+                  : "bg-[#F5F3EF] text-[#374151] border-[#E5E7EB] hover:border-[#F97316]"}`}
             >
               {item.name}
             </button>
           ))}
         </div>
 
-        {/* Size picker */}
-        {addingItem && (
-          <div className="px-3 pb-3 border-t border-[#F3F4F6] pt-2 bg-[#FFF7ED]">
-            <p className="text-[10px] font-bold text-[#F97316] mb-2">Choose size for: {addingItem.name}</p>
-            <div className="flex flex-wrap gap-1.5 mb-2">
-              {addingItem.sizes.map(sz => (
-                <button
-                  key={sz}
-                  onClick={() => setSelectedSize(sz)}
-                  className={`text-[10px] px-2.5 py-1 rounded-full font-semibold border transition-all
-                    ${selectedSize === sz ? "bg-[#1A1A2E] text-white border-[#1A1A2E]" : "bg-white text-[#374151] border-[#E5E7EB]"}`}
-                >
-                  {sz}
-                </button>
+        {/* Size chooser — appears when item selected */}
+        {pendingItem && (
+          <div className="px-3 pb-3 pt-2 border-t border-[#F3F4F6] bg-[#FAFAFA] space-y-2">
+            <p className="text-[10px] font-bold text-[#1A1A2E]">How big is your {pendingItem.name}?</p>
+            <div className="space-y-1.5">
+              {(["s", "m", "l"]).map(sz => (
+                <div key={sz} className={`flex items-center gap-2 rounded-xl border px-3 py-2 ${SIZE_COLORS[sz].btn}`}>
+                  <div className="flex-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wide">{SIZE_LABELS[sz]}</span>
+                    <span className="text-[10px] ml-2 opacity-80">— {pendingItem[sz]}</span>
+                  </div>
+                  <button
+                    onClick={() => addItem(pendingItem, sz, "moving")}
+                    className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border ${SIZE_COLORS[sz].active}`}
+                  >
+                    📦 Move
+                  </button>
+                  <button
+                    onClick={() => addItem(pendingItem, sz, "donate")}
+                    className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-[#8B5CF6] text-white"
+                  >
+                    🫶 Donate
+                  </button>
+                </div>
               ))}
             </div>
-            {selectedSize && (
-              <div className="flex gap-2">
-                <button
-                  onClick={() => addItem(addingItem.name, selectedSize, "moving")}
-                  className="flex-1 py-1.5 rounded-xl bg-[#F97316] text-white text-[11px] font-bold"
-                >
-                  📦 Moving
-                </button>
-                <button
-                  onClick={() => addItem(addingItem.name, selectedSize, "donate")}
-                  className="flex-1 py-1.5 rounded-xl bg-[#8B5CF6] text-white text-[11px] font-bold"
-                >
-                  🫶 Donate
-                </button>
-              </div>
-            )}
           </div>
         )}
-
-        {/* Custom item */}
-        <div className="px-3 pb-3 pt-2 flex gap-2 border-t border-[#F3F4F6]">
-          <input
-            placeholder="Add custom item…"
-            value={customItem}
-            onChange={e => setCustomItem(e.target.value)}
-            className="flex-1 px-3 py-1.5 rounded-xl border border-[#E5E7EB] text-xs focus:outline-none focus:border-[#F97316]"
-          />
-          <button
-            onClick={() => { if (customItem.trim()) { addItem(customItem.trim(), "Custom", "moving"); setCustomItem(""); } }}
-            className="px-3 py-1.5 bg-[#F97316] rounded-xl text-white"
-          >
-            <Plus className="w-3.5 h-3.5" />
-          </button>
-        </div>
       </div>
 
       {/* Side-by-side lists */}
       {items.length > 0 && (
         <div className="flex gap-2">
-          {/* Moving list */}
+          {/* Moving */}
           <div className="flex-1 bg-white rounded-2xl shadow-sm overflow-hidden">
             <div className="px-3 py-2 bg-[#FFF7ED] border-b border-[#FED7AA]">
               <p className="text-[10px] font-bold text-[#F97316]">📦 Moving ({movingItems.length})</p>
             </div>
-            <div className="divide-y divide-[#F3F4F6] max-h-64 overflow-y-auto">
-              {movingItems.length === 0 && <p className="text-[10px] text-[#9CA3AF] px-3 py-3">None added yet</p>}
+            <div className="divide-y divide-[#F3F4F6] max-h-56 overflow-y-auto">
+              {movingItems.length === 0 && <p className="text-[10px] text-[#9CA3AF] px-3 py-2">None yet</p>}
               {items.map((item, idx) => item.list !== "moving" ? null : (
                 <div key={idx} className="px-2.5 py-2">
-                  <p className="text-[10px] font-bold text-[#1A1A2E] leading-tight">{item.name}</p>
-                  <p className="text-[9px] text-[#6B7280]">{item.size}</p>
+                  <p className="text-[10px] font-bold text-[#1A1A2E]">{item.name}</p>
+                  <p className="text-[9px] text-[#F97316] font-semibold">{SIZE_LABELS[item.size]}: {item.sizeLabel}</p>
                   <p className="text-[9px] text-[#9CA3AF]">{item.room}</p>
-                  <div className="flex gap-1 mt-1">
+                  <div className="flex gap-1.5 mt-1">
                     <button onClick={() => moveToList(idx, "donate")} className="text-[9px] text-[#8B5CF6] font-semibold">→ Donate</button>
                     <button onClick={() => removeItem(idx)} className="text-[9px] text-[#EF4444] font-semibold ml-auto">✕</button>
                   </div>
@@ -256,19 +247,19 @@ export default function InventoryTab({ user }) {
             </div>
           </div>
 
-          {/* Donation list */}
+          {/* Donate */}
           <div className="flex-1 bg-white rounded-2xl shadow-sm overflow-hidden">
             <div className="px-3 py-2 bg-[#F5F3FF] border-b border-[#DDD6FE]">
               <p className="text-[10px] font-bold text-[#8B5CF6]">🫶 Donate ({donateItems.length})</p>
             </div>
-            <div className="divide-y divide-[#F3F4F6] max-h-64 overflow-y-auto">
-              {donateItems.length === 0 && <p className="text-[10px] text-[#9CA3AF] px-3 py-3">None added yet</p>}
+            <div className="divide-y divide-[#F3F4F6] max-h-56 overflow-y-auto">
+              {donateItems.length === 0 && <p className="text-[10px] text-[#9CA3AF] px-3 py-2">None yet</p>}
               {items.map((item, idx) => item.list !== "donate" ? null : (
                 <div key={idx} className="px-2.5 py-2">
-                  <p className="text-[10px] font-bold text-[#1A1A2E] leading-tight">{item.name}</p>
-                  <p className="text-[9px] text-[#6B7280]">{item.size}</p>
+                  <p className="text-[10px] font-bold text-[#1A1A2E]">{item.name}</p>
+                  <p className="text-[9px] text-[#8B5CF6] font-semibold">{SIZE_LABELS[item.size]}: {item.sizeLabel}</p>
                   <p className="text-[9px] text-[#9CA3AF]">{item.room}</p>
-                  <div className="flex gap-1 mt-1">
+                  <div className="flex gap-1.5 mt-1">
                     <button onClick={() => moveToList(idx, "moving")} className="text-[9px] text-[#F97316] font-semibold">→ Moving</button>
                     <button onClick={() => removeItem(idx)} className="text-[9px] text-[#EF4444] font-semibold ml-auto">✕</button>
                   </div>
@@ -282,20 +273,16 @@ export default function InventoryTab({ user }) {
       {/* Email CTA */}
       {items.length > 0 && (
         <div className="bg-white rounded-2xl shadow-sm px-4 py-3">
-          <p className="text-[11px] text-[#6B7280] mb-2 text-center">Email full inventory + truck estimate to movers</p>
           {sent ? (
             <div className="flex items-center justify-center gap-2 py-2 bg-[#F0FDF4] rounded-xl">
               <CheckCircle2 className="w-4 h-4 text-[#059669]" />
-              <span className="text-xs font-bold text-[#059669]">Sent!</span>
+              <span className="text-xs font-bold text-[#059669]">Sent to {user?.email}</span>
             </div>
           ) : (
-            <button
-              onClick={handleEmail}
-              disabled={sending}
-              className="w-full py-2.5 rounded-xl bg-[#F97316] text-white text-xs font-bold flex items-center justify-center gap-2"
-            >
+            <button onClick={handleEmail} disabled={sending}
+              className="w-full py-2.5 rounded-xl bg-[#F97316] text-white text-xs font-bold flex items-center justify-center gap-2">
               {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
-              {sending ? "Sending…" : "Email Quote Sheet"}
+              {sending ? "Sending…" : "Email Quote Sheet to Movers"}
             </button>
           )}
         </div>
