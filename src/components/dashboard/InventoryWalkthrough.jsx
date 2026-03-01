@@ -28,11 +28,15 @@ const DEFAULT_SUGGESTIONS = {
   storage: ["Storage Shelves", "Seasonal Items", "Holiday Decor", "Sports Equipment"],
 };
 
-export default function InventoryWalkthrough({ user, onClose }) {
+export default function InventoryWalkthrough({ user, onClose, selectedRooms }) {
+  const activeRooms = selectedRooms && selectedRooms.length > 0
+    ? ROOMS.filter(r => selectedRooms.includes(r.id))
+    : ROOMS;
+
   const [rooms, setRooms] = useState(() =>
     ROOMS.reduce((acc, r) => ({ ...acc, [r.id]: [] }), {})
   );
-  const [expandedRoom, setExpandedRoom] = useState("living");
+  const [expandedRoom, setExpandedRoom] = useState(activeRooms[0]?.id || "living");
   const [newItem, setNewItem] = useState("");
   const [editingItem, setEditingItem] = useState(null); // {roomId, idx}
   const [editText, setEditText] = useState("");
