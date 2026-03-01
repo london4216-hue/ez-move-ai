@@ -236,25 +236,54 @@ export default function InventoryWalkthrough({ user, onClose, selectedRooms }) {
             </div>
           </>
         ) : (
-          /* Summary view */
+          /* Summary view — Mover Quote Format */
           <>
             <div className="flex-1 overflow-y-auto px-4 py-3">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-3">
                 <button onClick={() => setShowSummary(false)} className="text-xs text-[#F97316] font-semibold">← Edit List</button>
-                <p className="text-sm font-bold text-[#1A1A2E]">{totalBringing} Items to Bring</p>
+                <span className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wider">Mover Quote Sheet</span>
               </div>
 
+              {/* Quote Header Block */}
+              <div className="bg-[#1A1A2E] rounded-2xl px-4 py-3 mb-4">
+                <p className="text-white text-sm font-bold">📦 Moving Inventory</p>
+                <p className="text-[#9CA3AF] text-[11px] mt-0.5">Prepared by: {user?.full_name || "Homeowner"}</p>
+                <p className="text-[#9CA3AF] text-[11px]">From: {user?.current_address || "Current Address"}</p>
+                <p className="text-[#9CA3AF] text-[11px]">To: {user?.new_address || "New Address"}</p>
+                <div className="flex items-center gap-3 mt-2 pt-2 border-t border-white/10">
+                  <div className="text-center">
+                    <p className="text-white text-base font-bold">{totalBringing}</p>
+                    <p className="text-[#9CA3AF] text-[9px] uppercase">Items</p>
+                  </div>
+                  <div className="w-px h-6 bg-white/10" />
+                  <div className="text-center">
+                    <p className="text-white text-base font-bold">{roomsWithItems.length}</p>
+                    <p className="text-[#9CA3AF] text-[9px] uppercase">Rooms</p>
+                  </div>
+                  <div className="w-px h-6 bg-white/10" />
+                  <div className="text-center">
+                    <p className="text-white text-base font-bold">{Object.values(rooms).flat().filter(i => !i.bringing).length}</p>
+                    <p className="text-[#9CA3AF] text-[9px] uppercase">Leaving</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Room-by-room breakdown */}
               {roomsWithItems.map(room => {
                 const bringing = rooms[room.id].filter(i => i.bringing);
                 if (!bringing.length) return null;
                 return (
-                  <div key={room.id} className="mb-4">
-                    <p className="text-xs font-bold text-[#6B7280] uppercase tracking-wider mb-2">{room.emoji} {room.label}</p>
-                    <div className="space-y-1">
+                  <div key={room.id} className="mb-3">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className="text-sm">{room.emoji}</span>
+                      <p className="text-xs font-bold text-[#1A1A2E] uppercase tracking-wide">{room.label}</p>
+                      <span className="text-[10px] text-[#F97316] font-bold bg-[#FFF7ED] px-1.5 py-0.5 rounded-full">{bringing.length} items</span>
+                    </div>
+                    <div className="bg-[#FAFAFA] rounded-xl border border-[#F3F4F6] overflow-hidden">
                       {bringing.map((item, idx) => (
-                        <div key={idx} className="flex items-center gap-2 bg-[#FFF7ED] rounded-xl px-3 py-2">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-[#F97316] flex-shrink-0" />
-                          <span className="text-xs font-medium text-[#1A1A2E]">{item.name}</span>
+                        <div key={idx} className={`flex items-center gap-2 px-3 py-2 ${idx < bringing.length - 1 ? "border-b border-[#F3F4F6]" : ""}`}>
+                          <div className="w-1.5 h-1.5 rounded-full bg-[#F97316] flex-shrink-0" />
+                          <span className="text-xs text-[#1A1A2E] font-medium">{item.name}</span>
                         </div>
                       ))}
                     </div>
@@ -262,28 +291,30 @@ export default function InventoryWalkthrough({ user, onClose, selectedRooms }) {
                 );
               })}
 
-              {/* Leaving behind */}
+              {/* Leaving behind — compact */}
               {Object.values(rooms).flat().some(i => !i.bringing) && (
-                <div className="mt-2 pt-3 border-t border-[#F3F4F6]">
-                  <p className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider mb-2">🚫 Leaving Behind</p>
-                  <div className="space-y-1">
-                    {ROOMS.map(room =>
+                <div className="mt-3 pt-3 border-t border-[#F3F4F6]">
+                  <p className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-wider mb-2">🚫 Not Moving (Leave Behind)</p>
+                  <div className="bg-[#FEF2F2] rounded-xl border border-[#FEE2E2] px-3 py-2">
+                    {ROOMS.flatMap(room =>
                       rooms[room.id].filter(i => !i.bringing).map((item, idx) => (
-                        <div key={`${room.id}-${idx}`} className="flex items-center gap-2 bg-[#FEF2F2] rounded-xl px-3 py-2">
-                          <X className="w-3 h-3 text-[#EF4444] flex-shrink-0" />
-                          <span className="text-xs font-medium text-[#EF4444] line-through">{item.name}</span>
-                          <span className="text-[10px] text-[#9CA3AF]">— {room.label}</span>
+                        <div key={`${room.id}-${idx}`} className="flex items-center gap-2 py-1">
+                          <X className="w-2.5 h-2.5 text-[#EF4444] flex-shrink-0" />
+                          <span className="text-xs text-[#EF4444] line-through">{item.name}</span>
+                          <span className="text-[10px] text-[#9CA3AF] ml-auto">{ROOMS.find(r => r.id === room.id)?.label}</span>
                         </div>
                       ))
                     )}
                   </div>
                 </div>
               )}
+
+              <p className="text-[10px] text-[#9CA3AF] text-center mt-4">Generated by EZ Move AI · {new Date().toLocaleDateString()}</p>
             </div>
 
             {/* Email CTA */}
             <div className="px-4 pb-6 pt-3 border-t border-[#F3F4F6]">
-              <p className="text-[11px] text-[#6B7280] text-center mb-3">Share this list with movers for accurate quotes</p>
+              <p className="text-[11px] text-[#6B7280] text-center mb-3">Email this to movers for accurate quotes</p>
               {sent ? (
                 <div className="flex items-center justify-center gap-2 py-3 bg-[#F0FDF4] rounded-2xl">
                   <CheckCircle2 className="w-4 h-4 text-[#059669]" />
@@ -296,7 +327,7 @@ export default function InventoryWalkthrough({ user, onClose, selectedRooms }) {
                   className="w-full py-3 rounded-2xl bg-[#F97316] text-white text-sm font-bold flex items-center justify-center gap-2"
                 >
                   {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
-                  {sending ? "Sending…" : "Email My Inventory List"}
+                  {sending ? "Sending…" : "Email Quote Sheet to Movers"}
                 </button>
               )}
             </div>
