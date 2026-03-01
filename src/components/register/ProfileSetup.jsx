@@ -11,28 +11,7 @@ export default function ProfileSetup({ onComplete }) {
     current_address: "",
     destination_address: "",
   });
-  const [addressSuggestions, setAddressSuggestions] = useState([]);
-  const [loadingAddress, setLoadingAddress] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-
-  const handleAddressInput = async (val) => {
-    setForm(f => ({ ...f, current_address: val }));
-    if (val.length < 5) { setAddressSuggestions([]); return; }
-    setLoadingAddress(true);
-    try {
-      const res = await base44.integrations.Core.InvokeLLM({
-        prompt: `Given the partial address "${val}", suggest 3 realistic full US street addresses that match. Return JSON only.`,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            suggestions: { type: "array", items: { type: "string" } }
-          }
-        }
-      });
-      setAddressSuggestions(res.suggestions || []);
-    } catch {}
-    setLoadingAddress(false);
-  };
 
   const handleSubmit = async () => {
     setSubmitting(true);
