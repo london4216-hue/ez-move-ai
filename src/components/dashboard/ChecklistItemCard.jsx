@@ -2,7 +2,7 @@ import { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Phone, UserPlus, Check, ShoppingCart, ClipboardList } from "lucide-react";
 import RoomSetupWizard from "./RoomSetupWizard";
-import ProviderAppointmentModal from "./ProviderAppointmentModal";
+import ProviderContactCard from "./ProviderContactCard";
 
 export default function ChecklistItemCard({ item, completed, skipped, onComplete, onSkip, userAddress, onProviderSaved, user }) {
   const [expanded, setExpanded] = useState(false);
@@ -10,7 +10,7 @@ export default function ChecklistItemCard({ item, completed, skipped, onComplete
   const [loadingAI, setLoadingAI] = useState(false);
   const [savedIdx, setSavedIdx] = useState(null);
   const [showInventory, setShowInventory] = useState(false);
-  const [appointmentProvider, setAppointmentProvider] = useState(null);
+  const [selectedProvider, setSelectedProvider] = useState(null);
 
   const handleFindLocal = async () => {
     setLoadingAI(true);
@@ -59,7 +59,7 @@ export default function ChecklistItemCard({ item, completed, skipped, onComplete
     });
     setExpanded(false);
     if (onProviderSaved) onProviderSaved();
-    setAppointmentProvider(provider);
+    setSelectedProvider(provider);
   };
 
   if (skipped) {
@@ -183,6 +183,15 @@ export default function ChecklistItemCard({ item, completed, skipped, onComplete
 
     {showInventory && (
       <RoomSetupWizard user={user} onClose={() => setShowInventory(false)} />
+    )}
+    {selectedProvider && (
+      <ProviderContactCard
+        provider={selectedProvider}
+        item={item}
+        user={user}
+        onClose={() => setSelectedProvider(null)}
+        onScheduled={onProviderSaved}
+      />
     )}
     </>
   );
