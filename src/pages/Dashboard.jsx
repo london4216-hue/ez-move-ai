@@ -56,10 +56,9 @@ export default function Dashboard() {
       {/* Week progress steps */}
       <WeekProgress user={user} />
 
-      {/* Checklist + Calendar */}
+      {/* Checklist */}
       <div className="flex-1 px-3 pb-2 flex flex-col gap-3 overflow-y-auto">
         <ChecklistPanel user={user} onProviderSaved={() => setContactsRefresh(r => r + 1)} />
-        <AppointmentCalendar user={user} />
       </div>
 
       {/* Key Contacts — compact bottom bar */}
