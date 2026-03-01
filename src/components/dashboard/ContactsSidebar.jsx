@@ -160,6 +160,48 @@ export default function ContactsRow({ user, refreshKey }) {
           </button>
         )}
       </div>
+
+      {/* Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-end z-50">
+          <div className="w-full bg-white rounded-t-2xl p-4 space-y-3 max-h-96 overflow-y-auto">
+            <p className="text-sm font-bold text-[#1A1A2E]">{editingId ? "Edit Contact" : "Add Contact"}</p>
+            <input
+              autoFocus
+              value={formData.name}
+              onChange={e => setFormData({...formData, name: e.target.value})}
+              placeholder="Name *"
+              className="w-full text-xs border border-[#E5E7EB] rounded-lg px-3 py-2 outline-none focus:border-[#F97316]"
+            />
+            <input
+              value={formData.role}
+              onChange={e => setFormData({...formData, role: e.target.value})}
+              placeholder="Role (e.g., Movers, Painter)"
+              className="w-full text-xs border border-[#E5E7EB] rounded-lg px-3 py-2 outline-none focus:border-[#F97316]"
+            />
+            <input
+              value={formData.phone}
+              onChange={e => setFormData({...formData, phone: e.target.value})}
+              placeholder="Phone"
+              className="w-full text-xs border border-[#E5E7EB] rounded-lg px-3 py-2 outline-none focus:border-[#F97316]"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={handleSave}
+                className="flex-1 py-2 bg-[#F97316] text-white text-xs font-bold rounded-lg"
+              >
+                {editingId ? "Save" : "Add"}
+              </button>
+              <button
+                onClick={() => setShowModal(false)}
+                className="flex-1 py-2 border border-[#E5E7EB] text-[#6B7280] text-xs font-bold rounded-lg"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
