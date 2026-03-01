@@ -21,8 +21,8 @@ const WEEK_DATA = {
     items: [
       { id: "w2-1", title: "Finalize mover", description: "Confirm date aligned with closing timeline", ai_search_query: null },
       { id: "w2-2", title: "Schedule estate sale", description: "Suggested date based on close date", ai_search_query: null },
-      { id: "w2-3", title: "Order packing supplies", description: "Boxes, labels, tape, wardrobe boxes", ai_search_query: null },
-      { id: "w2-4", title: "Begin packing non-essentials", description: "Seasonal items, storage rooms, decor", ai_search_query: null },
+      { id: "w2-3", title: "Order packing supplies", description: "Boxes, labels, tape, wardrobe boxes", ai_search_query: null, amazon_search: "moving boxes packing supplies tape labels" },
+      { id: "w2-4", title: "Begin packing non-essentials", description: "Seasonal items, storage rooms, decor", ai_search_query: null, amazon_search: "wardrobe moving boxes storage bins" },
       { id: "w2-5", title: "Utility planning", description: "Start list of utilities to transfer/cancel", ai_search_query: null },
     ]
   },
@@ -34,7 +34,7 @@ const WEEK_DATA = {
       { id: "w3-1", title: "Painting (if needed)", description: "Find top-rated painters, neutral color guidance", ai_search_query: "top rated painters near me" },
       { id: "w3-2", title: "Junk removal", description: "Same-day or next-day local haulers", ai_search_query: "local junk removal same day near me" },
       { id: "w3-3", title: "Deep cleaning", description: "Kitchen, baths, windows, appliances", ai_search_query: "professional house cleaning near me" },
-      { id: "w3-4", title: "Patch & repair checklist", description: "Nail holes, touch-ups, minor fixes", ai_search_query: null },
+      { id: "w3-4", title: "Patch & repair checklist", description: "Nail holes, touch-ups, minor fixes", ai_search_query: null, amazon_search: "wall patch repair kit spackle touch up paint" },
     ]
   },
   4: {
@@ -42,7 +42,7 @@ const WEEK_DATA = {
     subtitle: "Zero chaos. Zero surprises.",
     emoji: "🟦",
     items: [
-      { id: "w4-1", title: "Final packing", description: "Daily mini-checklists so nothing piles up", ai_search_query: null },
+      { id: "w4-1", title: "Final packing", description: "Daily mini-checklists so nothing piles up", ai_search_query: null, amazon_search: "moving boxes packing tape bubble wrap" },
       { id: "w4-2", title: "Move-out day guidance", description: "What stays, what leaves, final walkthrough prep", ai_search_query: null },
       { id: "w4-3", title: "Utility transfers", description: "Electric, water, gas, internet", ai_search_query: null },
       { id: "w4-4", title: "Final clean", description: "Quick refresh before buyer walkthrough", ai_search_query: "professional house cleaning near me" },
