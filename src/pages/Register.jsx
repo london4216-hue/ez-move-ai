@@ -13,30 +13,17 @@ export default function Register() {
 
   const handleCodeVerified = async () => {
     setError("");
-    try {
-      // Just move to profile setup - let profile handle auth updates
-      setStep("profile");
-    } catch (e) {
-      console.error("Code verification error:", e);
-      setError("Failed to verify code. Please try again.");
-    }
+    setStep("profile");
   };
 
   const handleProfileComplete = async (data) => {
     setError("");
-    // Store profile data and move to week1 - will sync to user on week1 complete
     setStep("week1");
   };
 
   const handleWeek1Complete = async () => {
     setError("");
-    try {
-      await base44.auth.updateMe({ onboarded: true, current_week: 1 });
-      navigate(createPageUrl("Dashboard"));
-    } catch (e) {
-      console.error("Week1 completion error:", e);
-      setError("Failed to complete setup. Please try again.");
-    }
+    navigate(createPageUrl("Dashboard"));
   };
 
   return (
