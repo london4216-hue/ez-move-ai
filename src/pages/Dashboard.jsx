@@ -61,11 +61,9 @@ export default function Dashboard() {
 
       {/* Main content */}
       <div className="flex-1 px-3 pb-2 flex flex-col gap-3 overflow-y-auto">
-        {activeTab === "checklist" ? (
-          <ChecklistPanel user={user} onProviderSaved={() => setContactsRefresh(r => r + 1)} />
-        ) : (
-          <CalendarSheet user={user} />
-        )}
+        {activeTab === "checklist" && <ChecklistPanel user={user} onProviderSaved={() => setContactsRefresh(r => r + 1)} />}
+        {activeTab === "calendar" && <CalendarSheet user={user} />}
+        {activeTab === "inventory" && <InventoryTab user={user} />}
       </div>
 
       {/* Key Contacts — compact bottom bar */}
