@@ -7,7 +7,6 @@ import ContactsRow from "@/components/dashboard/ContactsSidebar";
 import ChecklistPanel from "@/components/dashboard/ChecklistPanel";
 import MessagesCorner from "@/components/dashboard/MessagesCorner";
 import WeekProgress from "@/components/dashboard/WeekProgress";
-import AppointmentCalendar from "@/components/dashboard/AppointmentCalendar";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
