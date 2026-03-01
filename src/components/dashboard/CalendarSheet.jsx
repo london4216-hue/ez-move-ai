@@ -282,7 +282,7 @@ export default function CalendarSheet({ user }) {
       {/* Upcoming section */}
       {futureAppts.length > 0 && (
         <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-          <div className="px-4 py-2.5 border-b border-[#F3F4F6]">
+          <div className="px-4 py-2 border-b border-[#F3F4F6]">
             <p className="text-xs font-bold text-[#1A1A2E]">Upcoming</p>
           </div>
           <div className="divide-y divide-[#F3F4F6]">
