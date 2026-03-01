@@ -23,6 +23,11 @@ export default function Register() {
 
   const handleWeek1Complete = async () => {
     setError("");
+    try {
+      await base44.auth.updateMe({ onboarded: true });
+    } catch (e) {
+      // Continue regardless
+    }
     navigate(createPageUrl("Dashboard"));
   };
 
