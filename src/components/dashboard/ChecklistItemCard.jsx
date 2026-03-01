@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Phone, UserPlus, Check } from "lucide-react";
+import { Phone, UserPlus, Check, ShoppingCart } from "lucide-react";
 
 export default function ChecklistItemCard({ item, completed, skipped, onComplete, onSkip, userAddress, onProviderSaved }) {
   const [expanded, setExpanded] = useState(false);
@@ -89,6 +89,16 @@ export default function ChecklistItemCard({ item, completed, skipped, onComplete
         </div>
 
         <div className="flex items-center gap-1">
+          {item.amazon_search && !completed && (
+            <a
+              href={`https://www.amazon.com/s?k=${encodeURIComponent(item.amazon_search)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 px-2 py-1 rounded-lg bg-[#FFF3CD] text-[#FF9900] text-[10px] font-bold whitespace-nowrap"
+            >
+              <ShoppingCart className="w-2.5 h-2.5" />Shop
+            </a>
+          )}
           {item.ai_search_query && !completed && (
             <button
               onClick={() => expanded ? setExpanded(false) : handleFindLocal()}
