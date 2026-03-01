@@ -44,20 +44,25 @@ export default function CalendarSheet({ user }) {
   const autoPlaceCurrentWeekTasks = (userData) => {
     if (!userData.close_date) return;
     const closeDate = parseISO(userData.close_date);
+    const today = new Date();
+    const daysUntilClose = Math.ceil((closeDate - today) / (1000 * 60 * 60 * 24));
     const tasks = [];
     
-    // Auto-place all 4 weeks of tasks
-    for (let week = 1; week <= 4; week++) {
-      const weekStart = addDays(closeDate, -(5 - week) * 7);
+    // Calculate how many weeks to use (min 1, max 4)
+    const weeksAvailable = daysUntilClose > 21 ? 4 : daysUntilClose > 14 ? 3 : daysUntilClose > 7 ? 2 : 1;
+    
+    // Auto-place tasks spread across available weeks
+    for (let week = 1; week <= weeksAvailable; week++) {
+      const weekStart = addDays(closeDate, -(weeksAvailable - week + 1) * 7 + 7);
       const weekItems = WEEK_DATA[week]?.items || [];
       
-      // Spread tasks across the week
-      const weekDays = 7;
-      const tasksPerDay = Math.ceil(weekItems.length / weekDays);
+      // Spread tasks across available days in the week
+      const availableDays = week === weeksAvailable ? daysUntilClose % 7 || 7 : 7;
+      const tasksPerDay = Math.ceil(weekItems.length / availableDays);
       
       weekItems.forEach((title, idx) => {
         const dayOffset = Math.floor(idx / tasksPerDay);
-        const taskDate = addDays(weekStart, Math.min(dayOffset, 6));
+        const taskDate = addDays(weekStart, Math.min(dayOffset, availableDays - 1));
         tasks.push({
           title,
           date: format(taskDate, "yyyy-MM-dd"),
