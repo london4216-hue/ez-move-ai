@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Mail, Loader2, CheckCircle2 } from "lucide-react";
+import { Mail, Loader2, CheckCircle2, GripHorizontal } from "lucide-react";
 
 const ROOM_CATALOG = {
   "Living Room": [
