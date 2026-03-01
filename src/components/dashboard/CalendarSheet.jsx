@@ -308,11 +308,11 @@ export default function CalendarSheet({ user }) {
         </div>
       )}
 
-      {appointments.length === 0 && (
+      {appointments.filter(a => a.status !== "completed" && a.status !== "cancelled").length === 0 && (
         <div className="bg-white rounded-2xl shadow-sm px-4 py-8 text-center">
           <p className="text-2xl mb-2">📅</p>
-          <p className="text-sm font-semibold text-[#1A1A2E]">No appointments yet</p>
-          <p className="text-xs text-[#9CA3AF] mt-1">Tap a date on the calendar to add one</p>
+          <p className="text-sm font-semibold text-[#1A1A2E]">No tasks yet</p>
+          <p className="text-xs text-[#9CA3AF] mt-1">Tasks will auto-populate for each week</p>
         </div>
       )}
     </div>
