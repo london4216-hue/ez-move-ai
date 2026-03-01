@@ -188,13 +188,13 @@ function ItemList({ items, listColor, listBg, onRemove, onEmail, sending, sent, 
         {sent ? (
           <div className="flex items-center justify-center gap-2 py-1 bg-[#F0FDF4] rounded-xl">
             <CheckCircle2 className="w-4 h-4 text-[#059669]" />
-            <span className="text-xs font-bold text-[#059669]">Sent to {user?.email}</span>
+            <span className="text-sm font-bold text-[#059669]">Sent to {user?.email}</span>
           </div>
         ) : (
           <button onClick={onEmail} disabled={sending}
-            className={`w-full py-2.5 rounded-xl text-white text-xs font-bold flex items-center justify-center gap-2 ${listBg}`}>
-            {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
-            {sending ? "Sending…" : "Email This List"}
+            className={`w-full py-3 rounded-xl text-white text-lg font-bold flex items-center justify-center gap-2 ${listBg}`}>
+            {sending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Mail className="w-5 h-5" />}
+            {sending ? "Sending…" : "Email Entire List"}
           </button>
         )}
       </div>
