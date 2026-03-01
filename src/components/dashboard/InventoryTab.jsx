@@ -175,9 +175,8 @@ function ItemList({ items, listColor, listBg, onRemove, onEmail, sending, sent, 
             <div 
               key={idx} 
               draggable
-              onDragStart={() => setDraggedIdx(idx)}
-              onDragEnd={() => setDraggedIdx(null)}
-              className={`flex items-center gap-2 px-3 py-2.5 cursor-move transition-all ${draggedIdx === idx ? "opacity-50 bg-[#F3F4F6]" : ""}`}
+              onDragStart={() => {}}
+              className="flex items-center gap-2 px-3 py-2.5 cursor-move transition-all"
             >
               <GripHorizontal className="w-4 h-4 text-[#D1D5DB] flex-shrink-0" />
               <div className="flex-1 min-w-0">
