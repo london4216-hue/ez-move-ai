@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Phone, UserPlus, Check, ShoppingCart } from "lucide-react";
+import { Phone, UserPlus, Check, ShoppingCart, ClipboardList } from "lucide-react";
+import InventoryWalkthrough from "./InventoryWalkthrough";
 
-export default function ChecklistItemCard({ item, completed, skipped, onComplete, onSkip, userAddress, onProviderSaved }) {
+export default function ChecklistItemCard({ item, completed, skipped, onComplete, onSkip, userAddress, onProviderSaved, user }) {
   const [expanded, setExpanded] = useState(false);
   const [aiResults, setAiResults] = useState(null);
   const [loadingAI, setLoadingAI] = useState(false);
   const [savedIdx, setSavedIdx] = useState(null);
+  const [showInventory, setShowInventory] = useState(false);
 
   const handleFindLocal = async () => {
     setLoadingAI(true);
@@ -89,6 +91,14 @@ export default function ChecklistItemCard({ item, completed, skipped, onComplete
         </div>
 
         <div className="flex items-center gap-1">
+          {item.inventory_walkthrough && !completed && (
+            <button
+              onClick={() => setShowInventory(true)}
+              className="flex items-center gap-1 px-2 py-1 rounded-lg bg-[#EEF2FF] text-[#4F46E5] text-[10px] font-bold whitespace-nowrap"
+            >
+              <ClipboardList className="w-2.5 h-2.5" />Walk-thru
+            </button>
+          )}
           {item.amazon_search && !completed && (
             <a
               href={`https://www.amazon.com/s?k=${encodeURIComponent(item.amazon_search)}`}
@@ -166,5 +176,9 @@ export default function ChecklistItemCard({ item, completed, skipped, onComplete
         </div>
       )}
     </div>
+
+    {showInventory && (
+      <InventoryWalkthrough user={user} onClose={() => setShowInventory(false)} />
+    )}
   );
 }
