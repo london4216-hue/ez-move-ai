@@ -12,6 +12,7 @@ export default function AgentDashboard() {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteName, setInviteName] = useState("");
   const [invitePhone, setInvitePhone] = useState("");
+  const [inviteCloseDate, setInviteCloseDate] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -50,7 +51,7 @@ export default function AgentDashboard() {
   }, [navigate]);
 
   const handleInvite = async () => {
-    if (!inviteEmail || !inviteName || !invitePhone) {
+    if (!inviteEmail || !inviteName || !invitePhone || !inviteCloseDate) {
       alert("Please fill all fields");
       return;
     }
@@ -63,6 +64,7 @@ export default function AgentDashboard() {
         user_email: inviteEmail,
         user_name: inviteName,
         phone: invitePhone,
+        close_date: inviteCloseDate,
         invitation_code: inviteCode,
         status: "invited",
         invited_date: new Date().toISOString()
@@ -79,6 +81,7 @@ export default function AgentDashboard() {
       setInviteEmail("");
       setInviteName("");
       setInvitePhone("");
+      setInviteCloseDate("");
       setShowInviteModal(false);
     } catch (err) {
       console.error(err);
@@ -234,6 +237,16 @@ export default function AgentDashboard() {
                   value={invitePhone}
                   onChange={(e) => setInvitePhone(e.target.value)}
                   placeholder="555-123-4567"
+                  className="w-full px-4 py-2 rounded-lg border border-[#E5E7EB] focus:outline-none focus:border-[#C85A17]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-[#6B7280] mb-2 block">Estimated Close Date</label>
+                <input
+                  type="date"
+                  value={inviteCloseDate}
+                  onChange={(e) => setInviteCloseDate(e.target.value)}
                   className="w-full px-4 py-2 rounded-lg border border-[#E5E7EB] focus:outline-none focus:border-[#C85A17]"
                 />
               </div>
