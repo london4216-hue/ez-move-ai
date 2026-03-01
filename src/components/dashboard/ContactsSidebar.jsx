@@ -11,48 +11,31 @@ export default function ContactsRow({ user }) {
   const [contacts] = useState(DEFAULT_CONTACTS);
 
   return (
-    <div className="mx-3 mb-3 bg-white rounded-2xl px-4 py-3 shadow-sm">
-      <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wider mb-3">Key Contacts</p>
-      <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
+    <div className="mx-3 mb-4 bg-white rounded-2xl px-3 py-2.5 shadow-sm">
+      <p className="text-[9px] font-bold text-[#9CA3AF] uppercase tracking-wider mb-2">Key Contacts</p>
+      <div className="flex gap-2 overflow-x-auto no-scrollbar pb-0.5">
         {contacts.map((c, i) => (
-          <div key={i} className="flex-shrink-0 bg-[#F5F3EF] rounded-2xl p-3 w-44">
-            <div className="flex items-center gap-2.5 mb-2.5">
-              <div
-                className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
-                style={{ backgroundColor: c.color }}
-              >
-                {c.name.split(" ").map(n => n[0]).join("")}
-              </div>
-              <div className="text-left">
-                <p className="text-xs font-bold text-[#1A1A2E] leading-tight">{c.name}</p>
-                <p className="text-[10px] font-bold text-[#F97316] uppercase tracking-wide">{c.role}</p>
-              </div>
+          <div key={i} className="flex-shrink-0 flex items-center gap-2 bg-[#F5F3EF] rounded-xl px-2.5 py-1.5">
+            <div
+              className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0"
+              style={{ backgroundColor: c.color }}
+            >
+              {c.name.split(" ").map(n => n[0]).join("")}
             </div>
-            <div className="space-y-1.5">
-              <a
-                href={`tel:${c.phone.replace(/\D/g, "")}`}
-                className="flex items-center gap-1.5 text-[11px] text-[#1A1A2E] font-medium hover:text-[#F97316] transition-colors"
-                onClick={e => e.stopPropagation()}
-              >
-                <Phone className="w-3 h-3 text-[#F97316] flex-shrink-0" />
-                <span className="truncate">{c.phone}</span>
-              </a>
-              <a
-                href={`mailto:${c.email}`}
-                className="flex items-center gap-1.5 text-[11px] text-[#1A1A2E] font-medium hover:text-[#F97316] transition-colors"
-                onClick={e => e.stopPropagation()}
-              >
-                <Mail className="w-3 h-3 text-[#F97316] flex-shrink-0" />
-                <span className="truncate">{c.email}</span>
-              </a>
+            <div>
+              <p className="text-[10px] font-bold text-[#1A1A2E] leading-tight">{c.name}</p>
+              <p className="text-[9px] font-bold text-[#F97316] uppercase tracking-wide leading-tight">{c.role}</p>
+              <div className="flex gap-2 mt-0.5">
+                <a href={`tel:${c.phone.replace(/\D/g, "")}`} className="flex items-center gap-0.5 text-[9px] text-[#6B7280] hover:text-[#F97316]">
+                  <Phone className="w-2.5 h-2.5" />{c.phone}
+                </a>
+              </div>
             </div>
           </div>
         ))}
-        <div className="flex-shrink-0 w-14 flex items-center justify-center">
-          <button className="w-10 h-10 rounded-full bg-[#F5F3EF] border-2 border-dashed border-[#D1D5DB] flex items-center justify-center text-[#9CA3AF] text-xl font-light">
-            +
-          </button>
-        </div>
+        <button className="flex-shrink-0 w-8 h-8 rounded-full bg-[#F5F3EF] border-2 border-dashed border-[#D1D5DB] flex items-center justify-center text-[#9CA3AF] text-base self-center">
+          +
+        </button>
       </div>
     </div>
   );
