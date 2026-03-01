@@ -23,6 +23,7 @@ export default function Register() {
       await base44.auth.updateMe({ code_verified: true });
       setStep("profile");
     } catch (e) {
+      console.error("Code verification error:", e);
       setError("Failed to verify code. Please try again.");
     }
   };
