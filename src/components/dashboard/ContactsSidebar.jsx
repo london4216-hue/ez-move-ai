@@ -1,39 +1,37 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 
-const COLORS = ["#4F7EFF", "#7C3AED", "#059669", "#D97706", "#DC2626"];
-
 const DEFAULT_CONTACTS = [
-  { name: "Sarah M.", role: "Agent", color: "#4F7EFF" },
+  { name: "Sarah M.", role: "Agent", color: "#F97316" },
   { name: "Mike T.", role: "Escrow", color: "#7C3AED" },
   { name: "Lisa R.", role: "Lender", color: "#059669" },
 ];
 
-export default function ContactsSidebar({ user }) {
-  const [contacts, setContacts] = useState(DEFAULT_CONTACTS);
+export default function ContactsRow({ user }) {
+  const [contacts] = useState(DEFAULT_CONTACTS);
 
   return (
-    <div className="w-28 bg-white rounded-2xl p-3 shadow-sm flex flex-col">
+    <div className="mx-3 mb-3 bg-white rounded-2xl px-4 py-3 shadow-sm">
       <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wider mb-3">Key Contacts</p>
-      <div className="flex-1 flex flex-col gap-2 overflow-y-auto">
+      <div className="flex gap-4 overflow-x-auto no-scrollbar">
         {contacts.map((c, i) => (
-          <button key={i} className="flex flex-col items-center gap-1 group">
+          <button key={i} className="flex items-center gap-2.5 flex-shrink-0 bg-[#F5F3EF] rounded-xl px-3 py-2">
             <div
-              className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0 shadow-sm"
+              className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
               style={{ backgroundColor: c.color }}
             >
               {c.name.split(" ").map(n => n[0]).join("")}
             </div>
-            <div className="text-center">
-              <p className="text-[10px] font-semibold text-[#1A1A2E] leading-tight">{c.name.split(" ")[0]}</p>
-              <p className="text-[9px] font-semibold text-[#F97316] uppercase tracking-wide">{c.role}</p>
+            <div className="text-left">
+              <p className="text-xs font-bold text-[#1A1A2E] leading-tight">{c.name}</p>
+              <p className="text-[11px] font-semibold text-[#F97316] uppercase tracking-wide">{c.role}</p>
             </div>
           </button>
         ))}
+        <button className="flex-shrink-0 w-9 h-9 rounded-full bg-[#F5F3EF] border-2 border-dashed border-[#D1D5DB] flex items-center justify-center text-[#9CA3AF] text-lg font-light self-center">
+          +
+        </button>
       </div>
-      <button className="mt-2 w-full py-1.5 rounded-lg bg-[#F5F3EF] text-[#4F7EFF] text-[10px] font-bold">
-        + Add
-      </button>
     </div>
   );
 }
