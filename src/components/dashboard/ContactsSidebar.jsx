@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Phone, ChevronLeft, ChevronRight } from "lucide-react";
+import { Phone, ChevronLeft, ChevronRight, Edit2, Plus, X } from "lucide-react";
 
 const COLORS = ["#F97316", "#7C3AED", "#059669", "#3B82F6", "#EC4899", "#8B5CF6", "#14B8A6", "#F59E0B", "#EF4444"];
 
@@ -9,6 +9,9 @@ export default function ContactsRow({ user, refreshKey }) {
   const scrollRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [formData, setFormData] = useState({ name: "", role: "", phone: "" });
 
   useEffect(() => {
     if (!user) return;
