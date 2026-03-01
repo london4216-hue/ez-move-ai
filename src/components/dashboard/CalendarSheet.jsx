@@ -189,7 +189,7 @@ export default function CalendarSheet({ user }) {
 
         {/* Day detail */}
         {selected && (
-          <div className="border-t border-[#F3F4F6] px-3 py-3">
+          <div className="border-t border-[#F3F4F6] px-3 py-2">
             <div className="flex items-center justify-between mb-2">
               <p className="text-xs font-bold text-[#1A1A2E]">{format(selected, "EEEE, MMM d")}</p>
               <div className="flex gap-2">
