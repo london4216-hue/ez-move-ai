@@ -258,7 +258,7 @@ export default function CalendarSheet({ user }) {
       {/* Overdue section */}
       {overdueAppts.length > 0 && (
         <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-          <div className="px-4 py-2.5 border-b border-[#FEE2E2] bg-[#FEF2F2]">
+          <div className="px-4 py-2 border-b border-[#FEE2E2] bg-[#FEF2F2]">
             <p className="text-xs font-bold text-[#EF4444]">⚠️ Overdue ({overdueAppts.length})</p>
           </div>
           <div className="divide-y divide-[#F3F4F6]">
