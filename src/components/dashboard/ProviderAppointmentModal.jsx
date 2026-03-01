@@ -1,129 +1,225 @@
-import { useState } from "react";
-import { X, Phone, Calendar, Clock, Check, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { X, Phone, Plus, Star, Check, Loader2, DollarSign } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
-const TIME_SLOTS = ["8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM"];
-
 export default function ProviderAppointmentModal({ provider, checklistItem, user, onClose, onSaved }) {
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
-  const [notes, setNotes] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+  // Each "call log" stored in notes field as JSON array in Appointment entity
+  // We store one Appointment per provider, with notes = JSON.stringify(callLogs)
+  // callLogs: [{ called: bool, quote: string, notes: string, date: string, chosen: bool }]
 
-  const handleSchedule = async () => {
-    if (!date) return;
+  const [appointment, setAppointment] = useState(null);
+  const [callLogs, setCallLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  // Form for new log entry
+  const [called, setCalled] = useState(null); // true | false | null
+  const [quote, setQuote] = useState("");
+  const [notes, setNotes] = useState("");
+
+  useEffect(() => {
+    const load = async () => {
+      const existing = await base44.entities.Appointment.filter({
+        user_id: user?.id,
+        provider_name: provider.name,
+        title: `${checklistItem} — ${provider.name}`
+      });
+      if (existing.length > 0) {
+        const appt = existing[0];
+        setAppointment(appt);
+        try { setCallLogs(JSON.parse(appt.notes || "[]")); } catch { setCallLogs([]); }
+      }
+      setLoading(false);
+    };
+    if (user?.id) load();
+    else setLoading(false);
+  }, []);
+
+  const saveLog = async () => {
+    if (called === null) return;
     setSaving(true);
-    await base44.entities.Appointment.create({
-      user_id: user?.id,
-      title: `${checklistItem} — ${provider.name}`,
-      provider_name: provider.name,
-      phone: provider.phone || "",
-      date,
-      time: time || "",
-      notes,
-      status: "scheduled"
-    });
+    const newLog = {
+      called,
+      quote: quote.trim(),
+      notes: notes.trim(),
+      date: new Date().toLocaleDateString(),
+      chosen: false
+    };
+    const updatedLogs = [...callLogs, newLog];
+    setCallLogs(updatedLogs);
+
+    if (appointment) {
+      await base44.entities.Appointment.update(appointment.id, { notes: JSON.stringify(updatedLogs) });
+    } else {
+      const created = await base44.entities.Appointment.create({
+        user_id: user?.id,
+        title: `${checklistItem} — ${provider.name}`,
+        provider_name: provider.name,
+        phone: provider.phone || "",
+        date: new Date().toISOString().split("T")[0],
+        notes: JSON.stringify(updatedLogs),
+        status: "tentative"
+      });
+      setAppointment(created);
+    }
+
+    setCalled(null);
+    setQuote("");
+    setNotes("");
     setSaving(false);
-    setSaved(true);
-    setTimeout(() => {
-      onSaved?.();
-      onClose();
-    }, 1200);
+    onSaved?.();
   };
+
+  const toggleChosen = async (idx) => {
+    const updated = callLogs.map((log, i) => ({ ...log, chosen: i === idx ? !log.chosen : false }));
+    setCallLogs(updated);
+    if (appointment) {
+      await base44.entities.Appointment.update(appointment.id, { notes: JSON.stringify(updated), status: updated[idx].chosen ? "scheduled" : "tentative" });
+    }
+    onSaved?.();
+  };
+
+  const chosenLog = callLogs.find(l => l.chosen);
 
   return (
     <div className="fixed inset-0 bg-black/60 z-50 flex items-end justify-center">
-      <div className="bg-white w-full max-w-md rounded-t-3xl max-h-[85vh] flex flex-col">
+      <div className="bg-white w-full max-w-md rounded-t-3xl max-h-[88vh] flex flex-col">
+        {/* Handle */}
+        <div className="flex justify-center pt-3 pb-1">
+          <div className="w-10 h-1 bg-[#E5E7EB] rounded-full" />
+        </div>
+
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-4 border-b border-[#F3F4F6]">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-[#F3F4F6]">
           <div>
-            <h2 className="text-base font-bold text-[#1A1A2E]">Schedule Appointment</h2>
-            <p className="text-[11px] text-[#6B7280]">{checklistItem}</p>
+            <p className="text-sm font-bold text-[#1A1A2E]">{provider.name}</p>
+            <p className="text-[10px] text-[#F97316] font-semibold">{checklistItem}</p>
           </div>
-          <button onClick={onClose} className="p-1"><X className="w-5 h-5 text-[#6B7280]" /></button>
+          <button onClick={onClose}><X className="w-5 h-5 text-[#9CA3AF]" /></button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-          {/* Provider Card */}
-          <div className="bg-[#FFF7ED] border border-[#FED7AA] rounded-2xl px-4 py-3 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-[#F97316] flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-              {provider.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-[#1A1A2E]">{provider.name}</p>
-              <p className="text-[10px] text-[#D97706] font-semibold">⭐ {provider.rating}</p>
-              {provider.phone && (
-                <a href={`tel:${provider.phone}`} className="flex items-center gap-1 text-[11px] text-[#F97316] font-semibold mt-0.5">
-                  <Phone className="w-3 h-3" />{provider.phone}
-                </a>
-              )}
-            </div>
-          </div>
-
-          {/* Date */}
-          <div>
-            <label className="text-xs font-bold text-[#1A1A2E] flex items-center gap-1.5 mb-2">
-              <Calendar className="w-3.5 h-3.5 text-[#F97316]" /> Preferred Date
-            </label>
-            <input
-              type="date"
-              value={date}
-              onChange={e => setDate(e.target.value)}
-              min={new Date().toISOString().split("T")[0]}
-              className="w-full px-3 py-2.5 rounded-xl border border-[#E5E7EB] text-sm focus:outline-none focus:border-[#F97316] bg-white"
-            />
-          </div>
-
-          {/* Time slots */}
-          <div>
-            <label className="text-xs font-bold text-[#1A1A2E] flex items-center gap-1.5 mb-2">
-              <Clock className="w-3.5 h-3.5 text-[#F97316]" /> Preferred Time
-            </label>
-            <div className="grid grid-cols-5 gap-2">
-              {TIME_SLOTS.map(t => (
-                <button
-                  key={t}
-                  onClick={() => setTime(t)}
-                  className={`py-1.5 rounded-xl text-[10px] font-semibold border transition-all
-                    ${time === t ? "bg-[#F97316] text-white border-[#F97316]" : "bg-white text-[#6B7280] border-[#E5E7EB] hover:border-[#F97316]"}`}
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Notes */}
-          <div>
-            <label className="text-xs font-bold text-[#1A1A2E] mb-2 block">Notes (optional)</label>
-            <textarea
-              value={notes}
-              onChange={e => setNotes(e.target.value)}
-              placeholder="e.g. 3 bedroom, need weekend availability…"
-              rows={3}
-              className="w-full px-3 py-2.5 rounded-xl border border-[#E5E7EB] text-xs focus:outline-none focus:border-[#F97316] resize-none"
-            />
-          </div>
-        </div>
-
-        {/* CTA */}
-        <div className="px-4 pb-6 pt-3 border-t border-[#F3F4F6]">
-          {saved ? (
-            <div className="flex items-center justify-center gap-2 py-3 bg-[#F0FDF4] rounded-2xl">
-              <Check className="w-4 h-4 text-[#059669]" />
-              <span className="text-sm font-bold text-[#059669]">Appointment Scheduled!</span>
-            </div>
-          ) : (
-            <button
-              onClick={handleSchedule}
-              disabled={!date || saving}
-              className="w-full py-3 rounded-2xl bg-[#F97316] text-white text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-40"
-            >
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Calendar className="w-4 h-4" />}
-              {saving ? "Scheduling…" : "Confirm Appointment"}
-            </button>
+        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
+          {/* Call button */}
+          {provider.phone && (
+            <a href={`tel:${provider.phone}`}
+              className="flex items-center gap-3 bg-[#FFF7ED] border border-[#FED7AA] rounded-2xl px-4 py-2.5">
+              <div className="w-8 h-8 rounded-xl bg-[#F97316] flex items-center justify-center flex-shrink-0">
+                <Phone className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <p className="text-[10px] text-[#9CA3AF] font-semibold uppercase tracking-wide">Tap to Call</p>
+                <p className="text-sm font-bold text-[#1A1A2E]">{provider.phone}</p>
+              </div>
+            </a>
           )}
+
+          {/* Existing call logs */}
+          {loading && <p className="text-xs text-[#9CA3AF]">Loading…</p>}
+          {!loading && callLogs.length > 0 && (
+            <div>
+              <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wide mb-2">Call History</p>
+              <div className="space-y-2">
+                {callLogs.map((log, idx) => (
+                  <div key={idx}
+                    className={`rounded-xl border px-3 py-2.5 transition-all
+                      ${log.chosen
+                        ? "bg-[#F0FDF4] border-[#6EE7B7]"
+                        : log.called
+                          ? "bg-[#F0F9FF] border-[#BAE6FD]"
+                          : "bg-[#FEF2F2] border-[#FECACA]"}`}>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full
+                            ${log.called ? "bg-[#059669] text-white" : "bg-[#EF4444] text-white"}`}>
+                            {log.called ? "✓ Called" : "✗ Not Reached"}
+                          </span>
+                          {log.quote && (
+                            <span className="text-[10px] font-bold text-[#059669] bg-[#D1FAE5] px-2 py-0.5 rounded-full">
+                              💰 {log.quote}
+                            </span>
+                          )}
+                        </div>
+                        {log.notes && <p className="text-[10px] text-[#6B7280] mt-1">{log.notes}</p>}
+                        <p className="text-[9px] text-[#9CA3AF] mt-0.5">{log.date}</p>
+                      </div>
+                      <button
+                        onClick={() => toggleChosen(idx)}
+                        title={log.chosen ? "Remove selection" : "Select this provider"}
+                        className={`flex-shrink-0 w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all
+                          ${log.chosen ? "bg-[#059669] border-[#059669]" : "border-[#D1D5DB] hover:border-[#059669]"}`}>
+                        <Star className={`w-3.5 h-3.5 ${log.chosen ? "text-white fill-white" : "text-[#D1D5DB]"}`} />
+                      </button>
+                    </div>
+                    {log.chosen && (
+                      <p className="text-[10px] font-bold text-[#059669] mt-1.5 flex items-center gap-1">
+                        <Check className="w-3 h-3" /> Selected as preferred provider
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* New log entry form */}
+          <div className="bg-[#FAFAFA] rounded-2xl border border-[#F3F4F6] px-3 py-3 space-y-3">
+            <p className="text-[10px] font-bold text-[#1A1A2E] uppercase tracking-wide">Log a Call</p>
+
+            {/* Called? Yes/No */}
+            <div>
+              <p className="text-[10px] text-[#6B7280] font-semibold mb-1.5">Did they answer?</p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setCalled(true)}
+                  className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all
+                    ${called === true ? "bg-[#059669] text-white border-[#059669]" : "bg-white text-[#6B7280] border-[#E5E7EB]"}`}>
+                  ✓ Yes — Reached
+                </button>
+                <button
+                  onClick={() => setCalled(false)}
+                  className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all
+                    ${called === false ? "bg-[#EF4444] text-white border-[#EF4444]" : "bg-white text-[#6B7280] border-[#E5E7EB]"}`}>
+                  ✗ No Answer
+                </button>
+              </div>
+            </div>
+
+            {/* Quote */}
+            <div>
+              <label className="text-[10px] text-[#6B7280] font-semibold block mb-1">Quote / Price (optional)</label>
+              <div className="relative">
+                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#9CA3AF]" />
+                <input
+                  value={quote}
+                  onChange={e => setQuote(e.target.value)}
+                  placeholder="e.g. $1,200 or $85/hr"
+                  className="w-full pl-8 pr-3 py-2 rounded-xl border border-[#E5E7EB] text-xs focus:outline-none focus:border-[#F97316]"
+                />
+              </div>
+            </div>
+
+            {/* Notes */}
+            <div>
+              <label className="text-[10px] text-[#6B7280] font-semibold block mb-1">Notes (optional)</label>
+              <textarea
+                value={notes}
+                onChange={e => setNotes(e.target.value)}
+                placeholder="e.g. includes packing, available Sat, crew of 3…"
+                rows={2}
+                className="w-full px-3 py-2 rounded-xl border border-[#E5E7EB] text-xs resize-none focus:outline-none focus:border-[#F97316]"
+              />
+            </div>
+
+            <button
+              onClick={saveLog}
+              disabled={called === null || saving}
+              className="w-full py-2.5 rounded-xl bg-[#F97316] text-white text-xs font-bold flex items-center justify-center gap-2 disabled:opacity-40"
+            >
+              {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
+              {saving ? "Saving…" : "Log This Call"}
+            </button>
+          </div>
         </div>
       </div>
     </div>
