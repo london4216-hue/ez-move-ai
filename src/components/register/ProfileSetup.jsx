@@ -57,19 +57,16 @@ export default function ProfileSetup({ onComplete }) {
   };
 
   return (
-    <div className="w-full max-w-sm">
-      <div className="text-center mb-8">
-        <div className="inline-flex items-center gap-2 mb-4">
-          <div className="w-8 h-8 bg-[#1A1A2E] rounded-lg flex items-center justify-center">
-            <span className="text-white text-xs font-bold">EZ</span>
-          </div>
-          <span className="text-xl font-semibold text-[#1A1A2E] tracking-tight">EZ Move <span className="text-[#C85A17]">AI</span></span>
+    <div className="w-full max-w-sm mx-auto">
+      <div className="text-center mb-10">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-gradient-to-br from-[#C85A17] to-[#F97316] mb-6 mx-auto">
+          <span className="text-white text-lg font-bold">EZ</span>
         </div>
-        <h1 className="text-2xl font-bold text-[#1A1A2E] mb-1">Your profile</h1>
-        <p className="text-sm text-[#6B7280]">Verify your info and add closing details</p>
+        <h1 className="text-3xl font-bold text-[#1A1A2E] mb-2">Tell us about yourself</h1>
+        <p className="text-sm text-[#6B7280]">We'll use this to personalize your moving timeline</p>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-5">
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-xl p-3">
             <p className="text-sm text-red-600">{error}</p>
@@ -79,23 +76,23 @@ export default function ProfileSetup({ onComplete }) {
         {/* Name Fields */}
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider block mb-1.5">First Name</label>
+            <label className="text-xs font-semibold text-[#6B7280] mb-2 block">First Name</label>
             <input
               type="text"
               value={firstName}
               onChange={e => setFirstName(e.target.value)}
-              placeholder="First name"
-              className="w-full px-4 py-3 rounded-xl border border-[#E5E7EB] bg-white text-[#1A1A2E] text-sm focus:outline-none focus:border-[#C85A17]"
+              placeholder="John"
+              className="w-full px-4 py-3 rounded-xl border border-[#E5E7EB] bg-white text-[#1A1A2E] text-sm focus:outline-none focus:border-[#C85A17] focus:ring-2 focus:ring-[#C85A17]/10"
             />
           </div>
           <div>
-            <label className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider block mb-1.5">Last Name</label>
+            <label className="text-xs font-semibold text-[#6B7280] mb-2 block">Last Name</label>
             <input
               type="text"
               value={lastName}
               onChange={e => setLastName(e.target.value)}
-              placeholder="Last name"
-              className="w-full px-4 py-3 rounded-xl border border-[#E5E7EB] bg-white text-[#1A1A2E] text-sm focus:outline-none focus:border-[#C85A17]"
+              placeholder="Doe"
+              className="w-full px-4 py-3 rounded-xl border border-[#E5E7EB] bg-white text-[#1A1A2E] text-sm focus:outline-none focus:border-[#C85A17] focus:ring-2 focus:ring-[#C85A17]/10"
             />
           </div>
         </div>
@@ -112,16 +109,16 @@ export default function ProfileSetup({ onComplete }) {
 
         {/* Buyer / Seller */}
         <div>
-          <p className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider mb-2">I am a</p>
+          <p className="text-xs font-semibold text-[#6B7280] mb-2 block">I am a</p>
           <div className="flex gap-3">
             {["seller", "buyer"].map(type => (
               <button
                 key={type}
                 onClick={() => setUserType(type)}
-                className={`flex-1 py-3 rounded-xl font-semibold text-sm capitalize transition-all
+                className={`flex-1 py-3 rounded-xl font-bold text-sm capitalize transition-all
                   ${user_type === type
-                    ? "bg-[#1A1A2E] text-white shadow-lg"
-                    : "bg-white text-[#6B7280] border border-[#E5E7EB]"}`}
+                    ? "bg-gradient-to-r from-[#C85A17] to-[#F97316] text-white shadow-lg"
+                    : "bg-white text-[#6B7280] border border-[#E5E7EB] hover:border-[#C85A17]"}`}
               >
                 {type}
               </button>
@@ -129,21 +126,26 @@ export default function ProfileSetup({ onComplete }) {
           </div>
         </div>
 
-        {/* Estimated Close Date Info */}
-        <div className="bg-[#F0F9FF] border border-[#BFDBFE] rounded-xl p-3">
-          <p className="text-xs font-semibold text-[#1E40AF] mb-1">4-Week Plan</p>
-          <p className="text-[11px] text-[#1E40AF]">
-            Starting today, you have ~30 days to complete your move. Update your actual closing date in the dashboard.
-          </p>
+        {/* Timeline Info */}
+        <div className="bg-gradient-to-br from-[#FEF3ED] to-[#FFF7ED] border border-[#FDCCB9] rounded-2xl p-4">
+          <div className="flex gap-3">
+            <div className="text-2xl">📅</div>
+            <div>
+              <p className="text-xs font-bold text-[#C85A17] mb-0.5">30-Day Moving Timeline</p>
+              <p className="text-xs text-[#92400E]">
+                We'll break your move into 4 manageable weeks. You can update dates in your dashboard.
+              </p>
+            </div>
+          </div>
         </div>
 
         <button
            onClick={handleSubmit}
            disabled={!homeAddress || submitting}
-           className="w-full py-4 rounded-2xl bg-[#C85A17] text-white font-semibold text-base
-             disabled:opacity-40 active:scale-[0.98] transition-all mt-4 shadow-[0_8px_24px_rgba(200,90,23,0.3)]"
+           className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#C85A17] to-[#F97316] text-white font-bold text-base
+             disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all shadow-[0_4px_12px_rgba(200,90,23,0.2)]"
          >
-           {submitting ? "Setting up..." : "Let's Go"}
+           {submitting ? "Creating your plan..." : "Create Plan"}
          </button>
       </div>
     </div>
