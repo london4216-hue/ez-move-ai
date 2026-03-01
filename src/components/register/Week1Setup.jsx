@@ -56,16 +56,16 @@ export default function Week1Setup({ onComplete }) {
       )}
 
       <button
-        onClick={onComplete}
+        onClick={() => onComplete && onComplete()}
         className="w-full py-4 rounded-2xl bg-[#1A1A2E] text-white font-semibold text-base
-          active:scale-[0.98] transition-all shadow-lg"
+          active:scale-[0.98] transition-all shadow-lg hover:bg-[#2A2A3E]"
       >
         Go to My Dashboard
       </button>
 
       <button
-        onClick={onComplete}
-        className="w-full py-3 text-sm text-[#6B7280] mt-2"
+        onClick={() => onComplete && onComplete()}
+        className="w-full py-3 text-sm text-[#6B7280] mt-2 hover:text-[#1A1A2E]"
       >
         Skip for now
       </button>
