@@ -30,7 +30,7 @@ export default function Week1Setup({ onComplete }) {
             onClick={() => toggle(item.id)}
             className={`w-full text-left p-4 rounded-2xl border-2 transition-all flex items-start gap-3
               ${checked[item.id]
-                ? "border-[#4F7EFF] bg-[#EEF2FF]"
+                ? "border-[#F97316] bg-[#FFF7ED]"
                 : "border-[#E5E7EB] bg-white"}`}
           >
             <div className={`w-5 h-5 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all

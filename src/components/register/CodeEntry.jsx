@@ -54,8 +54,8 @@ export default function CodeEntry({ onVerified }) {
             onChange={(e) => handleChange(i, e.target.value)}
             onKeyDown={(e) => handleKey(i, e)}
             className={`w-14 h-16 text-center text-2xl font-bold rounded-2xl border-2 outline-none transition-all bg-white
-              ${d ? "border-[#4F7EFF] text-[#1A1A2E]" : "border-[#E5E7EB] text-[#9CA3AF]"}
-              focus:border-[#4F7EFF] focus:shadow-[0_0_0_4px_rgba(79,126,255,0.1)]`}
+              ${d ? "border-[#F97316] text-[#1A1A2E]" : "border-[#E5E7EB] text-[#9CA3AF]"}
+              focus:border-[#F97316] focus:shadow-[0_0_0_4px_rgba(249,115,22,0.15)]`}
           />
         ))}
       </div>

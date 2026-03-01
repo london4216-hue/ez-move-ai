@@ -28,7 +28,7 @@ export default function WeekProgress({ user }) {
         </div>
         {daysLeft !== null && (
           <div className="text-right">
-            <p className="text-2xl font-bold text-[#4F7EFF]">{daysLeft}</p>
+            <p className="text-2xl font-bold text-[#F97316]">{daysLeft}</p>
             <p className="text-xs text-[#6B7280]">days to close</p>
           </div>
         )}

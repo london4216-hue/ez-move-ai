@@ -27,7 +27,7 @@ export default function ProfileSetup({ onComplete }) {
           <div className="w-8 h-8 bg-[#1A1A2E] rounded-lg flex items-center justify-center">
             <span className="text-white text-xs font-bold">EZ</span>
           </div>
-          <span className="text-xl font-semibold text-[#1A1A2E] tracking-tight">EZ Move <span className="text-[#4F7EFF]">AI</span></span>
+          <span className="text-xl font-semibold text-[#1A1A2E] tracking-tight">EZ Move <span className="text-[#F97316]">AI</span></span>
         </div>
         <h1 className="text-2xl font-bold text-[#1A1A2E] mb-1">Set up your profile</h1>
         <p className="text-sm text-[#6B7280]">Tell us about your transaction</p>

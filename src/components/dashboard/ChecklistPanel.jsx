@@ -79,7 +79,7 @@ export default function ChecklistPanel({ user }) {
             onClick={() => setActiveWeek(w)}
             className={`flex-1 min-w-0 py-2.5 px-2 text-xs font-semibold transition-all whitespace-nowrap
               ${activeWeek === w
-                ? "text-[#4F7EFF] border-b-2 border-[#4F7EFF]"
+                ? "text-[#F97316] border-b-2 border-[#F97316]"
                 : "text-[#9CA3AF]"}`}
           >
             Wk {w}
