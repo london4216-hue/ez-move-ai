@@ -19,9 +19,11 @@ export default function Register() {
         navigate(createPageUrl("Dashboard"));
         return;
       }
+      // Mark that code has been verified
+      await base44.auth.updateMe({ code_verified: true });
       setStep("profile");
     } catch (e) {
-      setError("Failed to verify. Please try again.");
+      setError("Failed to verify code. Please try again.");
     }
   };
 
