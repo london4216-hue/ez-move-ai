@@ -54,19 +54,42 @@ const WEEK_DATA = {
 export default function ChecklistPanel({ user, onProviderSaved }) {
   const currentWeek = user?.current_week || 1;
   const [completedIds, setCompletedIds] = useState(new Set());
-  const [skippedIds, setSkippedIds] = useState(new Set());
+  const [removedIds, setRemovedIds] = useState(new Set());
   const [activeWeek, setActiveWeek] = useState(currentWeek);
+  // customItems: { [week]: [{id, title, description}] }
+  const [customItems, setCustomItems] = useState({});
+  const [addingTask, setAddingTask] = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [newTaskDesc, setNewTaskDesc] = useState("");
 
   const weekData = WEEK_DATA[activeWeek];
-  const items = weekData?.items || [];
-  const completed = items.filter(i => completedIds.has(i.id)).length;
-  const progress = items.length ? Math.round((completed / items.length) * 100) : 0;
+  const baseItems = weekData?.items || [];
+  const weekCustom = (customItems[activeWeek] || []);
+  const allItems = [...baseItems.filter(i => !removedIds.has(i.id)), ...weekCustom];
+  const completed = allItems.filter(i => completedIds.has(i.id)).length;
+  const progress = allItems.length ? Math.round((completed / allItems.length) * 100) : 0;
 
   const handleComplete = (id) => {
     setCompletedIds(s => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
   };
-  const handleSkip = (id) => {
-    setSkippedIds(s => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  const handleRemove = (id) => {
+    setRemovedIds(s => { const n = new Set(s); n.add(id); return n; });
+    setCompletedIds(s => { const n = new Set(s); n.delete(id); return n; });
+  };
+  const handleRemoveCustom = (week, id) => {
+    setCustomItems(prev => ({ ...prev, [week]: (prev[week] || []).filter(i => i.id !== id) }));
+    setCompletedIds(s => { const n = new Set(s); n.delete(id); return n; });
+  };
+  const handleAddTask = () => {
+    if (!newTaskTitle.trim()) return;
+    const id = `custom-${activeWeek}-${Date.now()}`;
+    setCustomItems(prev => ({
+      ...prev,
+      [activeWeek]: [...(prev[activeWeek] || []), { id, title: newTaskTitle.trim(), description: newTaskDesc.trim(), custom: true }]
+    }));
+    setNewTaskTitle("");
+    setNewTaskDesc("");
+    setAddingTask(false);
   };
 
   return (
@@ -76,11 +99,9 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
         {[1, 2, 3, 4].map(w => (
           <button
             key={w}
-            onClick={() => setActiveWeek(w)}
+            onClick={() => { setActiveWeek(w); setAddingTask(false); }}
             className={`flex-1 min-w-0 py-2.5 px-2 text-xs font-semibold transition-all whitespace-nowrap
-              ${activeWeek === w
-                ? "text-[#F97316] border-b-2 border-[#F97316]"
-                : "text-[#9CA3AF]"}`}
+              ${activeWeek === w ? "text-[#F97316] border-b-2 border-[#F97316]" : "text-[#9CA3AF]"}`}
           >
             Wk {w}
           </button>
@@ -95,10 +116,8 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
         </div>
         <p className="text-xs text-[#6B7280] mb-2">{weekData.subtitle}</p>
         <div className="w-full h-1.5 bg-[#F3F4F6] rounded-full overflow-hidden">
-          <div
-            className="h-full rounded-full transition-all duration-500"
-            style={{ width: `${progress}%`, background: "linear-gradient(90deg, #F97316, #EF4444)" }}
-          />
+          <div className="h-full rounded-full transition-all duration-500"
+            style={{ width: `${progress}%`, background: "linear-gradient(90deg, #F97316, #EF4444)" }} />
         </div>
         {progress === 100 && (
           <p className="text-xs text-[#059669] font-semibold mt-1.5">🎉 Week {activeWeek} complete! You're ahead of schedule.</p>
@@ -106,20 +125,57 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
       </div>
 
       {/* Items */}
-      <div className="flex-1 overflow-y-auto px-3 pb-3 space-y-2 max-h-80">
-        {items.map(item => (
+      <div className="flex-1 overflow-y-auto px-3 pb-2 space-y-2 max-h-80">
+        {allItems.map(item => (
           <ChecklistItemCard
             key={item.id}
             item={item}
             completed={completedIds.has(item.id)}
-            skipped={skippedIds.has(item.id)}
+            skipped={false}
             onComplete={() => handleComplete(item.id)}
-            onSkip={() => handleSkip(item.id)}
+            onSkip={() => item.custom ? handleRemoveCustom(activeWeek, item.id) : handleRemove(item.id)}
             userAddress={user?.current_address}
             onProviderSaved={onProviderSaved}
             user={user}
           />
         ))}
+
+        {/* Add custom task */}
+        {addingTask ? (
+          <div className="rounded-xl border border-[#F3F4F6] bg-[#FAFAFA] p-3 space-y-2">
+            <p className="text-[11px] font-bold text-[#1A1A2E]">New Task</p>
+            <input
+              autoFocus
+              value={newTaskTitle}
+              onChange={e => setNewTaskTitle(e.target.value)}
+              placeholder="Task title *"
+              className="w-full text-xs border border-[#E5E7EB] rounded-lg px-2.5 py-1.5 outline-none focus:border-[#F97316]"
+            />
+            <input
+              value={newTaskDesc}
+              onChange={e => setNewTaskDesc(e.target.value)}
+              placeholder="Description (optional)"
+              className="w-full text-xs border border-[#E5E7EB] rounded-lg px-2.5 py-1.5 outline-none focus:border-[#F97316]"
+            />
+            <div className="flex gap-2">
+              <button onClick={handleAddTask}
+                className="flex-1 py-1.5 rounded-lg bg-[#F97316] text-white text-[11px] font-bold">
+                Add Task
+              </button>
+              <button onClick={() => { setAddingTask(false); setNewTaskTitle(""); setNewTaskDesc(""); }}
+                className="flex-1 py-1.5 rounded-lg border border-[#E5E7EB] text-[#6B7280] text-[11px] font-bold">
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={() => setAddingTask(true)}
+            className="w-full py-2 rounded-xl border-2 border-dashed border-[#E5E7EB] text-[11px] text-[#9CA3AF] font-semibold hover:border-[#F97316] hover:text-[#F97316] transition-all"
+          >
+            + Add Custom Task
+          </button>
+        )}
       </div>
     </div>
   );
