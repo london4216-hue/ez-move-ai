@@ -51,7 +51,7 @@ const WEEK_DATA = {
   }
 };
 
-export default function ChecklistPanel({ user }) {
+export default function ChecklistPanel({ user, onProviderSaved }) {
   const currentWeek = user?.current_week || 1;
   const [completedIds, setCompletedIds] = useState(new Set());
   const [skippedIds, setSkippedIds] = useState(new Set());
@@ -116,6 +116,7 @@ export default function ChecklistPanel({ user }) {
             onComplete={() => handleComplete(item.id)}
             onSkip={() => handleSkip(item.id)}
             userAddress={user?.current_address}
+            onProviderSaved={onProviderSaved}
           />
         ))}
       </div>
