@@ -330,7 +330,7 @@ export default function InventoryTab({ user }) {
   };
 
   return (
-    <div className="flex flex-col gap-3 pb-20">
+    <div className="flex flex-col gap-3">
 
       {/* Truck banner — moving only */}
       {activeTab === "moving" && (
