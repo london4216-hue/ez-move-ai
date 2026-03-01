@@ -36,12 +36,7 @@ export default function Register() {
 
   const handleWeek1Complete = async () => {
     setError("");
-    try {
-      await base44.auth.updateMe({ onboarded: true });
-      setTimeout(() => navigate(createPageUrl("Dashboard")), 100);
-    } catch (e) {
-      navigate(createPageUrl("Dashboard"));
-    }
+    navigate(createPageUrl("Dashboard"));
   };
 
   return (
