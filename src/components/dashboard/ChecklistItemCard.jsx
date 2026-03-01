@@ -179,7 +179,7 @@ export default function ChecklistItemCard({ item, completed, skipped, onComplete
     </div>
 
     {showInventory && (
-      <InventoryWalkthrough user={user} onClose={() => setShowInventory(false)} />
+      <RoomSetupWizard user={user} onClose={() => setShowInventory(false)} />
     )}
     </>
   );
