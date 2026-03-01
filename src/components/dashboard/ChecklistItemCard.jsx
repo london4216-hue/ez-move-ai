@@ -2,6 +2,7 @@ import { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Phone, UserPlus, Check, ShoppingCart, ClipboardList } from "lucide-react";
 import RoomSetupWizard from "./RoomSetupWizard";
+import ProviderContactCard from "./ProviderContactCard";
 
 export default function ChecklistItemCard({ item, completed, skipped, onComplete, onSkip, userAddress, onProviderSaved, user }) {
   const [expanded, setExpanded] = useState(false);
