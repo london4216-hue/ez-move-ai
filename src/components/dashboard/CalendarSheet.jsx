@@ -42,29 +42,30 @@ export default function CalendarSheet({ user }) {
   };
 
   const autoPlaceCurrentWeekTasks = (userData) => {
-    if (!userData.close_date || !userData.current_week) return;
+    if (!userData.close_date) return;
     const closeDate = parseISO(userData.close_date);
-    const currentWeek = userData.current_week;
     const tasks = [];
     
-    // Calculate current week start date
-    const weekStart = addDays(closeDate, -(5 - currentWeek) * 7);
-    const weekItems = WEEK_DATA[currentWeek]?.items || [];
-    
-    // Spread tasks across the week
-    const weekDays = 7;
-    const tasksPerDay = Math.ceil(weekItems.length / weekDays);
-    
-    weekItems.forEach((title, idx) => {
-      const dayOffset = Math.floor(idx / tasksPerDay);
-      const taskDate = addDays(weekStart, Math.min(dayOffset, 6)); // Cap at day 6 (last day of week)
-      tasks.push({
-        title,
-        date: format(taskDate, "yyyy-MM-dd"),
-        user_id: userData.id,
-        status: "tentative"
+    // Auto-place all 4 weeks of tasks
+    for (let week = 1; week <= 4; week++) {
+      const weekStart = addDays(closeDate, -(5 - week) * 7);
+      const weekItems = WEEK_DATA[week]?.items || [];
+      
+      // Spread tasks across the week
+      const weekDays = 7;
+      const tasksPerDay = Math.ceil(weekItems.length / weekDays);
+      
+      weekItems.forEach((title, idx) => {
+        const dayOffset = Math.floor(idx / tasksPerDay);
+        const taskDate = addDays(weekStart, Math.min(dayOffset, 6));
+        tasks.push({
+          title,
+          date: format(taskDate, "yyyy-MM-dd"),
+          user_id: userData.id,
+          status: "tentative"
+        });
       });
-    });
+    }
     
     // Create appointments for auto-placed tasks
     if (tasks.length > 0) {
