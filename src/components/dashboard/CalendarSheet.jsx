@@ -79,6 +79,18 @@ export default function CalendarSheet({ user }) {
     try { return isSameDay(parseISO(a.date), day); } catch { return false; }
   });
 
+  const getWeekAlerts = (day) => {
+    const weekStart = startOfWeek(day);
+    const weekEnd = endOfWeek(day);
+    return appointments.filter(a => {
+      try {
+        const aDate = parseISO(a.date);
+        const dayBeforeDue = addDays(aDate, -1);
+        return aDate >= weekStart && aDate <= weekEnd && isSameDay(dayBeforeDue, day) && a.status !== "completed" && a.status !== "cancelled";
+      } catch { return false; }
+    });
+  };
+
   const isOverdue = (appt) => {
     try {
       const d = parseISO(appt.date);
