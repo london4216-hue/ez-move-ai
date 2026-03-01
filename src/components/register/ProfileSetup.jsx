@@ -15,15 +15,18 @@ export default function ProfileSetup({ onComplete }) {
   useEffect(() => {
     const loadUser = async () => {
       try {
-        const user = await base44.auth.me();
-        if (user?.full_name) {
-          const [first, ...rest] = user.full_name.split(" ");
-          setFirstName(first || "");
-          setLastName(rest.join(" ") || "");
+        const isAuth = await base44.auth.isAuthenticated();
+        if (isAuth) {
+          const user = await base44.auth.me();
+          if (user?.full_name) {
+            const [first, ...rest] = user.full_name.split(" ");
+            setFirstName(first || "");
+            setLastName(rest.join(" ") || "");
+          }
+          if (user?.home_address) setHomeAddress(user.home_address);
         }
-        if (user?.home_address) setHomeAddress(user.home_address);
       } catch (e) {
-        console.error("Failed to load user:", e);
+        // Silent fail for unauthenticated users
       }
     };
     loadUser();
@@ -37,14 +40,19 @@ export default function ProfileSetup({ onComplete }) {
     setError("");
     setSubmitting(true);
     const today = new Date();
-    await onComplete({
-      first_name: firstName,
-      last_name: lastName,
-      home_address: homeAddress,
-      user_type,
-      close_date,
-      registration_date: format(today, "yyyy-MM-dd")
-    });
+    try {
+      await onComplete({
+        first_name: firstName,
+        last_name: lastName,
+        home_address: homeAddress,
+        user_type,
+        close_date,
+        registration_date: format(today, "yyyy-MM-dd")
+      });
+    } catch (e) {
+      setSubmitting(false);
+      setError("Please try again");
+    }
   };
 
   return (
