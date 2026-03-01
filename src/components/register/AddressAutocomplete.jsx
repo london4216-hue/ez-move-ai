@@ -61,10 +61,10 @@ export default function AddressAutocomplete({ label, value, onChange, placeholde
           onChange={e => handleInput(e.target.value)}
           onFocus={() => suggestions.length > 0 && setShowDropdown(true)}
           autoComplete="off"
-          className="w-full px-4 py-3 pr-10 rounded-xl border border-[#E5E7EB] bg-white text-[#1A1A2E] text-sm focus:outline-none focus:border-[#4F7EFF] focus:shadow-[0_0_0_3px_rgba(79,126,255,0.1)]"
+          className="w-full px-4 py-3 pr-10 rounded-xl border border-[#E5E7EB] bg-white text-[#1A1A2E] text-sm focus:outline-none focus:border-[#F97316] focus:shadow-[0_0_0_3px_rgba(249,115,22,0.15)]"
         />
         {loading && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-[#4F7EFF] border-t-transparent rounded-full animate-spin" />
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-[#F97316] border-t-transparent rounded-full animate-spin" />
         )}
         {!loading && query && (
           <button
@@ -86,7 +86,7 @@ export default function AddressAutocomplete({ label, value, onChange, placeholde
               onMouseDown={() => handleSelect(s)}
               className="w-full text-left px-4 py-3 text-sm text-[#1A1A2E] hover:bg-[#F5F3EF] transition-colors border-b border-[#F3F4F6] last:border-0 flex items-start gap-2"
             >
-              <svg className="w-4 h-4 text-[#4F7EFF] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="w-4 h-4 text-[#F97316] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>

@@ -43,7 +43,7 @@ export default function ChecklistItemCard({ item, completed, skipped, onComplete
     return (
       <div className="flex items-center justify-between p-3 rounded-xl bg-[#F9FAFB] opacity-50">
         <p className="text-xs text-[#9CA3AF] line-through">{item.title}</p>
-        <button onClick={onSkip} className="text-[10px] text-[#4F7EFF]">Undo</button>
+        <button onClick={onSkip} className="text-[10px] text-[#F97316]">Undo</button>
       </div>
     );
   }
@@ -55,7 +55,7 @@ export default function ChecklistItemCard({ item, completed, skipped, onComplete
         <button
           onClick={onComplete}
           className={`w-6 h-6 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all
-            ${completed ? "bg-[#059669] border-[#059669]" : "border-[#D1D5DB] hover:border-[#4F7EFF]"}`}
+            ${completed ? "bg-[#F97316] border-[#F97316]" : "border-[#D1D5DB] hover:border-[#F97316]"}`}
         >
           {completed && (
             <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -65,7 +65,7 @@ export default function ChecklistItemCard({ item, completed, skipped, onComplete
         </button>
 
         <div className="flex-1 min-w-0">
-          <p className={`text-sm font-semibold ${completed ? "text-[#059669] line-through" : "text-[#1A1A2E]"}`}>
+          <p className={`text-sm font-semibold ${completed ? "text-[#F97316] line-through" : "text-[#1A1A2E]"}`}>
             {item.title}
           </p>
           <p className="text-[11px] text-[#6B7280]">{item.description}</p>
@@ -75,7 +75,7 @@ export default function ChecklistItemCard({ item, completed, skipped, onComplete
           {item.ai_search_query && !completed && (
             <button
               onClick={() => expanded ? setExpanded(false) : handleFindLocal()}
-              className="px-2 py-1 rounded-lg bg-[#EEF2FF] text-[#4F7EFF] text-[10px] font-bold whitespace-nowrap"
+              className="px-2 py-1 rounded-lg bg-[#FFF7ED] text-[#F97316] text-[10px] font-bold whitespace-nowrap"
             >
               Find Local
             </button>
@@ -98,7 +98,7 @@ export default function ChecklistItemCard({ item, completed, skipped, onComplete
         <div className="px-3 pb-3 border-t border-[#F3F4F6] pt-2">
           {loadingAI ? (
             <div className="flex items-center gap-2 py-2">
-              <div className="w-4 h-4 border-2 border-[#4F7EFF] border-t-transparent rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-[#F97316] border-t-transparent rounded-full animate-spin" />
               <p className="text-xs text-[#6B7280]">Finding top local providers...</p>
             </div>
           ) : aiResults?.length > 0 ? (
@@ -111,7 +111,7 @@ export default function ChecklistItemCard({ item, completed, skipped, onComplete
                   </div>
                   <p className="text-[10px] text-[#6B7280] mt-0.5">{r.description}</p>
                   {r.phone && (
-                    <a href={`tel:${r.phone}`} className="text-[10px] text-[#4F7EFF] font-semibold mt-1 block">{r.phone}</a>
+                    <a href={`tel:${r.phone}`} className="text-[10px] text-[#F97316] font-semibold mt-1 block">{r.phone}</a>
                   )}
                 </div>
               ))}
