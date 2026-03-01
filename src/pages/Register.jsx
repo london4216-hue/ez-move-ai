@@ -34,35 +34,40 @@ export default function Register() {
   const handleProfileComplete = async (data) => {
     setError("");
     try {
+      const currentUser = await base44.auth.me();
+      
+      // Get client record to use their close date
+      const invitationCode = new URLSearchParams(window.location.search).get('code');
+      let closeDate = data.estimated_close_date;
+      
+      if (invitationCode) {
+        const clients = await base44.entities.Client.filter({
+          invitation_code: invitationCode
+        });
+        if (clients.length > 0 && clients[0].close_date) {
+          closeDate = clients[0].close_date;
+          await base44.entities.Client.update(clients[0].id, {
+            status: 'registered',
+            user_email: currentUser.email
+          });
+        }
+      }
+
       await base44.auth.updateMe({
         first_name: userData.firstName,
         last_name: userData.lastName,
         phone: userData.phone,
         home_address: data.home_address,
         user_type: data.user_type,
-        estimated_close_date: data.estimated_close_date,
+        estimated_close_date: closeDate,
         registration_date: data.registration_date
       });
 
       // Send welcome and congratulations emails
       await base44.functions.invoke('sendWelcomeEmail', {
         user_name: userData.firstName,
-        user_email: await base44.auth.me().then(u => u.email)
+        user_email: currentUser.email
       });
-
-      // Create client record in agent system
-      const invitationCode = new URLSearchParams(window.location.search).get('code');
-      if (invitationCode) {
-        const clients = await base44.entities.Client.filter({
-          invitation_code: invitationCode
-        });
-        if (clients.length > 0) {
-          await base44.entities.Client.update(clients[0].id, {
-            status: 'registered',
-            user_email: await base44.auth.me().then(u => u.email)
-          });
-        }
-      }
     } catch (e) {
       console.error("Profile save error:", e);
     }
