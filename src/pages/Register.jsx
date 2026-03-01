@@ -21,10 +21,16 @@ export default function Register() {
 
   const handleProfileComplete = async (data) => {
     try {
-      await base44.auth.updateMe({ ...data, onboarded: false });
+      const userData = {
+        user_type: data.user_type,
+        close_date: data.close_date,
+        registration_date: data.registration_date
+      };
+      await base44.auth.updateMe(userData);
       setStep("week1");
     } catch (e) {
-      console.error(e);
+      console.error("Profile update error:", e);
+      alert("Error saving profile. Please try again.");
     }
   };
 
