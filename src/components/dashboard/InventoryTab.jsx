@@ -185,22 +185,20 @@ function ItemList({ items, listColor, listBg, onRemove, onEmail, sending, sent, 
         </div>
       )}
 
-      {items.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-sm px-4 py-3">
-          {sent ? (
-            <div className="flex items-center justify-center gap-2 py-1 bg-[#F0FDF4] rounded-xl">
-              <CheckCircle2 className="w-4 h-4 text-[#059669]" />
-              <span className="text-xs font-bold text-[#059669]">Sent to {user?.email}</span>
-            </div>
-          ) : (
-            <button onClick={onEmail} disabled={sending}
-              className={`w-full py-2.5 rounded-xl text-white text-xs font-bold flex items-center justify-center gap-2 ${listBg}`}>
-              {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
-              {sending ? "Sending…" : "Email This List"}
-            </button>
-          )}
-        </div>
-      )}
+      <div className="bg-white rounded-2xl shadow-sm px-4 py-3">
+        {sent ? (
+          <div className="flex items-center justify-center gap-2 py-1 bg-[#F0FDF4] rounded-xl">
+            <CheckCircle2 className="w-4 h-4 text-[#059669]" />
+            <span className="text-xs font-bold text-[#059669]">Sent to {user?.email}</span>
+          </div>
+        ) : (
+          <button onClick={onEmail} disabled={sending}
+            className={`w-full py-2.5 rounded-xl text-white text-xs font-bold flex items-center justify-center gap-2 ${listBg}`}>
+            {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
+            {sending ? "Sending…" : "Email This List"}
+          </button>
+        )}
+      </div>
     </div>
   );
 }
