@@ -26,7 +26,7 @@ export default function ContactsSidebar({ user }) {
             </div>
             <div className="text-center">
               <p className="text-[10px] font-semibold text-[#1A1A2E] leading-tight">{c.name.split(" ")[0]}</p>
-              <p className="text-[9px] text-[#9CA3AF]">{c.role}</p>
+              <p className="text-[9px] font-semibold text-[#F97316] uppercase tracking-wide">{c.role}</p>
             </div>
           </button>
         ))}
