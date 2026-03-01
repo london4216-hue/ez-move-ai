@@ -10,7 +10,14 @@ export default function Register() {
   const [step, setStep] = useState("code"); // code | profile | week1
   const navigate = useNavigate();
 
-  const handleCodeVerified = () => setStep("profile");
+  const handleCodeVerified = async () => {
+    // If already onboarded, go straight to dashboard after code
+    try {
+      const u = await base44.auth.me();
+      if (u?.onboarded) { navigate(createPageUrl("Dashboard")); return; }
+    } catch (_) {}
+    setStep("profile");
+  };
 
   const handleProfileComplete = async (data) => {
     try {
