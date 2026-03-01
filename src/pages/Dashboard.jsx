@@ -48,6 +48,12 @@ export default function Dashboard() {
         </div>
         <div className="flex items-center gap-3">
           <MessagesCorner user={user} />
+          <button
+            onClick={() => base44.auth.logout(createPageUrl("Register"))}
+            className="text-[10px] font-semibold text-[#9CA3AF] hover:text-[#F97316] transition-colors"
+          >
+            Log out
+          </button>
           <div className="w-8 h-8 rounded-full bg-[#1A1A2E] flex items-center justify-center">
             <span className="text-white text-xs font-bold">
               {user?.full_name?.[0] || "U"}
