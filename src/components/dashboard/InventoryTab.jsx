@@ -75,15 +75,62 @@ const ROOM_CATALOG = {
 };
 
 const SIZE_CUFT = { s: 8, m: 20, l: 40 };
+const WEIGHT_PER_CUFT = 7; // Average weight per cubic foot of household goods
 
 function estimateTruck(items) {
   const cuft = items.reduce((sum, item) => sum + (SIZE_CUFT[item.size] || 15), 0);
   if (cuft === 0) return null;
-  if (cuft < 100) return { label: "Cargo Van / Small Truck", icon: "🚐", truck: "~100 cu ft", rooms: "Studio / 1-room" };
-  if (cuft < 300) return { label: "10–14 ft Truck", icon: "🚚", truck: "~300 cu ft", rooms: "1–2 Bedroom Apt" };
-  if (cuft < 550) return { label: "15–17 ft Truck", icon: "🚛", truck: "~500 cu ft", rooms: "2–3 Bedroom Home" };
-  if (cuft < 850) return { label: "20–22 ft Truck", icon: "🚛", truck: "~800 cu ft", rooms: "3–4 Bedroom Home" };
-  return { label: "26 ft Truck (or 2 trips)", icon: "🚛🚛", truck: "1200+ cu ft", rooms: "Large Home / Estate" };
+  
+  const totalWeight = Math.round(cuft * WEIGHT_PER_CUFT);
+  
+  if (cuft < 100) {
+    return { 
+      label: "Cargo Van / Small Truck", 
+      icon: "🚐", 
+      cuft: "~100 cu ft",
+      weight: "~700 lbs",
+      cost: "$500–$800",
+      rooms: "Studio / 1-room" 
+    };
+  }
+  if (cuft < 300) {
+    return { 
+      label: "10–14 ft Truck", 
+      icon: "🚚", 
+      cuft: "~300 cu ft",
+      weight: `~${Math.round(300 * WEIGHT_PER_CUFT)} lbs`,
+      cost: "$1,200–$1,800",
+      rooms: "1–2 Bedroom Apt" 
+    };
+  }
+  if (cuft < 550) {
+    return { 
+      label: "15–17 ft Truck", 
+      icon: "🚛", 
+      cuft: "~500 cu ft",
+      weight: `~${Math.round(500 * WEIGHT_PER_CUFT)} lbs`,
+      cost: "$2,500–$3,500",
+      rooms: "2–3 Bedroom Home" 
+    };
+  }
+  if (cuft < 850) {
+    return { 
+      label: "20–22 ft Truck", 
+      icon: "🚛", 
+      cuft: "~800 cu ft",
+      weight: `~${Math.round(800 * WEIGHT_PER_CUFT)} lbs`,
+      cost: "$4,000–$5,500",
+      rooms: "3–4 Bedroom Home" 
+    };
+  }
+  return { 
+    label: "26 ft Truck (or 2 trips)", 
+    icon: "🚛🚛", 
+    cuft: "1200+ cu ft",
+    weight: "8,400+ lbs",
+    cost: "$6,000–$9,000+",
+    rooms: "Large Home / Estate" 
+  };
 }
 
 const ALL_ROOMS = Object.keys(ROOM_CATALOG);
