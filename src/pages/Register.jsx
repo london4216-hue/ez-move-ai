@@ -43,6 +43,26 @@ export default function Register() {
         estimated_close_date: data.estimated_close_date,
         registration_date: data.registration_date
       });
+
+      // Send welcome and congratulations emails
+      await base44.functions.invoke('sendWelcomeEmail', {
+        user_name: userData.firstName,
+        user_email: await base44.auth.me().then(u => u.email)
+      });
+
+      // Create client record in agent system
+      const invitationCode = new URLSearchParams(window.location.search).get('code');
+      if (invitationCode) {
+        const clients = await base44.entities.Client.filter({
+          invitation_code: invitationCode
+        });
+        if (clients.length > 0) {
+          await base44.entities.Client.update(clients[0].id, {
+            status: 'registered',
+            user_email: await base44.auth.me().then(u => u.email)
+          });
+        }
+      }
     } catch (e) {
       console.error("Profile save error:", e);
     }
