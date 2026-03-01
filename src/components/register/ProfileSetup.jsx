@@ -82,32 +82,6 @@ export default function ProfileSetup({ onComplete }) {
           required
         />
 
-        {/* Agent Info */}
-        <div>
-          <label className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider block mb-1.5">
-            {form.user_type === "buyer" ? "Buyer's Agent Name" : "Listing Agent Name"}
-          </label>
-          <input
-            type="text"
-            value={form.agent_name}
-            onChange={e => setForm(f => ({ ...f, agent_name: e.target.value }))}
-            placeholder="Agent full name"
-            className="w-full px-4 py-3 rounded-xl border border-[#E5E7EB] bg-white text-[#1A1A2E] text-sm focus:outline-none focus:border-[#F97316] focus:shadow-[0_0_0_3px_rgba(249,115,22,0.15)]"
-          />
-        </div>
-        <div>
-          <label className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider block mb-1.5">
-            Agent Phone
-          </label>
-          <input
-            type="tel"
-            value={form.agent_phone}
-            onChange={e => setForm(f => ({ ...f, agent_phone: e.target.value }))}
-            placeholder="(555) 000-0000"
-            className="w-full px-4 py-3 rounded-xl border border-[#E5E7EB] bg-white text-[#1A1A2E] text-sm focus:outline-none focus:border-[#F97316] focus:shadow-[0_0_0_3px_rgba(249,115,22,0.15)]"
-          />
-        </div>
-
         <AddressAutocomplete
           label="New Destination Address"
           value={form.destination_address}
