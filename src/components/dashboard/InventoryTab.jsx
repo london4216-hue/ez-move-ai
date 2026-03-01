@@ -165,13 +165,10 @@ function ItemPicker({ listType, onAdd }) {
 
 // List display + email
 function ItemList({ items, listColor, listBg, onRemove, onEmail, sending, sent, user, emptyLabel }) {
+  if (items.length === 0) return null;
+  
   return (
     <div className="flex flex-col gap-2">
-      {items.length === 0 ? (
-        <div className="bg-white rounded-2xl px-4 py-6 text-center">
-          <p className="text-[11px] text-[#9CA3AF]">{emptyLabel}</p>
-        </div>
-      ) : (
         <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
           <div className="divide-y divide-[#F3F4F6] max-h-64 overflow-y-auto">
             {items.map((item, idx) => (
