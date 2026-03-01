@@ -38,6 +38,36 @@ export default function ContactsRow({ user, refreshKey }) {
     scrollRef.current?.scrollBy({ left: dir * 140, behavior: "smooth" });
   };
 
+  const openAddModal = () => {
+    setEditingId(null);
+    setFormData({ name: "", role: "", phone: "" });
+    setShowModal(true);
+  };
+
+  const openEditModal = (provider) => {
+    setEditingId(provider.id);
+    setFormData({ name: provider.name, role: provider.role, phone: provider.phone });
+    setShowModal(true);
+  };
+
+  const handleSave = async () => {
+    if (!formData.name.trim()) return;
+    if (editingId) {
+      await base44.entities.SavedProvider.update(editingId, formData);
+    } else {
+      await base44.entities.SavedProvider.create({ ...formData, user_id: user.id });
+    }
+    base44.entities.SavedProvider.filter({ user_id: user.id }).then(setSavedProviders).catch(() => {});
+    setShowModal(false);
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Remove this contact?")) {
+      await base44.entities.SavedProvider.delete(id);
+      setSavedProviders(p => p.filter(x => x.id !== id));
+    }
+  };
+
   // Build realtor contact from user profile
   const realtorContact = user?.agent_name ? {
     name: user.agent_name,
