@@ -50,6 +50,8 @@
 import Dashboard from './pages/Dashboard';
 import Home from './pages/Home';
 import Register from './pages/Register';
+import AgentLogin from './pages/AgentLogin';
+import AgentDashboard from './pages/AgentDashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -57,6 +59,8 @@ export const PAGES = {
     "Dashboard": Dashboard,
     "Home": Home,
     "Register": Register,
+    "AgentLogin": AgentLogin,
+    "AgentDashboard": AgentDashboard,
 }
 
 export const pagesConfig = {
