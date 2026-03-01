@@ -29,7 +29,7 @@ export default function ProfileSetup({ onComplete }) {
           <div className="w-8 h-8 bg-[#1A1A2E] rounded-lg flex items-center justify-center">
             <span className="text-white text-xs font-bold">EZ</span>
           </div>
-          <span className="text-xl font-semibold text-[#1A1A2E] tracking-tight">EZ Move <span className="text-[#F97316]">AI</span></span>
+          <span className="text-xl font-semibold text-[#1A1A2E] tracking-tight">EZ Move <span className="text-[#C85A17]">AI</span></span>
         </div>
         <h1 className="text-2xl font-bold text-[#1A1A2E] mb-1">Set up your profile</h1>
         <p className="text-sm text-[#6B7280]">Tell us about your transaction</p>
@@ -63,13 +63,13 @@ export default function ProfileSetup({ onComplete }) {
         ].map(({ key, label, required }) => (
           <div key={key}>
             <label className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider block mb-1.5">
-              {label} {required && <span className="text-[#F97316]">*</span>}
+              {label} {required && <span className="text-[#C85A17]">*</span>}
             </label>
             <input
               type="date"
               value={form[key]}
               onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
-              className="w-full px-4 py-3 rounded-xl border border-[#E5E7EB] bg-white text-[#1A1A2E] text-sm focus:outline-none focus:border-[#F97316] focus:shadow-[0_0_0_3px_rgba(249,115,22,0.15)]"
+              className="w-full px-4 py-3 rounded-xl border border-[#E5E7EB] bg-white text-[#1A1A2E] text-sm focus:outline-none focus:border-[#C85A17] focus:shadow-[0_0_0_3px_rgba(200,90,23,0.15)]"
             />
           </div>
         ))}
@@ -90,11 +90,11 @@ export default function ProfileSetup({ onComplete }) {
         />
 
         <button
-          onClick={handleSubmit}
-          disabled={!isValid || submitting}
-          className="w-full py-4 rounded-2xl bg-[#F97316] text-white font-semibold text-base
-            disabled:opacity-40 active:scale-[0.98] transition-all mt-2 shadow-[0_8px_24px_rgba(249,115,22,0.3)]"
-        >
+           onClick={handleSubmit}
+           disabled={!isValid || submitting}
+           className="w-full py-4 rounded-2xl bg-[#C85A17] text-white font-semibold text-base
+             disabled:opacity-40 active:scale-[0.98] transition-all mt-2 shadow-[0_8px_24px_rgba(200,90,23,0.3)]"
+         >
           {submitting ? "Setting up..." : "Continue to Week 1 Setup"}
         </button>
       </div>

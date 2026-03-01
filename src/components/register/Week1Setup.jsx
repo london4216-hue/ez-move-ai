@@ -30,11 +30,11 @@ export default function Week1Setup({ onComplete }) {
             onClick={() => toggle(item.id)}
             className={`w-full text-left p-4 rounded-2xl border-2 transition-all flex items-start gap-3
               ${checked[item.id]
-                ? "border-[#F97316] bg-[#FFF7ED]"
-                : "border-[#E5E7EB] bg-white"}`}
+                 ? "border-[#C85A17] bg-[#FEF3ED]"
+                 : "border-[#E5E7EB] bg-white"}`}
           >
             <div className={`w-5 h-5 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all
-              ${checked[item.id] ? "border-[#F97316] bg-[#F97316]" : "border-[#D1D5DB]"}`}>
+              ${checked[item.id] ? "border-[#C85A17] bg-[#C85A17]" : "border-[#D1D5DB]"}`}>
               {checked[item.id] && (
                 <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -50,9 +50,9 @@ export default function Week1Setup({ onComplete }) {
       </div>
 
       {count > 0 && (
-        <p className="text-center text-sm text-[#F97316] font-medium mb-4">
-          {count} task{count > 1 ? "s" : ""} added to your Week 1 plan
-        </p>
+        <p className="text-center text-sm text-[#C85A17] font-medium mb-4">
+           {count} task{count > 1 ? "s" : ""} added to your Week 1 plan
+         </p>
       )}
 
       <button
