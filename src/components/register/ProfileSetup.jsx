@@ -10,6 +10,8 @@ export default function ProfileSetup({ onComplete }) {
     close_date: "",
     current_address: "",
     destination_address: "",
+    agent_name: "",
+    agent_phone: "",
   });
   const [submitting, setSubmitting] = useState(false);
 
