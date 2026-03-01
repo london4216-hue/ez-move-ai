@@ -139,6 +139,18 @@ export default function ChecklistItemCard({ item, completed, skipped, onComplete
         </div>
       </div>
 
+      {/* N/A remove button */}
+      {!completed && (
+        <div className="px-3 pb-2.5">
+          <button
+            onClick={onSkip}
+            className="w-full py-2 rounded-lg bg-[#F3F4F6] text-[#6B7280] text-xs font-bold tracking-wide hover:bg-[#E5E7EB] transition-colors"
+          >
+            N/A — Remove this task
+          </button>
+        </div>
+      )}
+
       {/* AI Results */}
       {expanded && (
         <div className="px-3 pb-3 border-t border-[#F3F4F6] pt-2">
