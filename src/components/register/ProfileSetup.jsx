@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { base44 } from "@/api/base44Client";
+import AddressAutocomplete from "./AddressAutocomplete";
 
 export default function ProfileSetup({ onComplete }) {
   const [firstName, setFirstName] = useState("");
