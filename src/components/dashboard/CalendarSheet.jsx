@@ -251,7 +251,29 @@ export default function CalendarSheet({ user }) {
               </select>
               <textarea placeholder="Notes" value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={2}
                 className="w-full px-3 py-2 rounded-xl border border-[#E5E7EB] text-xs focus:outline-none focus:border-[#F97316] resize-none" />
-              <button onClick={save} className="w-full py-2 rounded-xl bg-[#F97316] text-white text-xs font-bold">
+              <div className="border-t border-[#E5E7EB] pt-2 mt-2">
+                <p className="text-xs font-bold text-[#1A1A2E] mb-2">Reminders</p>
+                {form.reminder_times?.map((reminder, idx) => (
+                  <div key={idx} className="flex gap-2 mb-2">
+                    <input type="number" min="1" value={reminder.value} onChange={e => setForm(f => {
+                      const updated = [...f.reminder_times];
+                      updated[idx].value = parseInt(e.target.value);
+                      return { ...f, reminder_times: updated };
+                    })} className="flex-1 px-2 py-1 rounded-lg border border-[#E5E7EB] text-xs focus:outline-none focus:border-[#F97316]" />
+                    <select value={reminder.type} onChange={e => setForm(f => {
+                      const updated = [...f.reminder_times];
+                      updated[idx].type = e.target.value;
+                      return { ...f, reminder_times: updated };
+                    })} className="flex-1 px-2 py-1 rounded-lg border border-[#E5E7EB] text-xs focus:outline-none focus:border-[#F97316]">
+                      <option value="email">Email</option>
+                      <option value="in_app">In-App</option>
+                    </select>
+                    <button onClick={() => setForm(f => ({ ...f, reminder_times: f.reminder_times.filter((_, i) => i !== idx) }))} className="px-2 py-1 text-[#EF4444] text-xs">Remove</button>
+                  </div>
+                ))}
+                <button onClick={() => setForm(f => ({ ...f, reminder_times: [...(f.reminder_times || []), { value: 24, type: "email" }] }))} className="text-[10px] text-[#F97316] font-bold">+ Add Reminder</button>
+              </div>
+              <button onClick={save} className="w-full py-2 rounded-xl bg-[#F97316] text-white text-xs font-bold mt-2">
                 {editingAppt ? "Save Changes" : "Add Appointment"}
               </button>
             </div>
