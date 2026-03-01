@@ -20,7 +20,7 @@ export default function CodeEntry({ onVerified }) {
 
   const handleVerify = () => {
     const code = digits.join("");
-    if (code === "1226") {
+    if (code === "1016") {
       onVerified();
     } else {
       setError("Invalid code. Please check your invite email.");
