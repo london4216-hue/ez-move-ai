@@ -33,20 +33,21 @@ export default function ProfileSetup({ onComplete }) {
   }, []);
 
   const handleSubmit = async () => {
-    if (!close_date || !homeAddress) {
+    if (!homeAddress) {
       setError("Please fill in all required fields");
       return;
     }
     setError("");
     setSubmitting(true);
     const today = new Date();
+    const estimatedClose = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
     try {
       await onComplete({
         first_name: firstName,
         last_name: lastName,
         home_address: homeAddress,
         user_type,
-        close_date,
+        estimated_close_date: format(estimatedClose, "yyyy-MM-dd"),
         registration_date: format(today, "yyyy-MM-dd")
       });
     } catch (e) {
@@ -128,28 +129,22 @@ export default function ProfileSetup({ onComplete }) {
           </div>
         </div>
 
-        {/* Close Date */}
-        <div>
-          <label className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider block mb-1.5">
-            Closing Date <span className="text-[#C85A17]">*</span>
-          </label>
-          <input
-            type="date"
-            value={close_date}
-            onChange={e => setCloseDate(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-[#E5E7EB] bg-white text-[#1A1A2E] text-sm focus:outline-none focus:border-[#C85A17]"
-          />
-          <p className="text-[11px] text-[#9CA3AF] mt-2">Today: {format(new Date(), "MMM d, yyyy")}</p>
+        {/* Estimated Close Date Info */}
+        <div className="bg-[#F0F9FF] border border-[#BFDBFE] rounded-xl p-3">
+          <p className="text-xs font-semibold text-[#1E40AF] mb-1">4-Week Plan</p>
+          <p className="text-[11px] text-[#1E40AF]">
+            Starting today, you have ~30 days to complete your move. Update your actual closing date in the dashboard.
+          </p>
         </div>
 
         <button
-          onClick={handleSubmit}
-          disabled={!close_date || !homeAddress || submitting}
-          className="w-full py-4 rounded-2xl bg-[#C85A17] text-white font-semibold text-base
-            disabled:opacity-40 active:scale-[0.98] transition-all mt-4 shadow-[0_8px_24px_rgba(200,90,23,0.3)]"
-        >
-          {submitting ? "Setting up..." : "Let's Go"}
-        </button>
+           onClick={handleSubmit}
+           disabled={!homeAddress || submitting}
+           className="w-full py-4 rounded-2xl bg-[#C85A17] text-white font-semibold text-base
+             disabled:opacity-40 active:scale-[0.98] transition-all mt-4 shadow-[0_8px_24px_rgba(200,90,23,0.3)]"
+         >
+           {submitting ? "Setting up..." : "Let's Go"}
+         </button>
       </div>
     </div>
   );
