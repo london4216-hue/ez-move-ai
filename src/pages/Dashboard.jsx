@@ -19,8 +19,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     base44.auth.me().then(u => {
-      if (!u) { navigate(createPageUrl("Register")); return; }
-      if (!u.onboarded) { navigate(createPageUrl("Register")); return; }
+      if (!u || !u.onboarded) { navigate(createPageUrl("Register")); return; }
       setUser(u);
       setLoading(false);
     }).catch(() => navigate(createPageUrl("Register")));
