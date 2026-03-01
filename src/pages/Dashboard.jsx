@@ -58,13 +58,37 @@ export default function Dashboard() {
       {/* Week progress steps */}
       <WeekProgress user={user} />
 
-      {/* Checklist */}
+      {/* Main content */}
       <div className="flex-1 px-3 pb-2 flex flex-col gap-3 overflow-y-auto">
-        <ChecklistPanel user={user} onProviderSaved={() => setContactsRefresh(r => r + 1)} />
+        {activeTab === "checklist" ? (
+          <ChecklistPanel user={user} onProviderSaved={() => setContactsRefresh(r => r + 1)} />
+        ) : (
+          <CalendarSheet user={user} />
+        )}
       </div>
 
       {/* Key Contacts — compact bottom bar */}
       <ContactsRow user={user} refreshKey={contactsRefresh} />
+
+      {/* Bottom tab bar */}
+      <div className="flex border-t border-[#E5E7EB] bg-white">
+        <button
+          onClick={() => setActiveTab("checklist")}
+          className={`flex-1 py-3 flex flex-col items-center gap-0.5 text-[10px] font-semibold transition-colors
+            ${activeTab === "checklist" ? "text-[#F97316]" : "text-[#9CA3AF]"}`}
+        >
+          <span className="text-base">☑️</span>
+          Checklist
+        </button>
+        <button
+          onClick={() => setActiveTab("calendar")}
+          className={`flex-1 py-3 flex flex-col items-center gap-0.5 text-[10px] font-semibold transition-colors
+            ${activeTab === "calendar" ? "text-[#F97316]" : "text-[#9CA3AF]"}`}
+        >
+          <span className="text-base">📅</span>
+          Calendar
+        </button>
+      </div>
     </div>
   );
 }
