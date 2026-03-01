@@ -222,8 +222,8 @@ export default function CalendarSheet({ user }) {
 
         {/* Add/Edit form */}
         {showForm && (
-          <div className="border-t border-[#F3F4F6] px-3 py-3 bg-[#FAFAFA]">
-            <div className="flex items-center justify-between mb-3">
+          <div className="border-t border-[#F3F4F6] px-3 py-2 bg-[#FAFAFA]">
+            <div className="flex items-center justify-between mb-2">
               <p className="text-xs font-bold text-[#1A1A2E]">{editingAppt ? "Edit Appointment" : "New Appointment"}</p>
               <button onClick={() => setShowForm(false)}><X className="w-4 h-4 text-[#9CA3AF]" /></button>
             </div>
