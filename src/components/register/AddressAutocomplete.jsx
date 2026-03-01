@@ -51,7 +51,7 @@ export default function AddressAutocomplete({ label, value, onChange, placeholde
   return (
     <div className="relative" ref={containerRef}>
       <label className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider block mb-1.5">
-        {label} {required && <span className="text-[#4F7EFF]">*</span>}
+        {label} {required && <span className="text-[#F97316]">*</span>}
       </label>
       <div className="relative">
         <input
