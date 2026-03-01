@@ -2,7 +2,7 @@ import { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Phone, UserPlus, Check, ShoppingCart, ClipboardList } from "lucide-react";
 import RoomSetupWizard from "./RoomSetupWizard";
-import ProviderAppointmentModal from "./ProviderAppointmentModal";
+import ProviderContactCard from "./ProviderContactCard";
 
 export default function ChecklistItemCard({ item, completed, skipped, onComplete, onSkip, userAddress, onProviderSaved, user }) {
   const [expanded, setExpanded] = useState(false);
@@ -10,7 +10,7 @@ export default function ChecklistItemCard({ item, completed, skipped, onComplete
   const [loadingAI, setLoadingAI] = useState(false);
   const [savedIdx, setSavedIdx] = useState(null);
   const [showInventory, setShowInventory] = useState(false);
-  const [appointmentProvider, setAppointmentProvider] = useState(null);
+  const [selectedProvider, setSelectedProvider] = useState(null);
 
   const handleFindLocal = async () => {
     setLoadingAI(true);
@@ -47,9 +47,9 @@ export default function ChecklistItemCard({ item, completed, skipped, onComplete
 
   const handleSelectProvider = async (provider, idx) => {
     setSavedIdx(idx);
-    const user = await base44.auth.me();
+    const me = await base44.auth.me();
     await base44.entities.SavedProvider.create({
-      user_id: user.id,
+      user_id: me.id,
       name: provider.name,
       role: item.title,
       phone: provider.phone || "",
@@ -59,6 +59,7 @@ export default function ChecklistItemCard({ item, completed, skipped, onComplete
     });
     setExpanded(false);
     if (onProviderSaved) onProviderSaved();
+    setSelectedProvider(provider);
   };
 
   if (skipped) {
