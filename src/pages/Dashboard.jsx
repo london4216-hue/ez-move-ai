@@ -80,6 +80,14 @@ export default function Dashboard() {
           Checklist
         </button>
         <button
+          onClick={() => setActiveTab("inventory")}
+          className={`flex-1 py-3 flex flex-col items-center gap-0.5 text-[10px] font-semibold transition-colors
+            ${activeTab === "inventory" ? "text-[#F97316]" : "text-[#9CA3AF]"}`}
+        >
+          <span className="text-base">📦</span>
+          Inventory
+        </button>
+        <button
           onClick={() => setActiveTab("calendar")}
           className={`flex-1 py-3 flex flex-col items-center gap-0.5 text-[10px] font-semibold transition-colors
             ${activeTab === "calendar" ? "text-[#F97316]" : "text-[#9CA3AF]"}`}
