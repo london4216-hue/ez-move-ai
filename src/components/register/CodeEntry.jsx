@@ -18,10 +18,14 @@ export default function CodeEntry({ onVerified }) {
     if (e.key === "Backspace" && !digits[i] && i > 0) refs[i - 1].current?.focus();
   };
 
-  const handleVerify = () => {
+  const handleVerify = async () => {
     const code = digits.join("");
     if (code === "1016") {
-      onVerified();
+      try {
+        await onVerified();
+      } catch (e) {
+        setError("Something went wrong. Please try again.");
+      }
     } else {
       setError("Invalid code. Please check your invite email.");
       setDigits(["", "", "", ""]);
@@ -31,21 +35,18 @@ export default function CodeEntry({ onVerified }) {
 
   return (
     <div className="w-full max-w-sm">
-      <div className="text-center mb-12">
-        <div className="inline-flex items-center gap-2 mb-8">
-          <div className="w-10 h-10 bg-[#1A1A2E] rounded-xl flex items-center justify-center">
-            <span className="text-white text-sm font-bold">EZ</span>
+      <div className="text-center mb-10">
+        <div className="inline-flex items-center gap-2 mb-6">
+          <div className="w-8 h-8 bg-[#1A1A2E] rounded-lg flex items-center justify-center">
+            <span className="text-white text-xs font-bold">EZ</span>
           </div>
-          <span className="text-2xl font-semibold text-[#1A1A2E] tracking-tight">EZ Move <span className="text-[#F97316]">AI</span></span>
+          <span className="text-xl font-semibold text-[#1A1A2E] tracking-tight">EZ Move <span className="text-[#4F7EFF]">AI</span></span>
         </div>
-        <div className="mb-6 p-4 bg-[#FFF7ED] rounded-2xl border border-[#FED7AA]">
-          <p className="text-xs font-bold text-[#C85A17] uppercase tracking-wider">Required to Begin</p>
-          <h1 className="text-3xl font-bold text-[#1A1A2E] mt-2">Enter your invite code</h1>
-        </div>
-        <p className="text-sm text-[#6B7280]">You need an invite code from your real estate agent or broker to access EZ Move AI</p>
+        <h1 className="text-2xl font-bold text-[#1A1A2E] mb-2">Enter your invite code</h1>
+        <p className="text-sm text-[#6B7280]">Your broker or agent sent you a 4-digit code</p>
       </div>
 
-      <div className="flex gap-3 justify-center mb-8">
+      <div className="flex gap-3 justify-center mb-6">
         {digits.map((d, i) => (
           <input
             key={i}
@@ -56,32 +57,28 @@ export default function CodeEntry({ onVerified }) {
             value={d}
             onChange={(e) => handleChange(i, e.target.value)}
             onKeyDown={(e) => handleKey(i, e)}
-            autoFocus={i === 0}
-            className={`w-16 h-20 text-center text-3xl font-bold rounded-2xl border-2 outline-none transition-all bg-white
-              ${d ? "border-[#F97316] text-[#1A1A2E] shadow-[0_0_0_4px_rgba(249,115,22,0.1)]" : "border-[#E5E7EB] text-[#9CA3AF]"}
+            className={`w-14 h-16 text-center text-2xl font-bold rounded-2xl border-2 outline-none transition-all bg-white
+              ${d ? "border-[#F97316] text-[#1A1A2E]" : "border-[#E5E7EB] text-[#9CA3AF]"}
               focus:border-[#F97316] focus:shadow-[0_0_0_4px_rgba(249,115,22,0.15)]`}
           />
         ))}
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-3 mb-6">
-          <p className="text-sm text-red-600 font-medium">{error}</p>
-        </div>
+        <p className="text-center text-sm text-red-500 mb-4">{error}</p>
       )}
 
       <button
         onClick={handleVerify}
         disabled={digits.some(d => !d)}
         className="w-full py-4 rounded-2xl bg-[#1A1A2E] text-white font-semibold text-base
-          disabled:opacity-40 active:scale-[0.98] transition-all shadow-lg hover:bg-[#2A2A3E]"
+          disabled:opacity-40 active:scale-[0.98] transition-all"
       >
-        Verify Code
+        Continue
       </button>
 
-      <p className="text-center text-xs text-[#9CA3AF] mt-8">
-        <span className="block mb-2">Don't have an invite code?</span>
-        <span className="text-[#6B7280] font-medium">Contact your real estate agent or broker</span>
+      <p className="text-center text-xs text-[#9CA3AF] mt-6">
+        Don't have a code? Contact your real estate agent.
       </p>
     </div>
   );
