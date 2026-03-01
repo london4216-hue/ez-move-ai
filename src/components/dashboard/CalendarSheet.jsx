@@ -160,6 +160,7 @@ export default function CalendarSheet({ user }) {
             const dayAppts = apptForDay(day);
             const today = isToday(day);
             const hasOverdue = dayAppts.some(isOverdue);
+            const weekAlerts = getWeekAlerts(day);
             const isSelected = selected && isSameDay(selected, day);
             return (
               <button
@@ -171,6 +172,7 @@ export default function CalendarSheet({ user }) {
                 <span className={`text-[11px] font-semibold
                   ${today ? "text-[#F97316]" : hasOverdue ? "text-[#EF4444]" : "text-[#1A1A2E]"}`}>
                   {format(day, "d")}
+                  {weekAlerts.length > 0 && <span className="ml-0.5 text-[8px] text-[#EF4444] font-bold">●</span>}
                 </span>
                 {dayAppts.length > 0 && (
                   <div className="flex gap-0.5 mt-0.5">
