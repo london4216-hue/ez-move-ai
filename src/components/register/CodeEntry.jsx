@@ -34,52 +34,53 @@ export default function CodeEntry({ onVerified }) {
   };
 
   return (
-    <div className="w-full max-w-sm">
-      <div className="text-center mb-10">
-        <div className="inline-flex items-center gap-2 mb-6">
-          <div className="w-8 h-8 bg-[#1A1A2E] rounded-lg flex items-center justify-center">
-            <span className="text-white text-xs font-bold">EZ</span>
-          </div>
-          <span className="text-xl font-semibold text-[#1A1A2E] tracking-tight">EZ Move <span className="text-[#4F7EFF]">AI</span></span>
+    <div className="w-full max-w-sm mx-auto">
+      <div className="text-center mb-12">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-gradient-to-br from-[#C85A17] to-[#F97316] mb-6 mx-auto">
+          <span className="text-white text-lg font-bold">EZ</span>
         </div>
-        <h1 className="text-2xl font-bold text-[#1A1A2E] mb-2">Enter your invite code</h1>
-        <p className="text-sm text-[#6B7280]">Your broker or agent sent you a 4-digit code</p>
+        <h1 className="text-3xl font-bold text-[#1A1A2E] mb-2">Welcome back</h1>
+        <p className="text-sm text-[#6B7280]">Enter the 4-digit code your agent sent you</p>
       </div>
 
-      <div className="flex gap-3 justify-center mb-6">
-        {digits.map((d, i) => (
-          <input
-            key={i}
-            ref={refs[i]}
-            type="text"
-            inputMode="numeric"
-            maxLength={1}
-            value={d}
-            onChange={(e) => handleChange(i, e.target.value)}
-            onKeyDown={(e) => handleKey(i, e)}
-            className={`w-14 h-16 text-center text-2xl font-bold rounded-2xl border-2 outline-none transition-all bg-white
-              ${d ? "border-[#F97316] text-[#1A1A2E]" : "border-[#E5E7EB] text-[#9CA3AF]"}
-              focus:border-[#F97316] focus:shadow-[0_0_0_4px_rgba(249,115,22,0.15)]`}
-          />
-        ))}
+      <div className="space-y-6">
+        <div className="flex gap-3 justify-center">
+          {digits.map((d, i) => (
+            <input
+              key={i}
+              ref={refs[i]}
+              type="text"
+              inputMode="numeric"
+              maxLength={1}
+              value={d}
+              onChange={(e) => handleChange(i, e.target.value)}
+              onKeyDown={(e) => handleKey(i, e)}
+              className={`w-16 h-20 text-center text-3xl font-bold rounded-2xl border-2 outline-none transition-all
+                ${d ? "border-[#C85A17] bg-[#FEF3ED] text-[#1A1A2E]" : "border-[#E5E7EB] bg-white text-[#D1D5DB]"}
+                focus:border-[#C85A17] focus:shadow-[0_0_0_4px_rgba(200,90,23,0.1)]`}
+            />
+          ))}
+        </div>
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-3.5">
+            <p className="text-sm text-red-600 text-center font-medium">{error}</p>
+          </div>
+        )}
+
+        <button
+          onClick={handleVerify}
+          disabled={digits.some(d => !d)}
+          className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#C85A17] to-[#F97316] text-white font-bold text-base
+            disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all shadow-[0_4px_12px_rgba(200,90,23,0.2)]"
+        >
+          Continue
+        </button>
+
+        <p className="text-center text-xs text-[#9CA3AF]">
+          Questions? <span className="text-[#C85A17] font-semibold">Contact your agent</span>
+        </p>
       </div>
-
-      {error && (
-        <p className="text-center text-sm text-red-500 mb-4">{error}</p>
-      )}
-
-      <button
-        onClick={handleVerify}
-        disabled={digits.some(d => !d)}
-        className="w-full py-4 rounded-2xl bg-[#1A1A2E] text-white font-semibold text-base
-          disabled:opacity-40 active:scale-[0.98] transition-all"
-      >
-        Continue
-      </button>
-
-      <p className="text-center text-xs text-[#9CA3AF] mt-6">
-        Don't have a code? Contact your real estate agent.
-      </p>
     </div>
   );
 }
