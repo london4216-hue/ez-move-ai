@@ -335,21 +335,37 @@ export default function InventoryTab({ user }) {
       {/* Truck banner — moving only */}
       {activeTab === "moving" && (
         truck ? (
-          <div className="bg-[#1A1A2E] rounded-2xl px-4 py-3 flex items-center gap-3">
-            <span className="text-2xl">{truck.icon}</span>
-            <div className="flex-1">
-              <p className="text-white text-xs font-bold">{truck.label}</p>
-              <p className="text-[#9CA3AF] text-[10px]">{truck.truck} · {truck.rooms}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-[#F97316] text-base font-bold">{movingItems.length}</p>
-              <p className="text-[#9CA3AF] text-[9px]">items</p>
+          <div className="bg-gradient-to-r from-[#E0F2FE] to-[#BAE6FD] rounded-2xl px-4 py-3 border border-[#7DD3FC] shadow-sm">
+            <div className="flex items-start gap-3">
+              <span className="text-2xl flex-shrink-0">{truck.icon}</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-[#0369A1] text-xs font-bold">{truck.label}</p>
+                <div className="grid grid-cols-2 gap-2 mt-1">
+                  <div>
+                    <p className="text-[9px] text-[#0EA5E9] font-semibold">Space</p>
+                    <p className="text-[10px] text-[#164E63] font-bold">{truck.cuft}</p>
+                  </div>
+                  <div>
+                    <p className="text-[9px] text-[#0EA5E9] font-semibold">Weight</p>
+                    <p className="text-[10px] text-[#164E63] font-bold">{truck.weight}</p>
+                  </div>
+                  <div>
+                    <p className="text-[9px] text-[#0EA5E9] font-semibold">Est. Cost</p>
+                    <p className="text-[10px] text-[#164E63] font-bold">{truck.cost}</p>
+                  </div>
+                  <div>
+                    <p className="text-[9px] text-[#0EA5E9] font-semibold">Items</p>
+                    <p className="text-[10px] text-[#164E63] font-bold">{movingItems.length}</p>
+                  </div>
+                </div>
+                <p className="text-[8px] text-[#0369A1] mt-1 italic">{truck.rooms}</p>
+              </div>
             </div>
           </div>
         ) : (
-          <div className="bg-[#1A1A2E] rounded-2xl px-4 py-3">
-            <p className="text-white text-xs font-bold">🚛 Estimated Truck Size</p>
-            <p className="text-[#9CA3AF] text-[10px]">Add items below to calculate</p>
+          <div className="bg-gradient-to-r from-[#E0F2FE] to-[#BAE6FD] rounded-2xl px-4 py-3 border border-[#7DD3FC]">
+            <p className="text-[#0369A1] text-xs font-bold">🚛 Estimated Truck Size & Cost</p>
+            <p className="text-[#0EA5E9] text-[10px] mt-1">Add items below to get accurate quote estimates</p>
           </div>
         )
       )}
