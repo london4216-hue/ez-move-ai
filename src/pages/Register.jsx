@@ -31,6 +31,9 @@ export default function Register() {
     setError("");
     try {
       const userData = {
+        first_name: data.first_name,
+        last_name: data.last_name,
+        home_address: data.home_address,
         user_type: data.user_type,
         close_date: data.close_date,
         registration_date: data.registration_date
