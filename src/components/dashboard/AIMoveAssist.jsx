@@ -4,6 +4,15 @@ import { base44 } from "@/api/base44Client";
 
 const FEATURES = [
   {
+    id: "neighborhood",
+    emoji: "🏘️",
+    icon: MapPin,
+    title: "New Neighborhood Research",
+    tagline: "Learn about your new area",
+    color: "violet",
+    description: "Tell AI your new address and it researches schools, parks, hospitals, grocery stores, transit, utilities, and local services in your new neighborhood.",
+  },
+  {
     id: "quote",
     emoji: "📋",
     icon: FileText,
@@ -38,15 +47,6 @@ const FEATURES = [
     tagline: "Don't forget the paperwork",
     color: "emerald",
     description: "AI generates a comprehensive checklist of all documents you should gather before closing: mortgage papers, utility records, insurance docs, ID confirmations, and more.",
-  },
-  {
-    id: "neighborhood",
-    emoji: "🏘️",
-    icon: MapPin,
-    title: "New Neighborhood Research",
-    tagline: "Learn about your new area",
-    color: "violet",
-    description: "Tell AI your new address and it researches schools, parks, hospitals, grocery stores, transit, utilities, and local services in your new neighborhood.",
   },
   {
     id: "budget",
