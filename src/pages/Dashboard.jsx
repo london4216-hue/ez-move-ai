@@ -91,7 +91,7 @@ export default function Dashboard() {
                 )))}% complete
               </span>
             </div>
-            <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+            <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-orange-500 to-orange-400 rounded-full transition-all duration-700"
                 style={{
