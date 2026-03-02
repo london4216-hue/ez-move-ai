@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Sparkles, ChevronDown, ChevronUp, Camera, DollarSign, Clock, FileText, Package, Leaf, Brain, Truck, MessageSquare, Home, Zap } from "lucide-react";
+import { Sparkles, ChevronDown, ChevronUp, FileText } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 const FEATURES = [
@@ -11,75 +11,11 @@ const FEATURES = [
     tagline: "Turn your inventory into a pro quote request",
     color: "blue",
     description: "Based on your My Stuff inventory, AI drafts a detailed quote request listing every item with size — ready to send to 3 local movers in one tap.",
-    cta: "Generate Quote Request",
-    comingSoon: false,
-  },
-
-  {
-    id: "resale",
-    emoji: "💰",
-    icon: DollarSign,
-    title: "Resale Estimator",
-    tagline: "You might be sitting on cash",
-    color: "emerald",
-    description: "AI checks current Facebook Marketplace and Craigslist trends for items you tagged as donate or junk — and flags which ones are worth selling instead.",
-    cta: "Check Resale Value",
-    comingSoon: true,
-  },
-  {
-    id: "boxes",
-    emoji: "📦",
-    icon: Package,
-    title: "Box & Supply Estimator",
-    tagline: "Never run out mid-pack again",
-    color: "amber",
-    description: "Based on your room-by-room inventory, AI calculates exactly how many boxes (small, medium, large), tape rolls, and packing paper you'll need.",
-    cta: "Estimate Supplies",
-    comingSoon: true,
-  },
-  {
-    id: "eco",
-    emoji: "🌱",
-    icon: Leaf,
-    title: "Eco Move Score",
-    tagline: "How green is your move?",
-    color: "green",
-    description: "See your donate-to-junk ratio, estimated landfill weight, and get matched with local charities and recycling centers that pick up items like yours.",
-    cta: "Get My Eco Score",
-    comingSoon: true,
-  },
-  {
-    id: "photo",
-    emoji: "📸",
-    icon: Camera,
-    title: "Photo Room Scan",
-    tagline: "Snap it — AI sorts it",
-    color: "violet",
-    description: "Take a photo of any room and AI instantly identifies furniture and items, suggesting whether to move, donate, or junk each one. Skip the manual list.",
-    cta: "Scan a Room",
-    comingSoon: true,
-  },
-  {
-    id: "advice",
-    emoji: "🧠",
-    icon: Brain,
-    title: "Ask the Move AI",
-    tagline: "Your personal moving concierge",
-    color: "pink",
-    description: "Ask anything: 'What should I pack last?', 'How do I move a piano?', 'What's the cheapest way to ship boxes cross-country?' — instant expert answers.",
-    cta: "Ask a Question",
-    comingSoon: true,
   },
 ];
 
 const COLOR_MAP = {
-  blue:   { bg: "bg-blue-50",   border: "border-blue-200",   icon: "bg-blue-100 text-blue-600",   btn: "bg-blue-500",   badge: "bg-blue-100 text-blue-600" },
-  orange: { bg: "bg-orange-50", border: "border-orange-200", icon: "bg-orange-100 text-orange-600", btn: "bg-orange-500", badge: "bg-orange-100 text-orange-600" },
-  emerald:{ bg: "bg-emerald-50",border: "border-emerald-200",icon: "bg-emerald-100 text-emerald-600",btn: "bg-emerald-500",badge: "bg-emerald-100 text-emerald-600" },
-  amber:  { bg: "bg-amber-50",  border: "border-amber-200",  icon: "bg-amber-100 text-amber-600",  btn: "bg-amber-500",  badge: "bg-amber-100 text-amber-600" },
-  green:  { bg: "bg-green-50",  border: "border-green-200",  icon: "bg-green-100 text-green-600",  btn: "bg-green-500",  badge: "bg-green-100 text-green-600" },
-  violet: { bg: "bg-violet-50", border: "border-violet-200", icon: "bg-violet-100 text-violet-600", btn: "bg-violet-500", badge: "bg-violet-100 text-violet-600" },
-  pink:   { bg: "bg-pink-50",   border: "border-pink-200",   icon: "bg-pink-100 text-pink-600",   btn: "bg-pink-500",   badge: "bg-pink-100 text-pink-600" },
+  blue:   { bg: "bg-blue-50",   border: "border-blue-200",   icon: "bg-blue-100 text-blue-600",   btn: "bg-blue-500" },
 };
 
 function QuoteGenerator({ user }) {
