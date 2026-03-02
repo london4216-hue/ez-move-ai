@@ -9,42 +9,49 @@ import ProfileSetup from "@/components/register/ProfileSetup";
 
 export default function Register() {
   const [step, setStep] = useState("code");
+  const [error, setError] = useState("");
   const [phone, setPhone] = useState("");
   const [userData, setUserData] = useState({});
-  const [inviteCode, setInviteCode] = useState("");
+  const [verifiedCode, setVerifiedCode] = useState("");
   const navigate = useNavigate();
 
-  const handleCodeVerified = async (code) => {
-    // Validate code against DB
-    const clients = await base44.entities.Client.filter({ invitation_code: code });
-    if (clients.length === 0) throw new Error("Invalid code");
-    setInviteCode(code);
+  const handleCodeVerified = (code) => {
+    setVerifiedCode(code);
+    setError("");
     setStep("namePhone");
   };
 
   const handleNamePhoneComplete = (data) => {
+    setError("");
     setPhone(data.phone);
     setUserData(data);
     setStep("textApproval");
   };
 
   const handleTextApprovalComplete = () => {
+    setError("");
     setStep("profile");
   };
 
   const handleProfileComplete = async (data) => {
+    setError("");
     try {
       const currentUser = await base44.auth.me();
 
-      // Get close date from client record
+      // Get close date from the client record
       let closeDate = data.estimated_close_date;
-      if (inviteCode) {
-        const clients = await base44.entities.Client.filter({ invitation_code: inviteCode });
-        if (clients.length > 0 && clients[0].close_date) {
-          closeDate = clients[0].close_date;
-          await base44.entities.Client.update(clients[0].id, {
+      let clientRecord = null;
+
+      if (verifiedCode) {
+        const clients = await base44.entities.Client.filter({ invitation_code: verifiedCode });
+        if (clients.length > 0) {
+          clientRecord = clients[0];
+          if (clientRecord.close_date) closeDate = clientRecord.close_date;
+          await base44.entities.Client.update(clientRecord.id, {
             status: "registered",
-            user_email: currentUser.email
+            user_email: currentUser.email,
+            user_name: `${userData.firstName} ${userData.lastName}`.trim(),
+            phone: userData.phone,
           });
         }
       }
@@ -56,12 +63,13 @@ export default function Register() {
         home_address: data.home_address,
         user_type: data.user_type,
         estimated_close_date: closeDate,
-        registration_date: data.registration_date
+        registration_date: new Date().toISOString().split("T")[0],
       });
 
+      // Send welcome email
       await base44.functions.invoke("sendWelcomeEmail", {
         user_name: userData.firstName,
-        user_email: currentUser.email
+        user_email: currentUser.email,
       });
     } catch (e) {
       console.error("Profile save error:", e);
@@ -70,11 +78,46 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      {step === "code" && <CodeEntry onVerified={handleCodeVerified} />}
-      {step === "namePhone" && <NamePhoneEntry onComplete={handleNamePhoneComplete} />}
-      {step === "textApproval" && <TextApproval phone={phone} onComplete={handleTextApprovalComplete} />}
-      {step === "profile" && <ProfileSetup onComplete={handleProfileComplete} />}
+    <div className="min-h-screen bg-[#0F172A] flex flex-col items-center justify-center p-5">
+      {/* Logo */}
+      <div className="absolute top-12 left-1/2 -translate-x-1/2">
+        <div className="flex items-center gap-2.5">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-900/50">
+            <span className="text-white text-sm font-black">EZ</span>
+          </div>
+          <span className="text-white font-bold text-lg tracking-tight">
+            EZ Move <span className="text-orange-400">AI</span>
+          </span>
+        </div>
+      </div>
+
+      {/* Step progress dots */}
+      <div className="absolute top-28 left-1/2 -translate-x-1/2 flex gap-2">
+        {["code", "namePhone", "textApproval", "profile"].map((s, i) => (
+          <div
+            key={s}
+            className={`rounded-full transition-all duration-300 ${
+              s === step
+                ? "w-6 h-2 bg-orange-500"
+                : ["code", "namePhone", "textApproval", "profile"].indexOf(step) > i
+                ? "w-2 h-2 bg-orange-400"
+                : "w-2 h-2 bg-slate-600"
+            }`}
+          />
+        ))}
+      </div>
+
+      <div className="w-full max-w-sm bg-white rounded-3xl p-7 shadow-2xl mt-16">
+        {error && (
+          <div className="mb-4 bg-red-50 border border-red-200 rounded-2xl p-3">
+            <p className="text-sm text-red-600 font-medium">{error}</p>
+          </div>
+        )}
+        {step === "code" && <CodeEntry onVerified={handleCodeVerified} />}
+        {step === "namePhone" && <NamePhoneEntry onComplete={handleNamePhoneComplete} />}
+        {step === "textApproval" && <TextApproval phone={phone} onComplete={handleTextApprovalComplete} />}
+        {step === "profile" && <ProfileSetup onComplete={handleProfileComplete} />}
+      </div>
     </div>
   );
 }

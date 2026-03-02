@@ -2,98 +2,135 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
-import WeekProgress from "@/components/dashboard/WeekProgress";
+import { differenceInDays, parseISO } from "date-fns";
+import { LayoutList, Sparkles, CalendarDays, Package } from "lucide-react";
 import ChecklistPanel from "@/components/dashboard/ChecklistPanel";
 import CalendarSheet from "@/components/dashboard/CalendarSheet";
 import InventoryTab from "@/components/dashboard/InventoryTab";
-import ContactsSidebar from "@/components/dashboard/ContactsSidebar";
-import { CheckSquare, Package, CalendarDays, Users, LogOut } from "lucide-react";
+import AICenterTab from "@/components/dashboard/AICenterTab";
 
 const TABS = [
-  { id: "checklist", label: "Plan", icon: CheckSquare },
-  { id: "calendar", label: "Calendar", icon: CalendarDays },
-  { id: "inventory", label: "Inventory", icon: Package },
-  { id: "contacts", label: "Contacts", icon: Users },
+  { id: "plan", label: "My Plan", Icon: LayoutList },
+  { id: "ai", label: "AI Center", Icon: Sparkles },
+  { id: "calendar", label: "Calendar", Icon: CalendarDays },
+  { id: "inventory", label: "Inventory", Icon: Package },
 ];
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("checklist");
+  const [activeTab, setActiveTab] = useState("plan");
   const navigate = useNavigate();
 
   useEffect(() => {
-    base44.auth.me()
-      .then(u => { setUser(u); setLoading(false); })
-      .catch(() => navigate(createPageUrl("Register")));
+    base44.auth.me().then(u => {
+      setUser(u);
+      setLoading(false);
+    }).catch(() => navigate(createPageUrl("Register")));
   }, []);
 
+  const daysToClose = user?.estimated_close_date
+    ? differenceInDays(parseISO(user.estimated_close_date), new Date())
+    : null;
+
+  const closeStatus = daysToClose === null ? null
+    : daysToClose < 0 ? { label: "Closed!", color: "bg-emerald-500" }
+    : daysToClose <= 7 ? { label: `${daysToClose}d left`, color: "bg-red-500" }
+    : daysToClose <= 14 ? { label: `${daysToClose}d left`, color: "bg-amber-500" }
+    : { label: `${daysToClose}d to close`, color: "bg-orange-500" };
+
   if (loading) return (
-    <div className="min-h-screen bg-slate-100 flex items-center justify-center">
-      <div className="w-10 h-10 border-3 border-orange-500 border-t-transparent rounded-full animate-spin" />
+    <div className="min-h-screen bg-[#0F172A] flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
     </div>
   );
 
-  const initials = user?.full_name
-    ? user.full_name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
-    : "U";
-
   return (
-    <div className="flex flex-col h-screen max-w-md mx-auto bg-slate-100 overflow-hidden">
-
+    <div className="min-h-screen bg-slate-100 flex flex-col max-w-md mx-auto">
       {/* Header */}
-      <div className="bg-white px-5 pt-12 pb-4 flex items-center justify-between border-b border-slate-100">
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 bg-slate-900 rounded-xl flex items-center justify-center">
-            <span className="text-white text-xs font-black">EZ</span>
+      <div className="bg-[#0F172A] px-5 pt-12 pb-5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-900/40">
+              <span className="text-white text-xs font-black tracking-tight">EZ</span>
+            </div>
+            <div>
+              <p className="text-white font-bold text-base leading-tight">
+                EZ Move <span className="text-orange-400">AI</span>
+              </p>
+              {user?.full_name && (
+                <p className="text-slate-400 text-[11px] leading-tight">Hi, {user.full_name.split(" ")[0]}</p>
+              )}
+            </div>
           </div>
-          <div>
-            <span className="text-base font-black text-slate-900">EZ Move <span className="text-orange-500">AI</span></span>
-            {user?.full_name && (
-              <p className="text-[11px] text-slate-400 leading-none mt-0.5">Hey, {user.full_name.split(" ")[0]} 👋</p>
+
+          <div className="flex items-center gap-2">
+            {closeStatus && (
+              <div className={`${closeStatus.color} rounded-full px-3 py-1`}>
+                <span className="text-white text-[11px] font-bold">{closeStatus.label}</span>
+              </div>
             )}
+            <button
+              onClick={() => base44.auth.logout(createPageUrl("Register"))}
+              className="w-9 h-9 rounded-full bg-slate-700 flex items-center justify-center hover:bg-slate-600 transition-colors"
+            >
+              <span className="text-white text-xs font-bold">{user?.full_name?.[0] || "U"}</span>
+            </button>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => base44.auth.logout(createPageUrl("Register"))}
-            className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
-          <div className="w-9 h-9 rounded-xl bg-orange-500 flex items-center justify-center">
-            <span className="text-white text-xs font-black">{initials}</span>
+
+        {/* Progress bar toward close */}
+        {user?.estimated_close_date && user?.registration_date && (
+          <div className="mt-4">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-slate-400 text-[10px] font-semibold uppercase tracking-wider">Move Timeline</span>
+              <span className="text-orange-400 text-[10px] font-bold">
+                {Math.max(0, Math.min(100, Math.round(
+                  (differenceInDays(new Date(), parseISO(user.registration_date)) /
+                    differenceInDays(parseISO(user.estimated_close_date), parseISO(user.registration_date))) * 100
+                )))}% complete
+              </span>
+            </div>
+            <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-orange-500 to-orange-400 rounded-full transition-all duration-700"
+                style={{
+                  width: `${Math.max(2, Math.min(100, Math.round(
+                    (differenceInDays(new Date(), parseISO(user.registration_date)) /
+                      Math.max(1, differenceInDays(parseISO(user.estimated_close_date), parseISO(user.registration_date)))) * 100
+                  )))}%`
+                }}
+              />
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
-      {/* Week Progress */}
-      <div className="bg-white pt-4 pb-1 border-b border-slate-100">
-        <WeekProgress user={user} />
-      </div>
-
-      {/* Main content - scrollable */}
-      <div className="flex-1 overflow-y-auto no-scrollbar">
-        {activeTab === "checklist" && <ChecklistPanel user={user} />}
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-24">
+        {activeTab === "plan" && <ChecklistPanel user={user} />}
+        {activeTab === "ai" && <AICenterTab user={user} />}
         {activeTab === "calendar" && <CalendarSheet user={user} />}
         {activeTab === "inventory" && <InventoryTab user={user} />}
-        {activeTab === "contacts" && <ContactsSidebar user={user} />}
       </div>
 
-      {/* Bottom Tab Bar */}
-      <div className="bg-white border-t border-slate-100 flex safe-bottom pb-2">
-        {TABS.map(({ id, label, icon: Icon }) => (
-          <button
-            key={id}
-            onClick={() => setActiveTab(id)}
-            className={`flex-1 pt-3 pb-1 flex flex-col items-center gap-1 transition-all`}
-          >
-            <Icon className={`w-5 h-5 ${activeTab === id ? "text-orange-500" : "text-slate-400"}`} />
-            <span className={`text-[10px] font-bold ${activeTab === id ? "text-orange-500" : "text-slate-400"}`}>
-              {label}
-            </span>
-          </button>
-        ))}
+      {/* Bottom Nav */}
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-slate-100 px-4 py-2 z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
+        <div className="flex">
+          {TABS.map(({ id, label, Icon }) => {
+            const active = activeTab === id;
+            return (
+              <button
+                key={id}
+                onClick={() => setActiveTab(id)}
+                className={`flex-1 flex flex-col items-center gap-1 py-1.5 rounded-xl transition-all active:scale-95 ${active ? "text-orange-500" : "text-slate-400"}`}
+              >
+                <Icon className={`w-5 h-5 ${active ? "stroke-[2.5]" : ""}`} />
+                <span className={`text-[10px] font-bold leading-none ${active ? "text-orange-500" : "text-slate-400"}`}>{label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
