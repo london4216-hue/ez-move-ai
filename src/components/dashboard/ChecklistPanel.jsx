@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { differenceInDays, parseISO, addDays, format } from "date-fns";
-import { Lock } from "lucide-react";
+
 import ChecklistItemCard from "./ChecklistItemCard";
 
 const BASE_WEEKS = {
