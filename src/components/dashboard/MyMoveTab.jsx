@@ -1,16 +1,17 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import {
-  AlertTriangle, CheckCircle2, CalendarDays, Users, Package,
-  TrendingUp, Clock, ChevronRight, Phone, Star, LayoutList
+  AlertTriangle, CheckCircle2, CalendarDays,
+  ChevronRight, Phone, Star, ChevronDown
 } from "lucide-react";
-import { parseISO, differenceInDays, isPast, isToday, format, addDays, isWithinInterval, startOfWeek, endOfWeek } from "date-fns";
+import { parseISO, differenceInDays, isPast, isToday, format, isWithinInterval, startOfWeek, endOfWeek } from "date-fns";
 
 export default function MyMoveTab({ user, onNavigate }) {
   const [appointments, setAppointments] = useState([]);
   const [checklist, setChecklist] = useState([]);
   const [providers, setProviders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [alertsExpanded, setAlertsExpanded] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -30,7 +31,6 @@ export default function MyMoveTab({ user, onNavigate }) {
   const weekStart = startOfWeek(today);
   const weekEnd = endOfWeek(today);
 
-  // --- Alerts ---
   const overdueAppts = appointments.filter(a => {
     try {
       const d = parseISO(a.date);
@@ -45,29 +45,25 @@ export default function MyMoveTab({ user, onNavigate }) {
     } catch { return false; }
   });
 
-  const overdueChecklist = checklist.filter(c => !c.completed && !c.skipped);
   const completedChecklist = checklist.filter(c => c.completed);
   const checklistPct = checklist.length > 0 ? Math.round((completedChecklist.length / checklist.length) * 100) : 0;
 
-  // Days to close
   const daysToClose = user?.close_date
     ? differenceInDays(parseISO(user.close_date), today)
     : null;
 
-  // Move phase label
   const getPhase = () => {
-    if (daysToClose === null) return { label: "Getting Started", emoji: "🏁", color: "text-slate-600" };
-    if (daysToClose > 21) return { label: "Foundation Phase", emoji: "📋", color: "text-blue-600" };
-    if (daysToClose > 14) return { label: "Clearing & Logistics", emoji: "📦", color: "text-purple-600" };
-    if (daysToClose > 7) return { label: "Home Prep Phase", emoji: "🔨", color: "text-amber-600" };
-    if (daysToClose >= 0) return { label: "Final Move & Close", emoji: "🏠", color: "text-orange-600" };
-    return { label: "Move Complete!", emoji: "🎉", color: "text-green-600" };
+    if (daysToClose === null) return { label: "Getting Started", emoji: "🏁" };
+    if (daysToClose > 21) return { label: "Foundation Phase", emoji: "📋" };
+    if (daysToClose > 14) return { label: "Clearing & Logistics", emoji: "📦" };
+    if (daysToClose > 7) return { label: "Home Prep Phase", emoji: "🔨" };
+    if (daysToClose >= 0) return { label: "Final Move & Close", emoji: "🏠" };
+    return { label: "Move Complete!", emoji: "🎉" };
   };
   const phase = getPhase();
 
   const allAlerts = [
     ...overdueAppts.map(a => ({
-      type: "overdue",
       label: `Overdue: ${a.title}`,
       sub: a.date,
       icon: AlertTriangle,
@@ -75,7 +71,6 @@ export default function MyMoveTab({ user, onNavigate }) {
       bg: "bg-red-50 border-red-100",
     })),
     ...thisWeekAppts.map(a => ({
-      type: "week",
       label: a.title,
       sub: format(parseISO(a.date), "EEE, MMM d") + (a.time ? ` · ${a.time}` : ""),
       icon: CalendarDays,
@@ -84,6 +79,20 @@ export default function MyMoveTab({ user, onNavigate }) {
     })),
   ];
 
+  // Use 1 sample alert if no real alerts
+  const displayAlerts = allAlerts.length > 0 ? allAlerts : [
+    {
+      label: "Movers appointment not confirmed",
+      sub: "Tap to review your calendar",
+      icon: AlertTriangle,
+      color: "text-amber-600",
+      bg: "bg-amber-50 border-amber-100",
+      sample: true,
+    }
+  ];
+
+  const visibleAlerts = alertsExpanded ? displayAlerts : displayAlerts.slice(0, 1);
+
   if (loading) return (
     <div className="flex justify-center py-16">
       <div className="w-7 h-7 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
@@ -91,78 +100,65 @@ export default function MyMoveTab({ user, onNavigate }) {
   );
 
   return (
-    <div className="space-y-4">
-      {/* Hero card — move phase */}
-      <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-3xl p-5 text-white">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-white/70 text-[11px] font-bold uppercase tracking-wider mb-1">Current Phase</p>
-            <p className="text-xl font-black">{phase.emoji} {phase.label}</p>
-            {daysToClose !== null && daysToClose >= 0 && (
-              <p className="text-white/80 text-sm mt-1 font-semibold">{daysToClose} days until closing</p>
-            )}
-            {user?.home_address && (
-              <p className="text-white/60 text-[11px] mt-1 truncate max-w-[200px]">{user.home_address}</p>
-            )}
-          </div>
-          <div className="bg-white/20 rounded-2xl px-3 py-2 text-center min-w-[52px]">
-            <p className="text-2xl font-black">{checklistPct}%</p>
-            <p className="text-[9px] text-white/70 font-bold uppercase">done</p>
-          </div>
+    <div className="space-y-3">
+      {/* Hero strip — compact */}
+      <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-4 text-white flex items-center gap-4">
+        <div className="flex-1 min-w-0">
+          <p className="text-white/70 text-[10px] font-bold uppercase tracking-wider">{phase.emoji} Current Phase</p>
+          <p className="text-sm font-black truncate">{phase.label}</p>
+          {daysToClose !== null && daysToClose >= 0 && (
+            <p className="text-white/70 text-[11px] font-semibold">{daysToClose}d to closing</p>
+          )}
         </div>
-
-        {/* Progress bar */}
-        <div className="mt-4">
-          <div className="h-2 bg-white/20 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-white rounded-full transition-all duration-700"
-              style={{ width: `${checklistPct}%` }}
-            />
-          </div>
-          <div className="flex justify-between mt-1.5">
-            <p className="text-[10px] text-white/60 font-semibold">{completedChecklist.length} tasks done</p>
-            <p className="text-[10px] text-white/60 font-semibold">{checklist.length - completedChecklist.length} remaining</p>
-          </div>
+        <div className="bg-white/20 rounded-xl px-3 py-2 text-center flex-shrink-0">
+          <p className="text-xl font-black">{checklistPct}%</p>
+          <p className="text-[9px] text-white/70 font-bold uppercase">done</p>
         </div>
       </div>
 
-      {/* Alerts section */}
-      {allAlerts.length > 0 && (
-        <div className="space-y-2">
-          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-            🔔 Alerts ({allAlerts.length})
-          </p>
-          {allAlerts.map((alert, i) => (
-            <div key={i} className={`rounded-2xl p-3.5 border flex items-start gap-3 ${alert.bg}`}>
-              <alert.icon className={`w-4 h-4 mt-0.5 flex-shrink-0 ${alert.color}`} />
+      {/* Alerts */}
+      <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+        <div className="px-4 py-2.5 flex items-center justify-between border-b border-slate-50">
+          <p className="text-xs font-bold text-slate-700">🔔 Alerts {allAlerts.length > 0 && `(${allAlerts.length})`}</p>
+          {displayAlerts.length > 1 && (
+            <button onClick={() => setAlertsExpanded(e => !e)} className="flex items-center gap-0.5 text-[10px] text-orange-500 font-bold">
+              {alertsExpanded ? "Collapse" : `Show all (${displayAlerts.length})`}
+              <ChevronDown className={`w-3 h-3 transition-transform ${alertsExpanded ? "rotate-180" : ""}`} />
+            </button>
+          )}
+        </div>
+        <div className="divide-y divide-slate-50">
+          {visibleAlerts.map((alert, i) => (
+            <div key={i} className={`flex items-center gap-3 px-4 py-2.5 ${alert.sample ? "opacity-50" : ""}`}>
+              <alert.icon className={`w-4 h-4 flex-shrink-0 ${alert.color}`} />
               <div className="flex-1 min-w-0">
-                <p className={`text-xs font-bold ${alert.color}`}>{alert.label}</p>
-                <p className="text-[10px] text-slate-400 mt-0.5">{alert.sub}</p>
+                <p className={`text-xs font-bold truncate ${alert.color}`}>{alert.label}</p>
+                <p className="text-[10px] text-slate-400">{alert.sub}</p>
               </div>
             </div>
           ))}
         </div>
-      )}
+      </div>
 
-      {/* This week at a glance */}
+      {/* This Week */}
       <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
-        <div className="px-4 py-3 flex items-center justify-between border-b border-slate-50">
+        <div className="px-4 py-2.5 flex items-center justify-between border-b border-slate-50">
           <p className="text-xs font-bold text-slate-700">📅 This Week</p>
           <button onClick={() => onNavigate("calendar")} className="text-[10px] text-orange-500 font-bold flex items-center gap-0.5">
             View all <ChevronRight className="w-3 h-3" />
           </button>
         </div>
         {thisWeekAppts.length === 0 ? (
-          <div className="px-4 py-5 text-center">
+          <div className="px-4 py-3 flex items-center justify-between">
             <p className="text-xs text-slate-400">No appointments this week</p>
-            <button onClick={() => onNavigate("calendar")} className="text-orange-500 font-bold text-xs mt-1">+ Add one</button>
+            <button onClick={() => onNavigate("calendar")} className="text-orange-500 font-bold text-xs">+ Add</button>
           </div>
         ) : (
           <div className="divide-y divide-slate-50">
-            {thisWeekAppts.slice(0, 4).map((a, i) => (
-              <div key={i} className="flex items-center gap-3 px-4 py-3">
-                <div className="w-8 h-8 rounded-xl bg-orange-50 flex items-center justify-center flex-shrink-0">
-                  <CalendarDays className="w-4 h-4 text-orange-400" />
+            {thisWeekAppts.slice(0, 2).map((a, i) => (
+              <div key={i} className="flex items-center gap-3 px-4 py-2.5">
+                <div className="w-7 h-7 rounded-lg bg-orange-50 flex items-center justify-center flex-shrink-0">
+                  <CalendarDays className="w-3.5 h-3.5 text-orange-400" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-bold text-slate-800 truncate">{a.title}</p>
@@ -178,26 +174,22 @@ export default function MyMoveTab({ user, onNavigate }) {
         )}
       </div>
 
-      {/* My Providers */}
+      {/* Booked Service Providers */}
       <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
-        <div className="px-4 py-3 flex items-center justify-between border-b border-slate-50">
-          <p className="text-xs font-bold text-slate-700">📋 Booked Service Providers ({providers.length})</p>
-          <button onClick={() => onNavigate("ai")} className="text-[10px] text-orange-500 font-bold flex items-center gap-0.5">
-            Find more <ChevronRight className="w-3 h-3" />
-          </button>
+        <div className="px-4 py-2.5 flex items-center justify-between border-b border-slate-50">
+          <p className="text-xs font-bold text-slate-700">📋 Booked Providers ({providers.length})</p>
         </div>
         {providers.length === 0 ? (
-          <div className="px-4 py-5 text-center">
-            <p className="text-xs text-slate-400">No providers saved yet</p>
-            <button onClick={() => onNavigate("ai")} className="text-orange-500 font-bold text-xs mt-1">Browse AI Center →</button>
+          <div className="px-4 py-3">
+            <p className="text-xs text-slate-400">No providers booked yet</p>
           </div>
         ) : (
           <div className="divide-y divide-slate-50">
-            {providers.map((p, i) => (
-              <div key={i} className="flex items-center gap-3 px-4 py-3">
-                <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center flex-shrink-0 text-base">
-                  {p.role === "Movers" ? "🚛" : p.role === "Cleaners" ? "✨" : p.role === "Painters" ? "🎨" : p.role === "Junk Removal" ? "🗑️" : p.role === "Estate Sale" ? "🏷️" : p.role === "Donation" ? "🫶" : "📋"}
-                </div>
+            {providers.slice(0, 2).map((p, i) => (
+              <div key={i} className="flex items-center gap-3 px-4 py-2.5">
+                <span className="text-base flex-shrink-0">
+                  {p.role === "Movers" ? "🚛" : p.role === "Cleaners" ? "✨" : p.role === "Painters" ? "🎨" : p.role === "Junk Removal" ? "🗑️" : p.role === "Estate Sale" ? "🏷️" : "📋"}
+                </span>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-bold text-slate-800 truncate">{p.name}</p>
                   <p className="text-[10px] text-orange-500 font-semibold">{p.role}</p>
@@ -210,8 +202,8 @@ export default function MyMoveTab({ user, onNavigate }) {
                     </div>
                   )}
                   {p.phone && (
-                    <a href={`tel:${p.phone}`} className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center hover:bg-orange-100 transition-colors">
-                      <Phone className="w-3.5 h-3.5 text-slate-500" />
+                    <a href={`tel:${p.phone}`} className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center">
+                      <Phone className="w-3 h-3 text-slate-500" />
                     </a>
                   )}
                 </div>
@@ -221,30 +213,30 @@ export default function MyMoveTab({ user, onNavigate }) {
         )}
       </div>
 
-      {/* Quick stats */}
-      <div className="grid grid-cols-3 gap-2.5">
-        <div className="bg-white rounded-2xl border border-slate-100 p-3.5 text-center">
-          <p className="text-2xl font-black text-slate-800">{appointments.filter(a => a.status === "completed").length}</p>
-          <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Completed</p>
+      {/* Quick stats row */}
+      <div className="grid grid-cols-3 gap-2">
+        <div className="bg-white rounded-2xl border border-slate-100 p-3 text-center">
+          <p className="text-xl font-black text-slate-800">{appointments.filter(a => a.status === "completed").length}</p>
+          <p className="text-[10px] text-slate-400 font-semibold">Completed</p>
         </div>
-        <div className="bg-white rounded-2xl border border-slate-100 p-3.5 text-center">
-          <p className="text-2xl font-black text-orange-500">{overdueAppts.length}</p>
-          <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Overdue</p>
+        <div className="bg-white rounded-2xl border border-slate-100 p-3 text-center">
+          <p className="text-xl font-black text-orange-500">{overdueAppts.length}</p>
+          <p className="text-[10px] text-slate-400 font-semibold">Overdue</p>
         </div>
-        <div className="bg-white rounded-2xl border border-slate-100 p-3.5 text-center">
-          <p className="text-2xl font-black text-slate-800">{providers.length}</p>
-          <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Team Size</p>
+        <div className="bg-white rounded-2xl border border-slate-100 p-3 text-center">
+          <p className="text-xl font-black text-slate-800">{providers.length}</p>
+          <p className="text-[10px] text-slate-400 font-semibold">Providers</p>
         </div>
       </div>
 
-      {/* Upcoming milestone */}
+      {/* Closing day banner */}
       {daysToClose !== null && daysToClose >= 0 && (
-        <div className="bg-slate-800 rounded-2xl p-4 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center flex-shrink-0 text-lg">🏠</div>
+        <div className="bg-slate-800 rounded-2xl p-3.5 flex items-center gap-3">
+          <span className="text-xl flex-shrink-0">🏠</span>
           <div className="flex-1">
             <p className="text-white text-xs font-bold">Closing Day</p>
             <p className="text-slate-400 text-[11px]">
-              {user.close_date ? format(parseISO(user.close_date), "MMMM d, yyyy") : ""} · {daysToClose} days away
+              {user.close_date ? format(parseISO(user.close_date), "MMMM d, yyyy") : ""}
             </p>
           </div>
           <div className="bg-orange-500/20 rounded-xl px-2.5 py-1.5">
