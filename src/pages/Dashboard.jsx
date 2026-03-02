@@ -52,8 +52,14 @@ export default function Dashboard() {
     </div>
   );
 
+  const handleOnboardingDone = () => {
+    localStorage.setItem(`onboarding_done_${user?.id}`, "1");
+    setShowOnboarding(false);
+  };
+
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col max-w-md mx-auto">
+      {showOnboarding && <Week1OnboardingModal user={user} onDone={handleOnboardingDone} />}
       {/* Header */}
       <div className="bg-white border-b border-slate-200 px-5 pt-12 pb-5">
         <div className="flex items-center justify-between">
