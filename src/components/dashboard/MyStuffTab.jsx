@@ -343,7 +343,7 @@ export default function MyStuffTab({ user, onNavigate }) {
     <SummaryScreen
       allDecisions={allDecisions}
       allSizes={sizes}
-      hasMover={hasMover}
+      providers={providers}
       onRestart={handleRestart}
       onGoToMoveInfo={() => onNavigate && onNavigate("mymove")}
     />
