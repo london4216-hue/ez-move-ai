@@ -5,6 +5,7 @@ import {
   Phone, Star, ChevronDown, ChevronRight
 } from "lucide-react";
 import { parseISO, differenceInDays, isPast, isToday, format, isWithinInterval, startOfWeek, endOfWeek } from "date-fns";
+import SavedInsights from "./SavedInsights";
 
 export default function MyMoveTab({ user, onNavigate }) {
   const [appointments, setAppointments] = useState([]);
