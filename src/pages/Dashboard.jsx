@@ -40,7 +40,7 @@ export default function Dashboard() {
     : { label: `${daysToClose}d to close`, color: "bg-orange-500" };
 
   if (loading) return (
-    <div className="min-h-screen bg-[#0F172A] flex items-center justify-center">
+    <div className="min-h-screen bg-slate-100 flex items-center justify-center">
       <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
     </div>
   );
