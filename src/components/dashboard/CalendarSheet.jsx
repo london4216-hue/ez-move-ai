@@ -150,6 +150,11 @@ export default function CalendarSheet({ user }) {
 
   return (
     <div className="flex flex-col gap-3 pb-4">
+      {/* Sync button */}
+      <div className="flex justify-end">
+        <ExportCalendarButton appointments={appointments.filter(a => a.status !== "cancelled")} />
+      </div>
+
       {/* Mini calendar */}
       <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
         <div className="flex items-center justify-between px-4 py-3 border-b border-[#F3F4F6]">
