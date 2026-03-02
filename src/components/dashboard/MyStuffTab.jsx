@@ -162,47 +162,98 @@ function RoomScreen({ room, roomIndex, totalRooms, decisions, sizes, onDecide, o
   );
 }
 
+// ─── Provider warning card ─────────────────────────────────────────────────────
+function ProviderWarning({ type, count, hasProvider, onGoToMoveInfo }) {
+  if (!count) return null;
+  if (hasProvider) return (
+    <div className={`rounded-2xl px-4 py-3 flex gap-3 items-center border
+      ${type === "move" ? "bg-emerald-50 border-emerald-200" : type === "donate" ? "bg-emerald-50 border-emerald-200" : "bg-emerald-50 border-emerald-200"}`}>
+      <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+      <p className="text-xs font-bold text-emerald-700">
+        {type === "move" ? "Mover booked! List ready to share." : type === "donate" ? "Donation pickup scheduled." : "Junk removal booked."}
+      </p>
+    </div>
+  );
+  const CONFIG = {
+    move: { color: "amber", label: "mover", cta: "Add a Mover", emoji: "🚛" },
+    donate: { color: "purple", label: "donation pickup", cta: "Add Donation Pickup", emoji: "🫶" },
+    junk: { color: "red", label: "junk removal", cta: "Add Junk Removal", emoji: "🗑️" },
+  };
+  const c = CONFIG[type];
+  const colorMap = {
+    amber: { bg: "bg-amber-50", border: "border-amber-200", title: "text-amber-800", body: "text-amber-600", btn: "bg-amber-500", icon: "text-amber-500" },
+    purple: { bg: "bg-purple-50", border: "border-purple-200", title: "text-purple-800", body: "text-purple-600", btn: "bg-purple-500", icon: "text-purple-500" },
+    red: { bg: "bg-red-50", border: "border-red-200", title: "text-red-800", body: "text-red-600", btn: "bg-red-500", icon: "text-red-500" },
+  }[c.color];
+  return (
+    <div className={`${colorMap.bg} border ${colorMap.border} rounded-2xl px-4 py-3 flex gap-3 items-start`}>
+      <AlertTriangle className={`w-4 h-4 ${colorMap.icon} mt-0.5 shrink-0`} />
+      <div className="flex-1">
+        <p className={`text-xs font-bold ${colorMap.title}`}>{c.emoji} No {c.label} selected yet!</p>
+        <p className={`text-[10px] ${colorMap.body} mt-0.5 mb-2`}>You have {count} item{count > 1 ? "s" : ""} tagged — book a {c.label} so it auto-adds to your calendar & alerts.</p>
+        <button onClick={onGoToMoveInfo} className={`text-[10px] font-bold text-white ${colorMap.btn} px-3 py-1.5 rounded-xl active:scale-[0.98] transition-transform`}>
+          Go to Move Info → {c.cta}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── AI Ideas panel ────────────────────────────────────────────────────────────
+function AIIdeasPanel() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="bg-gradient-to-br from-violet-50 to-blue-50 border border-violet-200 rounded-2xl overflow-hidden">
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="w-full px-4 py-3 flex items-center justify-between"
+      >
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-violet-500" />
+          <p className="text-xs font-bold text-violet-800">AI Superpowers — Coming Soon</p>
+        </div>
+        {open ? <ChevronUp className="w-4 h-4 text-violet-400" /> : <ChevronDown className="w-4 h-4 text-violet-400" />}
+      </button>
+      {open && (
+        <div className="px-4 pb-4 grid grid-cols-1 gap-2">
+          {AI_IDEAS.map((idea, i) => (
+            <div key={i} className="bg-white/70 rounded-xl px-3 py-2.5 flex gap-2.5 items-start">
+              <span className="text-lg leading-none mt-0.5">{idea.emoji}</span>
+              <div>
+                <p className="text-[11px] font-bold text-slate-700">{idea.title}</p>
+                <p className="text-[10px] text-slate-500">{idea.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Summary ──────────────────────────────────────────────────────────────────
-function SummaryScreen({ allDecisions, allSizes, hasMover, onRestart, onGoToMoveInfo }) {
+function SummaryScreen({ allDecisions, allSizes, providers, onRestart, onGoToMoveInfo }) {
   const groups = { move: [], donate: [], junk: [] };
   Object.entries(allDecisions).forEach(([item, dec]) => {
     if (groups[dec]) groups[dec].push(item);
   });
 
-  const moveItems = groups.move;
-  const hasMoveItems = moveItems.length > 0;
+  const hasMover = providers.some(p => /mover/i.test(p.role || ""));
+  const hasDonation = providers.some(p => /donat/i.test(p.role || ""));
+  const hasJunk = providers.some(p => /junk/i.test(p.role || ""));
 
   return (
     <div className="space-y-3">
       {/* Header */}
       <div className="bg-gradient-to-r from-orange-500 to-orange-400 rounded-2xl px-4 py-4 text-white">
         <p className="font-black text-base">Your Inventory 🎉</p>
-        <p className="text-orange-100 text-xs mt-0.5">Complete list sorted by category</p>
+        <p className="text-orange-100 text-xs mt-0.5">Complete list — act on each category below</p>
       </div>
 
-      {/* No mover warning */}
-      {hasMoveItems && !hasMover && (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 flex gap-3 items-start">
-          <AlertTriangle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
-          <div className="flex-1">
-            <p className="text-xs font-bold text-amber-800">No mover selected yet!</p>
-            <p className="text-[10px] text-amber-600 mt-0.5 mb-2">You have {moveItems.length} items to move but haven't booked a mover. Add one to your plan so it shows up on your calendar.</p>
-            <button
-              onClick={onGoToMoveInfo}
-              className="text-[10px] font-bold text-white bg-amber-500 px-3 py-1.5 rounded-xl active:scale-[0.98] transition-transform"
-            >
-              Go to Move Info → Add a Mover
-            </button>
-          </div>
-        </div>
-      )}
-
-      {hasMoveItems && hasMover && (
-        <div className="bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-3 flex gap-3 items-center">
-          <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-          <p className="text-xs font-bold text-emerald-700">Mover booked! Your move list is ready to share.</p>
-        </div>
-      )}
+      {/* Provider warnings for each category */}
+      <ProviderWarning type="move" count={groups.move.length} hasProvider={hasMover} onGoToMoveInfo={onGoToMoveInfo} />
+      <ProviderWarning type="donate" count={groups.donate.length} hasProvider={hasDonation} onGoToMoveInfo={onGoToMoveInfo} />
+      <ProviderWarning type="junk" count={groups.junk.length} hasProvider={hasJunk} onGoToMoveInfo={onGoToMoveInfo} />
 
       {/* Lists */}
       {LISTS.map(list => (
@@ -231,10 +282,10 @@ function SummaryScreen({ allDecisions, allSizes, hasMover, onRestart, onGoToMove
         </div>
       ))}
 
-      <button
-        onClick={onRestart}
-        className="w-full py-3 rounded-2xl border border-slate-200 bg-white text-slate-500 text-xs font-bold"
-      >
+      {/* AI Ideas */}
+      <AIIdeasPanel />
+
+      <button onClick={onRestart} className="w-full py-3 rounded-2xl border border-slate-200 bg-white text-slate-500 text-xs font-bold">
         Start Over
       </button>
     </div>
