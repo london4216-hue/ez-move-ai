@@ -1,8 +1,10 @@
 import { useState, useRef } from "react";
+import { base44 } from "@/api/base44Client";
 
 export default function CodeEntry({ onVerified }) {
   const [digits, setDigits] = useState(["", "", "", ""]);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const refs = [useRef(), useRef(), useRef(), useRef()];
 
   const handleChange = (i, val) => {
@@ -20,15 +22,21 @@ export default function CodeEntry({ onVerified }) {
 
   const handleVerify = async () => {
     const code = digits.join("");
+    setLoading(true);
+    setError("");
     try {
-      const { data } = await import("@/api/base44Client").then(m => 
-        m.base44.entities.Client.filter({ invitation_code: code })
-      );
+      const clients = await base44.entities.Client.filter({ invitation_code: code });
+      if (clients.length === 0) {
+        setError("Invalid code. Please check your invite.");
+        setDigits(["", "", "", ""]);
+        refs[0].current?.focus();
+        return;
+      }
       await onVerified(code);
     } catch (e) {
-      setError("Invalid code. Please check your invite.");
-      setDigits(["", "", "", ""]);
-      refs[0].current?.focus();
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -76,10 +84,10 @@ export default function CodeEntry({ onVerified }) {
 
         <button
           onClick={handleVerify}
-          disabled={!allFilled}
+          disabled={!allFilled || loading}
           className="btn-primary"
         >
-          Continue →
+          {loading ? "Checking..." : "Continue →"}
         </button>
 
         <p className="text-center text-sm text-slate-400 mt-6">
