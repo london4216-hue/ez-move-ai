@@ -3,18 +3,20 @@ import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
 import { differenceInDays, parseISO } from "date-fns";
-import { LayoutList, CalendarDays, Package, Home } from "lucide-react";
+import { LayoutList, CalendarDays, Package, Home, Sparkles } from "lucide-react";
 import ChecklistPanel from "@/components/dashboard/ChecklistPanel";
 import CalendarSheet from "@/components/dashboard/CalendarSheet";
 import MyStuffTab from "@/components/dashboard/MyStuffTab";
 import MoveCommandCenter from "@/components/dashboard/MoveCommandCenter";
 import Week1OnboardingModal from "@/components/dashboard/Week1OnboardingModal";
+import AIMoveAssist from "@/components/dashboard/AIMoveAssist";
 
 const TABS = [
   { id: "plan", label: "My Plan", Icon: LayoutList },
   { id: "mymove", label: "Move Info", Icon: Home },
   { id: "calendar", label: "Calendar", Icon: CalendarDays },
   { id: "inventory", label: "My Stuff", Icon: Package },
+  { id: "ai", label: "AI Assist", Icon: Sparkles },
 ];
 
 export default function Dashboard() {
