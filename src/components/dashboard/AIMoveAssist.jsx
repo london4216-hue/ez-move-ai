@@ -83,13 +83,16 @@ function AIGenerator({ feature, user }) {
 
   const generate = async () => {
     setLoading(true);
+    setResult(null);
     try {
       const res = await base44.integrations.Core.InvokeLLM({
         prompt: prompts[feature.id],
+        add_context_from_internet: feature.id === "neighborhood",
       });
-      setResult(res);
+      setResult(res || "No response received. Please try again.");
     } catch(e) {
-      setResult("Could not generate. Please try again.");
+      console.error("AI generation error:", e);
+      setResult(`Error: ${e.message || "Failed to generate. Try again."}`);
     }
     setLoading(false);
   };
