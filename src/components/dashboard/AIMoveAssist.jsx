@@ -203,7 +203,7 @@ function FeatureCard({ feature, user }) {
       {open && (
         <div className="px-4 pb-4">
           <p className="text-[11px] text-slate-600 leading-relaxed mb-3">{feature.description}</p>
-          <AIGenerator feature={feature} user={user} />
+          <AIGenerator feature={feature} user={user} onSave={() => {}} />
         </div>
       )}
     </div>
