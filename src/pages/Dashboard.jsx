@@ -2,117 +2,98 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
-import StatusBar from "@/components/dashboard/StatusBar";
-import ContactsRow from "@/components/dashboard/ContactsSidebar";
-import ChecklistPanel from "@/components/dashboard/ChecklistPanel";
-import MessagesCorner from "@/components/dashboard/MessagesCorner";
 import WeekProgress from "@/components/dashboard/WeekProgress";
-import CalendarSheet from "@/components/dashboard/CalendarSheet.jsx";
-import InventoryTab from "@/components/dashboard/InventoryTab.jsx";
+import ChecklistPanel from "@/components/dashboard/ChecklistPanel";
+import CalendarSheet from "@/components/dashboard/CalendarSheet";
+import InventoryTab from "@/components/dashboard/InventoryTab";
+import ContactsSidebar from "@/components/dashboard/ContactsSidebar";
+import { CheckSquare, Package, CalendarDays, Users, LogOut } from "lucide-react";
+
+const TABS = [
+  { id: "checklist", label: "Plan", icon: CheckSquare },
+  { id: "calendar", label: "Calendar", icon: CalendarDays },
+  { id: "inventory", label: "Inventory", icon: Package },
+  { id: "contacts", label: "Contacts", icon: Users },
+];
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [contactsRefresh, setContactsRefresh] = useState(0);
   const [activeTab, setActiveTab] = useState("checklist");
   const navigate = useNavigate();
 
   useEffect(() => {
-    base44.auth.me().then(u => {
-      setUser(u);
-      setLoading(false);
-    }).catch(() => navigate(createPageUrl("Register")));
+    base44.auth.me()
+      .then(u => { setUser(u); setLoading(false); })
+      .catch(() => navigate(createPageUrl("Register")));
   }, []);
 
   if (loading) return (
-    <div className="min-h-screen bg-[#F5F3EF] flex items-center justify-center">
-      <div className="w-8 h-8 border-2 border-[#F97316] border-t-transparent rounded-full animate-spin" />
+    <div className="min-h-screen bg-slate-100 flex items-center justify-center">
+      <div className="w-10 h-10 border-3 border-orange-500 border-t-transparent rounded-full animate-spin" />
     </div>
   );
 
-  return (
-    <div className="min-h-screen bg-[#F5F3EF] flex flex-col max-w-md mx-auto relative">
-      <StatusBar user={user} />
+  const initials = user?.full_name
+    ? user.full_name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
+    : "U";
 
-      {/* Top branding */}
-      <div className="px-5 pt-3 pb-2 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-[#1A1A2E] rounded-lg flex items-center justify-center">
-            <span className="text-white text-[10px] font-bold">EZ</span>
+  return (
+    <div className="flex flex-col h-screen max-w-md mx-auto bg-slate-100 overflow-hidden">
+
+      {/* Header */}
+      <div className="bg-white px-5 pt-12 pb-4 flex items-center justify-between border-b border-slate-100">
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 bg-slate-900 rounded-xl flex items-center justify-center">
+            <span className="text-white text-xs font-black">EZ</span>
           </div>
-          <span className="text-base font-semibold text-[#1A1A2E] tracking-tight">
-            EZ Move <span className="text-[#F97316]">AI</span>
-          </span>
+          <div>
+            <span className="text-base font-black text-slate-900">EZ Move <span className="text-orange-500">AI</span></span>
+            {user?.full_name && (
+              <p className="text-[11px] text-slate-400 leading-none mt-0.5">Hey, {user.full_name.split(" ")[0]} 👋</p>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-3">
-          <MessagesCorner user={user} />
           <button
             onClick={() => base44.auth.logout(createPageUrl("Register"))}
-            className="text-[10px] font-semibold text-[#9CA3AF] hover:text-[#F97316] transition-colors"
+            className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600"
           >
-            Log out
+            <LogOut className="w-4 h-4" />
           </button>
-          <div className="w-8 h-8 rounded-full bg-[#1A1A2E] flex items-center justify-center">
-            <span className="text-white text-xs font-bold">
-              {user?.full_name?.[0] || "U"}
-            </span>
+          <div className="w-9 h-9 rounded-xl bg-orange-500 flex items-center justify-center">
+            <span className="text-white text-xs font-black">{initials}</span>
           </div>
         </div>
       </div>
 
-      {/* Week progress steps */}
-      <WeekProgress user={user} />
+      {/* Week Progress */}
+      <div className="bg-white pt-4 pb-1 border-b border-slate-100">
+        <WeekProgress user={user} />
+      </div>
 
-      {/* Main content */}
-      <div className="flex-1 px-3 pb-2 flex flex-col gap-3 overflow-y-auto">
-        {activeTab === "checklist" && <ChecklistPanel user={user} onProviderSaved={() => setContactsRefresh(r => r + 1)} />}
+      {/* Main content - scrollable */}
+      <div className="flex-1 overflow-y-auto no-scrollbar">
+        {activeTab === "checklist" && <ChecklistPanel user={user} />}
         {activeTab === "calendar" && <CalendarSheet user={user} />}
         {activeTab === "inventory" && <InventoryTab user={user} />}
+        {activeTab === "contacts" && <ContactsSidebar user={user} />}
       </div>
 
-      {/* Email & Clear controls */}
-      <div className="px-3 py-2 flex gap-2">
-        <button className="flex-1 bg-[#F97316] text-white py-2.5 rounded-xl text-[11px] font-bold hover:opacity-90 transition-opacity">
-          ✉️ Email
-        </button>
-        <select className="flex-1 bg-white border border-[#E5E7EB] py-2.5 rounded-xl text-[10px] font-semibold text-[#374151]">
-          <option value="moving">📦 Moving List</option>
-          <option value="donation">🫶 Donation List</option>
-        </select>
-        <button className="flex-1 bg-white border border-[#E5E7EB] text-[#9CA3AF] py-2.5 rounded-xl text-[10px] font-bold hover:text-[#EF4444] transition-colors">
-          Clear
-        </button>
-      </div>
-
-      {/* Key Contacts — compact bottom bar */}
-      <ContactsRow user={user} refreshKey={contactsRefresh} />
-
-      {/* Bottom tab bar */}
-      <div className="flex border-t border-[#E5E7EB] bg-white">
-        <button
-          onClick={() => setActiveTab("checklist")}
-          className={`flex-1 py-3 flex flex-col items-center gap-0.5 text-[10px] font-semibold transition-colors
-            ${activeTab === "checklist" ? "text-[#F97316]" : "text-[#9CA3AF]"}`}
-        >
-          <span className="text-base">☑️</span>
-          Checklist
-        </button>
-        <button
-          onClick={() => setActiveTab("inventory")}
-          className={`flex-1 py-3 flex flex-col items-center gap-0.5 text-[10px] font-semibold transition-colors
-            ${activeTab === "inventory" ? "text-[#F97316]" : "text-[#9CA3AF]"}`}
-        >
-          <span className="text-base">📦</span>
-          Inventory
-        </button>
-        <button
-          onClick={() => setActiveTab("calendar")}
-          className={`flex-1 py-3 flex flex-col items-center gap-0.5 text-[10px] font-semibold transition-colors
-            ${activeTab === "calendar" ? "text-[#F97316]" : "text-[#9CA3AF]"}`}
-        >
-          <span className="text-base">📅</span>
-          Calendar
-        </button>
+      {/* Bottom Tab Bar */}
+      <div className="bg-white border-t border-slate-100 flex safe-bottom pb-2">
+        {TABS.map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            onClick={() => setActiveTab(id)}
+            className={`flex-1 pt-3 pb-1 flex flex-col items-center gap-1 transition-all`}
+          >
+            <Icon className={`w-5 h-5 ${activeTab === id ? "text-orange-500" : "text-slate-400"}`} />
+            <span className={`text-[10px] font-bold ${activeTab === id ? "text-orange-500" : "text-slate-400"}`}>
+              {label}
+            </span>
+          </button>
+        ))}
       </div>
     </div>
   );
