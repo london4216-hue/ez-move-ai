@@ -89,13 +89,7 @@ function FeatureCard({ feature, user }) {
       {open && (
         <div className="px-4 pb-4">
           <p className="text-[11px] text-slate-600 leading-relaxed mb-3">{feature.description}</p>
-          {feature.comingSoon ? (
-            <div className="w-full py-2.5 rounded-xl border border-dashed border-slate-300 text-center">
-              <p className="text-[10px] text-slate-400 font-bold">🚀 Coming in a future update</p>
-            </div>
-          ) : feature.id === "quote" ? (
-            <QuoteGenerator user={user} />
-          ) : null}
+          {feature.id === "quote" && <QuoteGenerator user={user} />}
         </div>
       )}
     </div>
