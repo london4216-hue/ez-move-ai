@@ -127,6 +127,7 @@ export default function Dashboard() {
         {activeTab === "plan" && <ChecklistPanel user={user} />}
         {activeTab === "calendar" && <CalendarSheet user={user} />}
         {activeTab === "inventory" && <MyStuffTab user={user} onNavigate={setActiveTab} />}
+        {activeTab === "ai" && <AIMoveAssist user={user} />}
       </div>
 
       {/* Bottom Nav */}
