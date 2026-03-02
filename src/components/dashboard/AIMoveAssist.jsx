@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Sparkles, ChevronDown, ChevronUp, FileText } from "lucide-react";
+import { Sparkles, ChevronDown, ChevronUp, FileText, Package, Clock, MapPin, DollarSign, FileCheck } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 const FEATURES = [
@@ -8,9 +8,54 @@ const FEATURES = [
     emoji: "📋",
     icon: FileText,
     title: "Instant Mover Quote",
-    tagline: "Turn your inventory into a pro quote request",
+    tagline: "Professional quote request from your inventory",
     color: "blue",
     description: "Based on your My Stuff inventory, AI drafts a detailed quote request listing every item with size — ready to send to 3 local movers in one tap.",
+  },
+  {
+    id: "supplies",
+    emoji: "📦",
+    icon: Package,
+    title: "Packing Supplies Calculator",
+    tagline: "Exactly what you need, nothing wasted",
+    color: "amber",
+    description: "AI calculates exact quantities of boxes (small/medium/large), tape, bubble wrap, and packing paper based on your room-by-room inventory and item sizes.",
+  },
+  {
+    id: "timeline",
+    emoji: "🗓️",
+    icon: Clock,
+    title: "Packing Timeline",
+    tagline: "When to start, what to pack when",
+    color: "orange",
+    description: "AI creates a week-by-week packing schedule leading up to your closing date, prioritizing items you won't need versus everyday essentials.",
+  },
+  {
+    id: "documents",
+    emoji: "📄",
+    icon: FileCheck,
+    title: "Moving Documents Checklist",
+    tagline: "Don't forget the paperwork",
+    color: "emerald",
+    description: "AI generates a comprehensive checklist of all documents you should gather before closing: mortgage papers, utility records, insurance docs, ID confirmations, and more.",
+  },
+  {
+    id: "neighborhood",
+    emoji: "🏘️",
+    icon: MapPin,
+    title: "New Neighborhood Research",
+    tagline: "Learn about your new area",
+    color: "violet",
+    description: "Tell AI your new address and it researches schools, parks, hospitals, grocery stores, transit, utilities, and local services in your new neighborhood.",
+  },
+  {
+    id: "budget",
+    emoji: "💰",
+    icon: DollarSign,
+    title: "Moving Cost Estimator",
+    tagline: "Budget for the big day",
+    color: "red",
+    description: "AI estimates your total moving costs based on distance, truck size, supplies, and typical service fees — helps you plan financially and spot overpricing.",
   },
 ];
 
