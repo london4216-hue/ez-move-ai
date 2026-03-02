@@ -102,17 +102,33 @@ export default function MyMoveTab({ user, onNavigate }) {
   return (
     <div className="space-y-3">
       {/* Hero strip — compact */}
-      <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-4 text-white flex items-center gap-4">
-        <div className="flex-1 min-w-0">
-          <p className="text-white/70 text-[10px] font-bold uppercase tracking-wider">{phase.emoji} Current Phase</p>
-          <p className="text-sm font-black truncate">{phase.label}</p>
-          {daysToClose !== null && daysToClose >= 0 && (
-            <p className="text-white/70 text-[11px] font-semibold">{daysToClose}d to closing</p>
-          )}
+      <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-4 text-white">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="flex-1 min-w-0">
+            <p className="text-white/70 text-[10px] font-bold uppercase tracking-wider">{phase.emoji} Current Phase</p>
+            <p className="text-sm font-black truncate">{phase.label}</p>
+            {daysToClose !== null && daysToClose >= 0 && (
+              <p className="text-white/70 text-[11px] font-semibold">{daysToClose}d to closing</p>
+            )}
+          </div>
+          <div className="bg-white/20 rounded-xl px-3 py-2 text-center flex-shrink-0">
+            <p className="text-xl font-black">{checklistPct}%</p>
+            <p className="text-[9px] text-white/70 font-bold uppercase">done</p>
+          </div>
         </div>
-        <div className="bg-white/20 rounded-xl px-3 py-2 text-center flex-shrink-0">
-          <p className="text-xl font-black">{checklistPct}%</p>
-          <p className="text-[9px] text-white/70 font-bold uppercase">done</p>
+
+        {/* Progress bar */}
+        <div className="h-2 bg-white/20 rounded-full overflow-hidden mb-2">
+          <div className="h-full bg-white rounded-full transition-all duration-700" style={{ width: `${checklistPct}%` }} />
+        </div>
+        <div className="flex items-center justify-between">
+          <p className="text-[10px] text-white/70 font-semibold">{completedChecklist.length} of {checklist.length} tasks done</p>
+          <button
+            onClick={() => onNavigate("plan")}
+            className="bg-white/20 hover:bg-white/30 transition-colors text-white text-[10px] font-bold px-3 py-1 rounded-full flex items-center gap-1"
+          >
+            Complete your plan <ChevronRight className="w-3 h-3" />
+          </button>
         </div>
       </div>
 
