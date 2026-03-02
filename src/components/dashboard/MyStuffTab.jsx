@@ -209,17 +209,17 @@ export default function MyStuffTab({ user }) {
 
   if (!started) {
     return (
-      <div className="space-y-4">
-        <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl px-5 py-6 text-white">
-          <p className="text-xl font-black mb-1">Let's figure out where everything is going 📦</p>
+      <div className="flex flex-col gap-3" style={{ minHeight: "calc(100vh - 220px)" }}>
+        <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl px-5 py-5 text-white">
+          <p className="text-lg font-black mb-1">Let's figure out where everything is going 📦</p>
           <p className="text-orange-100 text-xs leading-relaxed">
             We'll go room by room so you can decide what to keep, donate, or junk before moving day.
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+        <div className="bg-white rounded-2xl border border-slate-100 overflow-y-auto flex-1">
           <div className="divide-y divide-slate-50">
-            {ROOMS.map((r, i) => (
+            {ROOMS.map((r) => (
               <div key={r.name} className="flex items-center gap-3 px-4 py-2.5">
                 <span className="text-lg">{r.emoji}</span>
                 <p className="flex-1 text-xs font-semibold text-slate-700">{r.name}</p>
@@ -231,7 +231,7 @@ export default function MyStuffTab({ user }) {
 
         <button
           onClick={() => setStarted(true)}
-          className="w-full py-4 rounded-2xl bg-orange-500 text-white font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-orange-200 active:scale-[0.98] transition-transform"
+          className="w-full py-4 rounded-2xl bg-orange-500 text-white font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-orange-200 active:scale-[0.98] transition-transform shrink-0"
         >
           Start Sorting <ChevronRight className="w-5 h-5" />
         </button>
