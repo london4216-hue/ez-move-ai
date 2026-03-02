@@ -13,6 +13,15 @@ const FEATURES = [
     description: "Tell AI your new address and it researches schools, parks, hospitals, grocery stores, transit, utilities, and local services in your new neighborhood.",
   },
   {
+    id: "delivery",
+    emoji: "🚚",
+    icon: Truck,
+    title: "Best Delivery Options",
+    tagline: "Compare moving & shipping services",
+    color: "sky",
+    description: "AI compares the best delivery and moving options for your move, including rates, reviews, timing, and coverage areas.",
+  },
+  {
     id: "quote",
     emoji: "📋",
     icon: FileText,
