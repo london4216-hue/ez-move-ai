@@ -110,7 +110,7 @@ function AIGenerator({ feature, user }) {
 
   const buttonColor = {
     quote: "bg-blue-500", supplies: "bg-amber-500", timeline: "bg-orange-500",
-    documents: "bg-emerald-500", neighborhood: "bg-violet-500", budget: "bg-red-500"
+    documents: "bg-emerald-500", neighborhood: "bg-violet-500", delivery: "bg-sky-500", budget: "bg-red-500"
   }[feature.id];
 
   return (
