@@ -13,7 +13,7 @@ const TABS = [
   { id: "mymove", label: "My Move", Icon: Home },
   { id: "plan", label: "My Plan", Icon: LayoutList },
   { id: "calendar", label: "Calendar", Icon: CalendarDays },
-  { id: "inventory", label: "Inventory", Icon: Package },
+  { id: "inventory", label: "My Stuff", Icon: Package },
 ];
 
 export default function Dashboard() {
