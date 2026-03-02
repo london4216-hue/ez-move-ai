@@ -162,10 +162,10 @@ export default function AIMoveAssist({ user }) {
       <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl px-4 py-5 text-white">
         <div className="flex items-center gap-2 mb-2">
           <Sparkles className="w-5 h-5 text-blue-100" />
-          <p className="font-black text-base">Move Quote AI</p>
+          <p className="font-black text-base">AI Move Utilities</p>
         </div>
         <p className="text-blue-100 text-xs leading-relaxed">
-          Turn your room-by-room inventory into professional mover quote requests. Share your item list with local movers instantly.
+          6 AI tools to plan, budget, pack, and organize every detail of your move. Everything runs on real data from your profile.
         </p>
       </div>
 
