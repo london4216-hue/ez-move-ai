@@ -75,14 +75,9 @@ function FeatureCard({ feature, user }) {
           <Icon className="w-4 h-4" />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <p className="text-xs font-black text-slate-800">{feature.emoji} {feature.title}</p>
-            {feature.comingSoon && (
-              <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-full ${c.badge}`}>COMING SOON</span>
-            )}
-          </div>
-          <p className="text-[10px] text-slate-500">{feature.tagline}</p>
-        </div>
+           <p className="text-xs font-black text-slate-800">{feature.emoji} {feature.title}</p>
+           <p className="text-[10px] text-slate-500">{feature.tagline}</p>
+         </div>
         {open ? <ChevronUp className="w-4 h-4 text-slate-400 shrink-0" /> : <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />}
       </button>
 
