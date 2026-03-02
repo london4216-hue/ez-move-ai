@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import {
   AlertTriangle, CheckCircle2, CalendarDays,
-  ChevronRight, Phone, Star, ChevronDown
+  Phone, Star, ChevronDown, ChevronRight
 } from "lucide-react";
 import { parseISO, differenceInDays, isPast, isToday, format, isWithinInterval, startOfWeek, endOfWeek } from "date-fns";
 
