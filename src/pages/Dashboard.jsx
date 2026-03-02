@@ -12,7 +12,6 @@ import MyMoveTab from "@/components/dashboard/MyMoveTab";
 const TABS = [
   { id: "mymove", label: "My Move", Icon: Home },
   { id: "plan", label: "My Plan", Icon: LayoutList },
-  { id: "ai", label: "AI Center", Icon: Sparkles },
   { id: "calendar", label: "Calendar", Icon: CalendarDays },
   { id: "inventory", label: "Inventory", Icon: Package },
 ];
