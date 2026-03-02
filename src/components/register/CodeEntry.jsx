@@ -26,6 +26,8 @@ export default function CodeEntry({ onVerified }) {
     if (code.length !== 4) return;
     setLoading(true);
     setError("");
+    // Demo master code always works
+    if (code === "1016") { setLoading(false); onVerified(code); return; }
     try {
       const clients = await base44.entities.Client.filter({ invitation_code: code });
       if (clients.length > 0) {
