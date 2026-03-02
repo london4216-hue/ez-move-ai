@@ -5,6 +5,7 @@ import {
   isSameDay, addMonths, subMonths, isPast, isToday, addDays, getISOWeek, startOfWeek, endOfWeek
 } from "date-fns";
 import { ChevronLeft, ChevronRight, Plus, X, Pencil, Trash2 } from "lucide-react";
+import ExportCalendarButton from "./ExportCalendarButton";
 
 const statusColors = {
   scheduled: "#059669",
