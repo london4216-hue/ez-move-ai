@@ -141,6 +141,14 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
     setNewTaskTitle(""); setNewTaskDesc(""); setAddingTask(false);
   };
 
+  // Check if the first task of the current week is done (Day 1 gate)
+  const currentWeekData = weeksData[currentWeek];
+  const currentWeekFirstItemId = currentWeekData?.items?.[0]?.id;
+  const day1Done = currentWeekFirstItemId ? completedIds.has(currentWeekFirstItemId) : true;
+
+  // A future week is locked if the user hasn't completed Day 1 of the current week
+  const isWeekLocked = (w) => w > currentWeek && !day1Done;
+
   const weekData = weeksData[activeWeek];
   const allItems = [...(weekData?.items || []).filter(i => !removedIds.has(i.id)), ...(customItems[activeWeek] || [])];
   const completed = allItems.filter(i => completedIds.has(i.id)).length;
