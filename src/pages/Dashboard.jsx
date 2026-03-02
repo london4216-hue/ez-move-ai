@@ -28,6 +28,11 @@ export default function Dashboard() {
     base44.auth.me().then(u => {
       setUser(u);
       setLoading(false);
+      // Show onboarding for brand-new users (registered in last 2 minutes)
+      const regDate = u?.registration_date ? new Date(u.registration_date) : null;
+      const isNew = regDate && (Date.now() - regDate.getTime()) < 2 * 60 * 1000;
+      const alreadySeen = localStorage.getItem(`onboarding_done_${u?.id}`);
+      if (isNew && !alreadySeen) setShowOnboarding(true);
     }).catch(() => navigate(createPageUrl("Register")));
   }, []);
 
