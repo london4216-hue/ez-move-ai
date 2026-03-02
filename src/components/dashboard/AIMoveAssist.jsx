@@ -95,13 +95,13 @@ export default function AIMoveAssist({ user }) {
   return (
     <div className="space-y-3">
       {/* Hero */}
-      <div className="bg-gradient-to-br from-violet-600 to-blue-600 rounded-2xl px-4 py-5 text-white">
+      <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl px-4 py-5 text-white">
         <div className="flex items-center gap-2 mb-2">
-          <Sparkles className="w-5 h-5 text-violet-200" />
-          <p className="font-black text-base">AI Move Assist</p>
+          <Sparkles className="w-5 h-5 text-blue-100" />
+          <p className="font-black text-base">Move Quote AI</p>
         </div>
-        <p className="text-violet-100 text-xs leading-relaxed">
-          Smart tools that go beyond your checklist — estimate, plan, and optimize your move with AI. None of this is date-driven; use it whenever it's helpful.
+        <p className="text-blue-100 text-xs leading-relaxed">
+          Turn your room-by-room inventory into professional mover quote requests. Share your item list with local movers instantly.
         </p>
       </div>
 
