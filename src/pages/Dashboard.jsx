@@ -48,7 +48,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col max-w-md mx-auto">
       {/* Header */}
-      <div className="bg-[#0F172A] px-5 pt-12 pb-5">
+      <div className="bg-white border-b border-slate-200 px-5 pt-12 pb-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-900/40">
