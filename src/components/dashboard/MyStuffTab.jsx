@@ -298,14 +298,11 @@ export default function MyStuffTab({ user, onNavigate }) {
   const [roomIndex, setRoomIndex] = useState(0);
   const [decisions, setDecisions] = useState({}); // { roomName: { item: list_key } }
   const [sizes, setSizes] = useState({});          // { item: size_label }
-  const [hasMover, setHasMover] = useState(false);
+  const [providers, setProviders] = useState([]);
 
   useEffect(() => {
     if (!user) return;
-    base44.entities.SavedProvider.filter({ user_id: user.id }).then(providers => {
-      const moverBooked = providers.some(p => /mover/i.test(p.role || ""));
-      setHasMover(moverBooked);
-    }).catch(() => {});
+    base44.entities.SavedProvider.filter({ user_id: user.id }).then(setProviders).catch(() => {});
   }, [user]);
 
   const room = ROOMS[roomIndex];
