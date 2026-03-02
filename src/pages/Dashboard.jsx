@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
 import { differenceInDays, parseISO } from "date-fns";
-import { LayoutList, Sparkles, CalendarDays, Package, Home } from "lucide-react";
+import { LayoutList, CalendarDays, Package, Home } from "lucide-react";
 import ChecklistPanel from "@/components/dashboard/ChecklistPanel";
 import CalendarSheet from "@/components/dashboard/CalendarSheet";
 import InventoryTab from "@/components/dashboard/InventoryTab";
