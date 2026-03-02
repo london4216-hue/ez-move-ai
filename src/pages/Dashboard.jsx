@@ -3,13 +3,15 @@ import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
 import { differenceInDays, parseISO } from "date-fns";
-import { LayoutList, Sparkles, CalendarDays, Package } from "lucide-react";
+import { LayoutList, Sparkles, CalendarDays, Package, Home } from "lucide-react";
 import ChecklistPanel from "@/components/dashboard/ChecklistPanel";
 import CalendarSheet from "@/components/dashboard/CalendarSheet";
 import InventoryTab from "@/components/dashboard/InventoryTab";
 import AICenterTab from "@/components/dashboard/AICenterTab";
+import MyMoveTab from "@/components/dashboard/MyMoveTab";
 
 const TABS = [
+  { id: "mymove", label: "My Move", Icon: Home },
   { id: "plan", label: "My Plan", Icon: LayoutList },
   { id: "ai", label: "AI Center", Icon: Sparkles },
   { id: "calendar", label: "Calendar", Icon: CalendarDays },
