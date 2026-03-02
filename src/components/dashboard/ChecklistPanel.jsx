@@ -216,18 +216,7 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
           )}
         </div>
 
-        {/* Locked week gate */}
-        {isWeekLocked(activeWeek) && (
-          <div className="mx-4 mb-3 bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3">
-            <Lock className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
-            <div>
-              <p className="text-xs font-bold text-amber-700">Complete Day 1 first</p>
-              <p className="text-[11px] text-amber-600 mt-0.5">
-                You can preview this week, but to unlock it complete the first task in Week {currentWeek}.
-              </p>
-            </div>
-          </div>
-        )}
+
 
         {/* Items */}
         <div className="px-3 pb-3 space-y-2 max-h-[420px] overflow-y-auto">
