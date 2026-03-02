@@ -186,12 +186,12 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
               key={w}
               onClick={() => { setActiveWeek(w); setAddingTask(false); }}
               className={`flex-1 min-w-[60px] py-3 px-2 text-xs font-bold transition-all whitespace-nowrap relative
-                ${activeWeek === w ? "text-orange-500" : "text-slate-400"}`}
+                ${activeWeek === w ? "text-orange-500" : isWeekLocked(w) ? "text-slate-300" : "text-slate-400"}`}
             >
               {w === currentWeek && (
                 <div className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-orange-500" />
               )}
-              Wk {w}
+              {isWeekLocked(w) ? <Lock className="w-3 h-3 mx-auto" /> : `Wk ${w}`}
               {activeWeek === w && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500 rounded-full" />}
             </button>
           ))}
