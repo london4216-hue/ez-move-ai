@@ -20,31 +20,37 @@ export default function CodeEntry({ onVerified }) {
 
   const handleVerify = async () => {
     const code = digits.join("");
-    if (code === "1016") {
-      try {
-        await onVerified();
-      } catch (e) {
-        setError("Something went wrong. Please try again.");
-      }
-    } else {
-      setError("Invalid code. Please check your invite email.");
+    try {
+      const { data } = await import("@/api/base44Client").then(m => 
+        m.base44.entities.Client.filter({ invitation_code: code })
+      );
+      await onVerified(code);
+    } catch (e) {
+      setError("Invalid code. Please check your invite.");
       setDigits(["", "", "", ""]);
       refs[0].current?.focus();
     }
   };
 
+  const allFilled = digits.every(d => d);
+
   return (
-    <div className="w-full max-w-sm mx-auto">
-      <div className="text-center mb-12">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-gradient-to-br from-[#C85A17] to-[#F97316] mb-6 mx-auto">
-          <span className="text-white text-lg font-bold">EZ</span>
+    <div className="w-full max-w-sm mx-auto px-6 py-10 flex flex-col min-h-screen justify-center">
+      {/* Logo */}
+      <div className="flex items-center gap-2.5 mb-14">
+        <div className="w-10 h-10 bg-slate-900 rounded-2xl flex items-center justify-center">
+          <span className="text-white text-sm font-black tracking-tight">EZ</span>
         </div>
-        <h1 className="text-3xl font-bold text-[#1A1A2E] mb-2">Welcome back</h1>
-        <p className="text-sm text-[#6B7280]">Enter the 4-digit code your agent sent you</p>
+        <span className="text-xl font-bold text-slate-900">EZ Move <span className="text-orange-500">AI</span></span>
       </div>
 
-      <div className="space-y-6">
-        <div className="flex gap-3 justify-center">
+      <div className="flex-1 flex flex-col justify-center">
+        <div className="mb-10">
+          <h1 className="text-4xl font-black text-slate-900 leading-tight mb-3">Enter your code</h1>
+          <p className="text-slate-500 text-base">Your agent sent you a 4-digit invite code</p>
+        </div>
+
+        <div className="flex gap-3 mb-6">
           {digits.map((d, i) => (
             <input
               key={i}
@@ -55,30 +61,29 @@ export default function CodeEntry({ onVerified }) {
               value={d}
               onChange={(e) => handleChange(i, e.target.value)}
               onKeyDown={(e) => handleKey(i, e)}
-              className={`w-16 h-20 text-center text-3xl font-bold rounded-2xl border-2 outline-none transition-all
-                ${d ? "border-[#C85A17] bg-[#FEF3ED] text-[#1A1A2E]" : "border-[#E5E7EB] bg-white text-[#D1D5DB]"}
-                focus:border-[#C85A17] focus:shadow-[0_0_0_4px_rgba(200,90,23,0.1)]`}
+              className={`flex-1 h-20 text-center text-3xl font-black rounded-2xl border-2 outline-none transition-all
+                ${d ? "border-orange-500 bg-orange-50 text-slate-900" : "border-slate-200 bg-white text-slate-300"}
+                focus:border-orange-500 focus:ring-4 focus:ring-orange-100`}
             />
           ))}
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-2xl p-3.5">
-            <p className="text-sm text-red-600 text-center font-medium">{error}</p>
+          <div className="bg-red-50 border border-red-100 rounded-2xl p-4 mb-6">
+            <p className="text-sm text-red-600 font-medium">{error}</p>
           </div>
         )}
 
         <button
           onClick={handleVerify}
-          disabled={digits.some(d => !d)}
-          className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#C85A17] to-[#F97316] text-white font-bold text-base
-            disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all shadow-[0_4px_12px_rgba(200,90,23,0.2)]"
+          disabled={!allFilled}
+          className="btn-primary"
         >
-          Continue
+          Continue →
         </button>
 
-        <p className="text-center text-xs text-[#9CA3AF]">
-          Questions? <span className="text-[#C85A17] font-semibold">Contact your agent</span>
+        <p className="text-center text-sm text-slate-400 mt-6">
+          Need help? <span className="text-orange-500 font-semibold">Contact your agent</span>
         </p>
       </div>
     </div>

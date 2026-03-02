@@ -27,56 +27,60 @@ export default function NamePhoneEntry({ onComplete }) {
   };
 
   return (
-    <div className="w-full max-w-sm">
-      <div className="text-center mb-8">
-        <div className="inline-flex items-center gap-2 mb-4">
-          <div className="w-8 h-8 bg-[#1A1A2E] rounded-lg flex items-center justify-center">
-            <span className="text-white text-xs font-bold">EZ</span>
-          </div>
-          <span className="text-xl font-semibold text-[#1A1A2E] tracking-tight">EZ Move <span className="text-[#F97316]">AI</span></span>
+    <div className="w-full max-w-sm mx-auto px-6 py-10 flex flex-col min-h-screen justify-center">
+      {/* Logo */}
+      <div className="flex items-center gap-2.5 mb-14">
+        <div className="w-10 h-10 bg-slate-900 rounded-2xl flex items-center justify-center">
+          <span className="text-white text-sm font-black tracking-tight">EZ</span>
         </div>
-        <h1 className="text-2xl font-bold text-[#1A1A2E] mb-1">Tell us your name</h1>
-        <p className="text-sm text-[#6B7280]">We'll text you updates during your move</p>
+        <span className="text-xl font-bold text-slate-900">EZ Move <span className="text-orange-500">AI</span></span>
       </div>
 
-      <div className="space-y-4">
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-3">
-            <p className="text-sm text-red-600">{error}</p>
-          </div>
-        )}
-
-        <div className="grid grid-cols-2 gap-3">
-          <input
-            type="text"
-            value={firstName}
-            onChange={e => setFirstName(e.target.value)}
-            placeholder="First name"
-            className="px-4 py-3 rounded-xl border border-[#E5E7EB] bg-white text-[#1A1A2E] text-sm focus:outline-none focus:border-[#F97316]"
-          />
-          <input
-            type="text"
-            value={lastName}
-            onChange={e => setLastName(e.target.value)}
-            placeholder="Last name"
-            className="px-4 py-3 rounded-xl border border-[#E5E7EB] bg-white text-[#1A1A2E] text-sm focus:outline-none focus:border-[#F97316]"
-          />
+      <div className="flex-1 flex flex-col justify-center">
+        <div className="mb-10">
+          <h1 className="text-4xl font-black text-slate-900 leading-tight mb-3">What's your name?</h1>
+          <p className="text-slate-500 text-base">We'll personalize your moving plan</p>
         </div>
 
-        <input
-          type="tel"
-          value={phone}
-          onChange={e => setPhone(formatPhone(e.target.value))}
-          placeholder="Phone number"
-          className="w-full px-4 py-3 rounded-xl border border-[#E5E7EB] bg-white text-[#1A1A2E] text-sm focus:outline-none focus:border-[#F97316]"
-        />
+        <div className="space-y-4">
+          {error && (
+            <div className="bg-red-50 border border-red-100 rounded-2xl p-4">
+              <p className="text-sm text-red-600 font-medium">{error}</p>
+            </div>
+          )}
 
-        <button
-          onClick={handleSubmit}
-          className="w-full py-4 rounded-2xl bg-[#1A1A2E] text-white font-semibold text-base active:scale-[0.98] transition-all"
-        >
-          Continue
-        </button>
+          <div className="grid grid-cols-2 gap-3">
+            <input
+              type="text"
+              value={firstName}
+              onChange={e => setFirstName(e.target.value)}
+              placeholder="First name"
+              className="input-field"
+            />
+            <input
+              type="text"
+              value={lastName}
+              onChange={e => setLastName(e.target.value)}
+              placeholder="Last name"
+              className="input-field"
+            />
+          </div>
+
+          <div className="relative">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm">📱</span>
+            <input
+              type="tel"
+              value={phone}
+              onChange={e => setPhone(formatPhone(e.target.value))}
+              placeholder="Phone number"
+              className="input-field pl-10"
+            />
+          </div>
+
+          <button onClick={handleSubmit} className="btn-primary">
+            Continue →
+          </button>
+        </div>
       </div>
     </div>
   );

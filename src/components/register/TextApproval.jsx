@@ -4,49 +4,52 @@ export default function TextApproval({ phone, onComplete }) {
   const [approved, setApproved] = useState(false);
 
   return (
-    <div className="w-full max-w-sm">
-      <div className="text-center mb-8">
-        <div className="inline-flex items-center gap-2 mb-4">
-          <div className="w-8 h-8 bg-[#1A1A2E] rounded-lg flex items-center justify-center">
-            <span className="text-white text-xs font-bold">EZ</span>
-          </div>
-          <span className="text-xl font-semibold text-[#1A1A2E] tracking-tight">EZ Move <span className="text-[#F97316]">AI</span></span>
+    <div className="w-full max-w-sm mx-auto px-6 py-10 flex flex-col min-h-screen justify-center">
+      {/* Logo */}
+      <div className="flex items-center gap-2.5 mb-14">
+        <div className="w-10 h-10 bg-slate-900 rounded-2xl flex items-center justify-center">
+          <span className="text-white text-sm font-black tracking-tight">EZ</span>
         </div>
-        <h1 className="text-2xl font-bold text-[#1A1A2E] mb-1">Text updates</h1>
-        <p className="text-sm text-[#6B7280]">Get important reminders and updates via text</p>
+        <span className="text-xl font-bold text-slate-900">EZ Move <span className="text-orange-500">AI</span></span>
       </div>
 
-      <div className="space-y-4">
-        <div className="bg-[#FEF3ED] border border-[#FCDDD8] rounded-xl p-4">
-          <p className="text-sm text-[#1A1A2E] mb-2">We'll send texts to:</p>
-          <p className="text-base font-semibold text-[#C85A17]">{phone}</p>
+      <div className="flex-1 flex flex-col justify-center">
+        <div className="mb-10">
+          <div className="w-16 h-16 bg-orange-100 rounded-3xl flex items-center justify-center text-3xl mb-6">💬</div>
+          <h1 className="text-4xl font-black text-slate-900 leading-tight mb-3">Stay in the loop</h1>
+          <p className="text-slate-500 text-base">We'll send you important reminders during your move</p>
         </div>
 
-        <button
-          onClick={() => setApproved(!approved)}
-          className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all
-            ${approved 
-              ? "border-[#F97316] bg-[#FEF9F3]" 
-              : "border-[#E5E7EB] bg-white hover:border-[#F97316]"}`}
-        >
-          <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all
-            ${approved ? "border-[#F97316] bg-[#F97316]" : "border-[#D1D5DB]"}`}>
-            {approved && (
-              <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-            )}
+        <div className="space-y-4">
+          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Sending updates to</p>
+            <p className="text-lg font-bold text-slate-900">{phone}</p>
           </div>
-          <span className="text-sm font-medium text-[#1A1A2E]">I agree to text updates during my move</span>
-        </button>
 
-        <button
-          onClick={() => onComplete()}
-          disabled={!approved}
-          className="w-full py-4 rounded-2xl bg-[#1A1A2E] text-white font-semibold text-base disabled:opacity-40 active:scale-[0.98] transition-all"
-        >
-          Continue
-        </button>
+          <button
+            onClick={() => setApproved(!approved)}
+            className={`w-full flex items-center gap-4 p-5 rounded-2xl border-2 transition-all text-left
+              ${approved ? "border-orange-500 bg-orange-50" : "border-slate-200 bg-white"}`}
+          >
+            <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-all
+              ${approved ? "border-orange-500 bg-orange-500" : "border-slate-300 bg-white"}`}>
+              {approved && (
+                <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              )}
+            </div>
+            <span className="text-sm font-semibold text-slate-700">I agree to receive text updates during my move</span>
+          </button>
+
+          <button
+            onClick={() => onComplete()}
+            disabled={!approved}
+            className="btn-primary"
+          >
+            Continue →
+          </button>
+        </div>
       </div>
     </div>
   );
