@@ -1,6 +1,15 @@
 import { useState, useEffect } from "react";
-import { ChevronRight, ChevronLeft, SkipForward, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { ChevronRight, ChevronLeft, SkipForward, AlertTriangle, CheckCircle2, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+
+const AI_IDEAS = [
+  { emoji: "📸", title: "Photo Room Scan", desc: "Snap a photo of any room and AI instantly suggests what to move, donate, or junk." },
+  { emoji: "💰", title: "Resale Estimator", desc: "AI checks current market prices for your donate/junk items — you might be sitting on cash." },
+  { emoji: "🕐", title: "Move Day Timeline", desc: "AI builds a custom hour-by-hour schedule for move day based on your inventory and closing time." },
+  { emoji: "📋", title: "Instant Mover Quote", desc: "One tap sends your sized inventory list to 3 local movers as a professional quote request." },
+  { emoji: "📦", title: "Box & Supply Estimator", desc: "Based on your item count and sizes, AI estimates exactly how many boxes and supplies you need." },
+  { emoji: "🌱", title: "Eco Move Score", desc: "See how green your move is. AI scores donate vs junk ratio and suggests local charities nearby." },
+];
 
 const ROOMS = [
   { name: "Living Room", emoji: "🛋️", items: ["Sofa", "Coffee Table", "TV", "TV Stand", "Bookcase", "Armchair", "Rug", "Side Tables", "Lamps", "Entertainment Center"] },
