@@ -164,7 +164,7 @@ export default function AICenterTab({ user, onProviderSaved, onNavigateToTab }) 
       <div className="bg-white rounded-2xl border border-slate-100 p-1.5 flex gap-1">
         {[
           { id: "find", label: "Find Services" },
-          { id: "team", label: `My Team (${savedProviders.length})` },
+          { id: "team", label: `Booked (${savedProviders.length})` },
           { id: "estimate", label: "Cost Estimate" },
         ].map(tab => (
           <button
