@@ -55,8 +55,8 @@ export default function Dashboard() {
               <span className="text-white text-xs font-black tracking-tight">EZ</span>
             </div>
             <div>
-              <p className="text-white font-bold text-base leading-tight">
-                EZ Move <span className="text-orange-400">AI</span>
+              <p className="text-slate-900 font-bold text-base leading-tight">
+                EZ Move <span className="text-orange-500">AI</span>
               </p>
               {user?.full_name && (
                 <p className="text-slate-400 text-[11px] leading-tight">Hi, {user.full_name.split(" ")[0]}</p>
