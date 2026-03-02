@@ -78,9 +78,11 @@ const COLOR_MAP = {
   red:     { bg: "bg-red-50",     border: "border-red-200",    icon: "bg-red-100 text-red-600",      btn: "bg-red-500" },
 };
 
-function AIGenerator({ feature, user }) {
+function AIGenerator({ feature, user, onSave }) {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const prompts = {
     quote: `You are a moving coordinator. Generate a professional moving quote request email for a homeowner named ${user?.full_name || "the homeowner"} located at ${user?.home_address || "their home"}. Their estimated move date is around ${user?.estimated_close_date || "soon"}. Write a concise, professional 150-word quote request a mover would love to receive. Make it friendly and professional.`,
