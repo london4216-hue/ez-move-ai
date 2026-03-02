@@ -110,6 +110,7 @@ export default function Dashboard() {
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto px-4 pt-4 pb-24">
+        {activeTab === "mymove" && <MyMoveTab user={user} onNavigate={setActiveTab} />}
         {activeTab === "plan" && <ChecklistPanel user={user} />}
         {activeTab === "ai" && <AICenterTab user={user} />}
         {activeTab === "calendar" && <CalendarSheet user={user} />}
