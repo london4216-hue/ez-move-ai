@@ -74,7 +74,7 @@ export default function Dashboard() {
               onClick={() => base44.auth.logout(createPageUrl("Register"))}
               className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-colors"
             >
-              <span className="text-white text-xs font-bold">{user?.full_name?.[0] || "U"}</span>
+              <span className="text-slate-600 text-xs font-bold">{user?.full_name?.[0] || "U"}</span>
             </button>
           </div>
         </div>
