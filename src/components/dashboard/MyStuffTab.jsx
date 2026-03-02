@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { ChevronRight, ChevronLeft, SkipForward } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ChevronRight, ChevronLeft, SkipForward, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 
 const ROOMS = [
   { name: "Living Room", emoji: "🛋️", items: ["Sofa", "Coffee Table", "TV", "TV Stand", "Bookcase", "Armchair", "Rug", "Side Tables", "Lamps", "Entertainment Center"] },
@@ -18,6 +19,15 @@ const LISTS = [
   { key: "junk", label: "Junk It", emoji: "🗑️", color: "bg-red-500", light: "bg-red-50 border-red-200 text-red-700" },
 ];
 
+const SIZES = ["Small", "Medium", "Large", "N/A"];
+const SIZE_DESC = {
+  Small: "Can be carried by 1 person",
+  Medium: "Needs 2 people / fits in sedan",
+  Large: "Truck required / oversized",
+  "N/A": "Not applicable",
+};
+
+// ─── Intro ───────────────────────────────────────────────────────────────────
 function IntroScreen({ onStart }) {
   return (
     <div className="flex flex-col items-center justify-center gap-6 py-8 px-2">
@@ -25,7 +35,7 @@ function IntroScreen({ onStart }) {
       <div className="text-center space-y-2">
         <h2 className="text-2xl font-black text-slate-800">Let's figure out<br />your stuff</h2>
         <p className="text-slate-500 text-sm leading-relaxed">
-          We'll walk through each room so you can sort everything into your <strong>mover list</strong>, <strong>donation pile</strong>, or <strong>junk it</strong>.
+          We'll walk through each room so you can sort everything into your <strong>mover list</strong>, <strong>donation pile</strong>, or <strong>junk it</strong> — and flag sizes for an accurate quote.
         </p>
       </div>
       <button
@@ -38,10 +48,61 @@ function IntroScreen({ onStart }) {
   );
 }
 
-function RoomScreen({ room, roomIndex, totalRooms, decisions, onDecide, onNext, onBack, onSkip, isLast }) {
+// ─── Single item row ──────────────────────────────────────────────────────────
+function ItemRow({ item, decision, size, onDecide, onSize }) {
+  const dec = LISTS.find(l => l.key === decision);
+  const showSize = !!decision; // show size picker once list is chosen
+
+  return (
+    <div className="px-4 py-3 border-b border-slate-50 last:border-0">
+      <div className="flex items-center justify-between mb-1.5">
+        <p className="text-xs font-bold text-slate-800">{item}</p>
+        {dec && (
+          <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${dec.light}`}>
+            {dec.emoji} {dec.label}
+          </span>
+        )}
+      </div>
+
+      {/* List buttons */}
+      <div className="flex gap-1.5 mb-2">
+        {LISTS.map(l => (
+          <button
+            key={l.key}
+            onClick={() => onDecide(item, l.key)}
+            className={`flex-1 py-1.5 rounded-xl text-[10px] font-bold transition-all border
+              ${decision === l.key ? `${l.color} text-white border-transparent` : "bg-slate-50 text-slate-500 border-slate-100 active:bg-slate-100"}`}
+          >
+            {l.emoji} {l.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Size picker — appears after list selected */}
+      {showSize && (
+        <div className="flex gap-1">
+          {SIZES.map(s => (
+            <button
+              key={s}
+              onClick={() => onSize(item, s)}
+              title={SIZE_DESC[s]}
+              className={`flex-1 py-1 rounded-lg text-[9px] font-bold border transition-all
+                ${size === s ? "bg-slate-700 text-white border-transparent" : "bg-white text-slate-400 border-slate-200 active:bg-slate-100"}`}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Room screen ──────────────────────────────────────────────────────────────
+function RoomScreen({ room, roomIndex, totalRooms, decisions, sizes, onDecide, onSize, onNext, onBack, onSkip, isLast }) {
   return (
     <div className="flex flex-col gap-3">
-      {/* Progress */}
+      {/* Progress dots */}
       <div className="flex gap-1">
         {Array.from({ length: totalRooms }).map((_, i) => (
           <div key={i} className={`flex-1 h-1 rounded-full transition-all ${i < roomIndex ? "bg-emerald-400" : i === roomIndex ? "bg-orange-500" : "bg-slate-200"}`} />
@@ -53,54 +114,32 @@ function RoomScreen({ room, roomIndex, totalRooms, decisions, onDecide, onNext, 
         <span className="text-3xl">{room.emoji}</span>
         <div>
           <p className="font-black text-slate-800 text-base">{room.name}</p>
-          <p className="text-[10px] text-slate-400">Room {roomIndex + 1} of {totalRooms}</p>
+          <p className="text-[10px] text-slate-400">Room {roomIndex + 1} of {totalRooms} · tap a size after sorting</p>
         </div>
       </div>
 
       {/* Items */}
       <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
-        <div className="divide-y divide-slate-50">
-          {room.items.map(item => {
-            const decided = decisions[item];
-            return (
-              <div key={item} className="px-4 py-3">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-xs font-bold text-slate-800">{item}</p>
-                  {decided && (
-                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${LISTS.find(l => l.key === decided)?.light}`}>
-                      {LISTS.find(l => l.key === decided)?.emoji} {LISTS.find(l => l.key === decided)?.label}
-                    </span>
-                  )}
-                </div>
-                <div className="flex gap-1.5">
-                  {LISTS.map(l => (
-                    <button
-                      key={l.key}
-                      onClick={() => onDecide(item, l.key)}
-                      className={`flex-1 py-1.5 rounded-xl text-[10px] font-bold transition-all border
-                        ${decided === l.key ? `${l.color} text-white border-transparent` : "bg-slate-50 text-slate-500 border-slate-100 active:bg-slate-100"}`}
-                    >
-                      {l.emoji} {l.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        {room.items.map(item => (
+          <ItemRow
+            key={item}
+            item={item}
+            decision={decisions[item]}
+            size={sizes[item]}
+            onDecide={onDecide}
+            onSize={onSize}
+          />
+        ))}
       </div>
 
       {/* Nav */}
       <div className="flex gap-2">
         {roomIndex > 0 && (
-          <button onClick={onBack} className="px-4 py-3 rounded-2xl border border-slate-200 bg-white text-slate-600 text-xs font-bold flex items-center gap-1">
+          <button onClick={onBack} className="px-4 py-3 rounded-2xl border border-slate-200 bg-white text-slate-600 text-xs font-bold flex items-center">
             <ChevronLeft className="w-4 h-4" />
           </button>
         )}
-        <button
-          onClick={onSkip}
-          className="px-4 py-3 rounded-2xl border border-slate-200 bg-white text-slate-400 text-xs font-bold flex items-center gap-1"
-        >
+        <button onClick={onSkip} className="px-4 py-3 rounded-2xl border border-slate-200 bg-white text-slate-400 text-xs font-bold flex items-center gap-1">
           <SkipForward className="w-4 h-4" /> Skip
         </button>
         <button
@@ -114,24 +153,49 @@ function RoomScreen({ room, roomIndex, totalRooms, decisions, onDecide, onNext, 
   );
 }
 
-function SummaryScreen({ allDecisions, onRestart }) {
-  const groups = {
-    move: [],
-    donate: [],
-    junk: [],
-  };
-
+// ─── Summary ──────────────────────────────────────────────────────────────────
+function SummaryScreen({ allDecisions, allSizes, hasMover, onRestart, onGoToMoveInfo }) {
+  const groups = { move: [], donate: [], junk: [] };
   Object.entries(allDecisions).forEach(([item, dec]) => {
     if (groups[dec]) groups[dec].push(item);
   });
 
+  const moveItems = groups.move;
+  const hasMoveItems = moveItems.length > 0;
+
   return (
     <div className="space-y-3">
+      {/* Header */}
       <div className="bg-gradient-to-r from-orange-500 to-orange-400 rounded-2xl px-4 py-4 text-white">
-        <p className="font-black text-base">Your Stuff, Sorted! 🎉</p>
-        <p className="text-orange-100 text-xs mt-0.5">Here's your complete list by category</p>
+        <p className="font-black text-base">Your Inventory 🎉</p>
+        <p className="text-orange-100 text-xs mt-0.5">Complete list sorted by category</p>
       </div>
 
+      {/* No mover warning */}
+      {hasMoveItems && !hasMover && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 flex gap-3 items-start">
+          <AlertTriangle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
+          <div className="flex-1">
+            <p className="text-xs font-bold text-amber-800">No mover selected yet!</p>
+            <p className="text-[10px] text-amber-600 mt-0.5 mb-2">You have {moveItems.length} items to move but haven't booked a mover. Add one to your plan so it shows up on your calendar.</p>
+            <button
+              onClick={onGoToMoveInfo}
+              className="text-[10px] font-bold text-white bg-amber-500 px-3 py-1.5 rounded-xl active:scale-[0.98] transition-transform"
+            >
+              Go to Move Info → Add a Mover
+            </button>
+          </div>
+        </div>
+      )}
+
+      {hasMoveItems && hasMover && (
+        <div className="bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-3 flex gap-3 items-center">
+          <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+          <p className="text-xs font-bold text-emerald-700">Mover booked! Your move list is ready to share.</p>
+        </div>
+      )}
+
+      {/* Lists */}
       {LISTS.map(list => (
         <div key={list.key} className={`rounded-2xl border overflow-hidden ${list.light}`}>
           <div className="px-4 py-2.5 border-b border-white/50 flex items-center gap-2">
@@ -139,14 +203,20 @@ function SummaryScreen({ allDecisions, onRestart }) {
             <p className="text-xs font-bold">{list.label} List <span className="font-normal opacity-70">({groups[list.key].length} items)</span></p>
           </div>
           {groups[list.key].length === 0 ? (
-            <p className="px-4 py-3 text-[10px] opacity-60">No items here</p>
+            <p className="px-4 py-3 text-[10px] opacity-60">No items</p>
           ) : (
-            <div className="px-4 py-3 flex flex-wrap gap-1.5">
-              {groups[list.key].map(item => (
-                <span key={item} className="text-[10px] font-semibold px-2.5 py-1 rounded-full bg-white/60">
-                  {item}
-                </span>
-              ))}
+            <div className="px-4 py-3 space-y-1.5">
+              {groups[list.key].map(item => {
+                const size = allSizes[item];
+                return (
+                  <div key={item} className="flex items-center justify-between">
+                    <span className="text-[10px] font-semibold px-2.5 py-1 rounded-full bg-white/60">{item}</span>
+                    {size && (
+                      <span className="text-[9px] font-bold text-slate-400 bg-white/60 px-2 py-0.5 rounded-full">{size}</span>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
@@ -162,13 +232,25 @@ function SummaryScreen({ allDecisions, onRestart }) {
   );
 }
 
-export default function MyStuffTab({ user }) {
-  const [phase, setPhase] = useState("intro"); // intro | sorting | summary
+// ─── Main ─────────────────────────────────────────────────────────────────────
+export default function MyStuffTab({ user, onNavigate }) {
+  const [phase, setPhase] = useState("intro");
   const [roomIndex, setRoomIndex] = useState(0);
-  const [decisions, setDecisions] = useState({}); // { roomName: { item: "move"|"donate"|"junk" } }
+  const [decisions, setDecisions] = useState({}); // { roomName: { item: list_key } }
+  const [sizes, setSizes] = useState({});          // { item: size_label }
+  const [hasMover, setHasMover] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    base44.entities.SavedProvider.filter({ user_id: user.id }).then(providers => {
+      const moverBooked = providers.some(p => /mover/i.test(p.role || ""));
+      setHasMover(moverBooked);
+    }).catch(() => {});
+  }, [user]);
 
   const room = ROOMS[roomIndex];
   const roomDecisions = decisions[room?.name] || {};
+  const roomSizes = sizes; // sizes are flat by item name
 
   const handleDecide = (item, dec) => {
     setDecisions(prev => ({
@@ -177,12 +259,13 @@ export default function MyStuffTab({ user }) {
     }));
   };
 
+  const handleSize = (item, s) => {
+    setSizes(prev => ({ ...prev, [item]: s }));
+  };
+
   const handleNext = () => {
-    if (roomIndex === ROOMS.length - 1) {
-      setPhase("summary");
-    } else {
-      setRoomIndex(i => i + 1);
-    }
+    if (roomIndex === ROOMS.length - 1) setPhase("summary");
+    else setRoomIndex(i => i + 1);
   };
 
   const handleBack = () => setRoomIndex(i => i - 1);
@@ -194,10 +277,20 @@ export default function MyStuffTab({ user }) {
     setPhase("intro");
     setRoomIndex(0);
     setDecisions({});
+    setSizes({});
   };
 
   if (phase === "intro") return <IntroScreen onStart={() => setPhase("sorting")} />;
-  if (phase === "summary") return <SummaryScreen allDecisions={allDecisions} onRestart={handleRestart} />;
+
+  if (phase === "summary") return (
+    <SummaryScreen
+      allDecisions={allDecisions}
+      allSizes={sizes}
+      hasMover={hasMover}
+      onRestart={handleRestart}
+      onGoToMoveInfo={() => onNavigate && onNavigate("mymove")}
+    />
+  );
 
   return (
     <RoomScreen
@@ -205,7 +298,9 @@ export default function MyStuffTab({ user }) {
       roomIndex={roomIndex}
       totalRooms={ROOMS.length}
       decisions={roomDecisions}
+      sizes={roomSizes}
       onDecide={handleDecide}
+      onSize={handleSize}
       onNext={handleNext}
       onBack={handleBack}
       onSkip={handleSkip}
