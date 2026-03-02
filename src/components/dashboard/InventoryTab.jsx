@@ -266,6 +266,106 @@ function ItemList({ items, listColor, listBg, onRemove, onEmail, sending, sent, 
   );
 }
 
+function AIServiceFinder({ user }) {
+  const [activeService, setActiveService] = useState(null);
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const services = [
+    { id: "movers", label: "Local Movers", emoji: "🚛", query: "local moving companies near" },
+    { id: "junk", label: "Junk Removal", emoji: "🗑️", query: "junk removal services near" },
+    { id: "donate", label: "Donation Centers", emoji: "🫶", query: "furniture donation pickup near" },
+  ];
+
+  const findServices = async (service) => {
+    setActiveService(service.id);
+    setLoading(true);
+    setResults([]);
+    const location = user?.home_address || "my area";
+    try {
+      const res = await base44.integrations.Core.InvokeLLM({
+        prompt: `Find 4 real local ${service.label.toLowerCase()} for someone moving from: ${location}. Return name, phone number, and a short 1-line description for each. Only include businesses that actually exist.`,
+        add_context_from_internet: true,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            providers: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  name: { type: "string" },
+                  phone: { type: "string" },
+                  description: { type: "string" },
+                }
+              }
+            }
+          }
+        }
+      });
+      setResults(res.providers || []);
+    } catch (e) {
+      setResults([]);
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+      <div className="px-4 pt-3 pb-2 border-b border-slate-100">
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-orange-500" />
+          <p className="text-xs font-bold text-slate-800">AI Service Finder</p>
+        </div>
+        <p className="text-[10px] text-slate-400 mt-0.5">Find local help for your move</p>
+      </div>
+
+      <div className="flex border-b border-slate-100">
+        {services.map(s => (
+          <button
+            key={s.id}
+            onClick={() => findServices(s)}
+            className={`flex-1 py-2.5 flex flex-col items-center gap-0.5 text-[9px] font-bold transition-all
+              ${activeService === s.id ? "bg-orange-50 text-orange-600 border-b-2 border-orange-500" : "text-slate-400 hover:bg-slate-50"}`}
+          >
+            <span className="text-base">{s.emoji}</span>
+            {s.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="px-3 py-3 min-h-[60px]">
+        {loading && (
+          <div className="flex items-center justify-center gap-2 py-4">
+            <Loader2 className="w-4 h-4 animate-spin text-orange-500" />
+            <span className="text-xs text-slate-400">Finding local services…</span>
+          </div>
+        )}
+        {!loading && results.length === 0 && !activeService && (
+          <p className="text-[10px] text-slate-400 text-center py-4">Tap a category above to find local providers</p>
+        )}
+        {!loading && results.length === 0 && activeService && (
+          <p className="text-[10px] text-slate-400 text-center py-4">No results found. Try again.</p>
+        )}
+        {!loading && results.map((r, i) => (
+          <div key={i} className="flex items-start gap-3 py-2.5 border-b border-slate-50 last:border-0">
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] font-bold text-slate-800">{r.name}</p>
+              {r.description && <p className="text-[9px] text-slate-400 mt-0.5 leading-relaxed">{r.description}</p>}
+            </div>
+            {r.phone && (
+              <a href={`tel:${r.phone}`} className="flex items-center gap-1 text-[10px] font-bold text-orange-500 flex-shrink-0">
+                <Phone className="w-3 h-3" />
+                {r.phone}
+              </a>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function InventoryTab({ user }) {
   const [activeTab, setActiveTab] = useState("moving");
 
