@@ -74,6 +74,7 @@ const COLOR_MAP = {
   orange:  { bg: "bg-orange-50",  border: "border-orange-200", icon: "bg-orange-100 text-orange-600",  btn: "bg-orange-500" },
   emerald: { bg: "bg-emerald-50", border: "border-emerald-200",icon: "bg-emerald-100 text-emerald-600",btn: "bg-emerald-500" },
   violet:  { bg: "bg-violet-50",  border: "border-violet-200", icon: "bg-violet-100 text-violet-600",  btn: "bg-violet-500" },
+  sky:     { bg: "bg-sky-50",     border: "border-sky-200",    icon: "bg-sky-100 text-sky-600",      btn: "bg-sky-500" },
   red:     { bg: "bg-red-50",     border: "border-red-200",    icon: "bg-red-100 text-red-600",      btn: "bg-red-500" },
 };
 
