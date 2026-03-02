@@ -97,6 +97,7 @@ function AIGenerator({ feature, user, onSave }) {
   const generate = async () => {
     setLoading(true);
     setResult(null);
+    setSaved(false);
     try {
       const res = await base44.integrations.Core.InvokeLLM({
         prompt: prompts[feature.id],
@@ -108,6 +109,27 @@ function AIGenerator({ feature, user, onSave }) {
       setResult(`Error: ${e.message || "Failed to generate. Try again."}`);
     }
     setLoading(false);
+  };
+
+  const handleSave = async () => {
+    if (!result) return;
+    setSaving(true);
+    try {
+      await base44.entities.SavedInsight.create({
+        user_id: user?.id,
+        tool_id: feature.id,
+        tool_name: feature.title,
+        tool_emoji: feature.emoji,
+        content: result,
+        category: feature.id,
+      });
+      setSaved(true);
+      if (onSave) onSave();
+      setTimeout(() => setSaved(false), 3000);
+    } catch(e) {
+      console.error("Save error:", e);
+    }
+    setSaving(false);
   };
 
   const buttonColor = {
