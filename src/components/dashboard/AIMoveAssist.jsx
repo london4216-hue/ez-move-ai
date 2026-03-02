@@ -155,7 +155,24 @@ function AIGenerator({ feature, user, onSave }) {
       {result && (
         <div className="bg-white rounded-xl border border-slate-200 p-3">
           <p className="text-[11px] text-slate-700 leading-relaxed whitespace-pre-wrap">{result}</p>
-          <button onClick={() => setResult(null)} className="mt-2 text-[10px] text-slate-500 font-bold">Clear</button>
+          <div className="flex gap-2 mt-2">
+            <button 
+              onClick={handleSave} 
+              disabled={saving || saved}
+              className={`text-[10px] font-bold flex items-center gap-1 px-2 py-1 rounded transition-all ${
+                saved 
+                  ? "text-green-600 bg-green-50" 
+                  : "text-blue-600 hover:bg-blue-50"
+              }`}
+            >
+              {saved ? (
+                <><Check className="w-3 h-3" /> Saved</>
+              ) : (
+                <><Save className="w-3 h-3" /> Save</>
+              )}
+            </button>
+            <button onClick={() => setResult(null)} className="text-[10px] text-slate-500 font-bold">Clear</button>
+          </div>
         </div>
       )}
     </div>
