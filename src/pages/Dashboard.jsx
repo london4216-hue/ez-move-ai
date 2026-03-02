@@ -7,7 +7,6 @@ import { LayoutList, Sparkles, CalendarDays, Package, Home } from "lucide-react"
 import ChecklistPanel from "@/components/dashboard/ChecklistPanel";
 import CalendarSheet from "@/components/dashboard/CalendarSheet";
 import InventoryTab from "@/components/dashboard/InventoryTab";
-import AICenterTab from "@/components/dashboard/AICenterTab";
 import MyMoveTab from "@/components/dashboard/MyMoveTab";
 
 const TABS = [
