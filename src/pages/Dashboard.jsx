@@ -83,7 +83,7 @@ export default function Dashboard() {
         {user?.estimated_close_date && user?.registration_date && (
           <div className="mt-4">
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-slate-400 text-[10px] font-semibold uppercase tracking-wider">Move Timeline</span>
+              <span className="text-slate-500 text-[10px] font-semibold uppercase tracking-wider">Move Timeline</span>
               <span className="text-orange-400 text-[10px] font-bold">
                 {Math.max(0, Math.min(100, Math.round(
                   (differenceInDays(new Date(), parseISO(user.registration_date)) /
