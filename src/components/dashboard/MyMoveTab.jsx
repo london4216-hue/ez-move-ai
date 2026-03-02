@@ -181,7 +181,7 @@ export default function MyMoveTab({ user, onNavigate }) {
       {/* My Providers */}
       <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
         <div className="px-4 py-3 flex items-center justify-between border-b border-slate-50">
-          <p className="text-xs font-bold text-slate-700">👥 My Team ({providers.length})</p>
+          <p className="text-xs font-bold text-slate-700">📋 Booked Service Providers ({providers.length})</p>
           <button onClick={() => onNavigate("ai")} className="text-[10px] text-orange-500 font-bold flex items-center gap-0.5">
             Find more <ChevronRight className="w-3 h-3" />
           </button>
