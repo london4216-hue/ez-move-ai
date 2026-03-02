@@ -124,7 +124,7 @@ export default function Dashboard() {
         {activeTab === "mymove" && <MoveCommandCenter user={user} onNavigate={setActiveTab} />}
         {activeTab === "plan" && <ChecklistPanel user={user} />}
         {activeTab === "calendar" && <CalendarSheet user={user} />}
-        {activeTab === "inventory" && <MyStuffTab user={user} />}
+        {activeTab === "inventory" && <MyStuffTab user={user} onNavigate={setActiveTab} />}
       </div>
 
       {/* Bottom Nav */}
