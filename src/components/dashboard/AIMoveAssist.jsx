@@ -14,17 +14,7 @@ const FEATURES = [
     cta: "Generate Quote Request",
     comingSoon: false,
   },
-  {
-    id: "timeline",
-    emoji: "🕐",
-    icon: Clock,
-    title: "Move Day Timeline",
-    tagline: "AI-built hour-by-hour move day plan",
-    color: "orange",
-    description: "AI creates a custom move day schedule based on your closing time, truck size, number of rooms, and distance — so nothing is rushed or forgotten.",
-    cta: "Build My Timeline",
-    comingSoon: true,
-  },
+
   {
     id: "resale",
     emoji: "💰",
