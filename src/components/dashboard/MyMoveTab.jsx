@@ -102,6 +102,9 @@ export default function MyMoveTab({ user, onNavigate }) {
 
   return (
     <div className="space-y-3">
+      {/* Saved Insights from AI Assist */}
+      <SavedInsights user={user} />
+
       {/* Hero strip — minimal */}
       <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl px-4 py-2.5 flex items-center gap-3 text-white">
         <span className="text-lg flex-shrink-0">{phase.emoji}</span>
