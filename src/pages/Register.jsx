@@ -78,15 +78,15 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0F172A] flex flex-col items-center justify-center p-5">
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-5">
       {/* Logo */}
       <div className="absolute top-12 left-1/2 -translate-x-1/2">
         <div className="flex items-center gap-2.5">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-900/50">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-200">
             <span className="text-white text-sm font-black">EZ</span>
           </div>
-          <span className="text-white font-bold text-lg tracking-tight">
-            EZ Move <span className="text-orange-400">AI</span>
+          <span className="text-slate-800 font-bold text-lg tracking-tight">
+            EZ Move <span className="text-orange-500">AI</span>
           </span>
         </div>
       </div>
@@ -101,7 +101,7 @@ export default function Register() {
                 ? "w-6 h-2 bg-orange-500"
                 : ["code", "namePhone", "textApproval", "profile"].indexOf(step) > i
                 ? "w-2 h-2 bg-orange-400"
-                : "w-2 h-2 bg-slate-600"
+                : "w-2 h-2 bg-slate-300"
             }`}
           />
         ))}
