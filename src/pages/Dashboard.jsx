@@ -10,8 +10,8 @@ import InventoryTab from "@/components/dashboard/InventoryTab";
 import MyMoveTab from "@/components/dashboard/MyMoveTab";
 
 const TABS = [
-  { id: "mymove", label: "My Move", Icon: Home },
   { id: "plan", label: "My Plan", Icon: LayoutList },
+  { id: "mymove", label: "Move Info", Icon: Home },
   { id: "calendar", label: "Calendar", Icon: CalendarDays },
   { id: "inventory", label: "My Stuff", Icon: Package },
 ];
