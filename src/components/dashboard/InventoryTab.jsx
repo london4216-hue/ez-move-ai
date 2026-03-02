@@ -371,17 +371,7 @@ export default function InventoryTab({ user }) {
       )}
 
       {activeTab === "donate" && (
-        <div className="bg-[#4C1D95] rounded-2xl px-4 py-3 flex items-center gap-3">
-          <span className="text-2xl">🫶</span>
-          <div className="flex-1">
-            <p className="text-white text-xs font-bold">Junk / Donation List</p>
-            <p className="text-[#C4B5FD] text-[10px]">Items to donate, sell, or junk-haul</p>
-          </div>
-          <div className="text-right">
-            <p className="text-[#C4B5FD] text-base font-bold">{donateItems.length}</p>
-            <p className="text-[#C4B5FD] text-[9px]">items</p>
-          </div>
-        </div>
+        <AIServiceFinder user={user} />
       )}
 
       {/* Sub-tabs */}
