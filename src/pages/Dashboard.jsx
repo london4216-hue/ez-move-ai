@@ -6,8 +6,8 @@ import { differenceInDays, parseISO } from "date-fns";
 import { LayoutList, CalendarDays, Package, Home } from "lucide-react";
 import ChecklistPanel from "@/components/dashboard/ChecklistPanel";
 import CalendarSheet from "@/components/dashboard/CalendarSheet";
-import InventoryTab from "@/components/dashboard/InventoryTab";
-import MyMoveTab from "@/components/dashboard/MyMoveTab";
+import MyStuffTab from "@/components/dashboard/MyStuffTab";
+import MoveCommandCenter from "@/components/dashboard/MoveCommandCenter";
 import Week1OnboardingModal from "@/components/dashboard/Week1OnboardingModal";
 
 const TABS = [
