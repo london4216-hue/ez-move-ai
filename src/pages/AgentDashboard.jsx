@@ -115,6 +115,23 @@ export default function AgentDashboard() {
     setEditingClientId(null);
   };
 
+  const deleteClient = async (clientId) => {
+    if (!confirm("Delete this client? This cannot be undone.")) return;
+    await base44.entities.Client.delete(clientId);
+    setClients(prev => prev.filter(c => c.id !== clientId));
+  };
+
+  const openEditFull = (client) => {
+    setEditForm({ user_name: client.user_name, user_email: client.user_email, phone: client.phone, home_address: client.home_address, close_date: client.close_date });
+    setEditingFullId(client.id);
+  };
+
+  const saveEditFull = async () => {
+    await base44.entities.Client.update(editingFullId, editForm);
+    setClients(prev => prev.map(c => c.id === editingFullId ? { ...c, ...editForm } : c));
+    setEditingFullId(null);
+  };
+
   if (loading) return (
     <div className="min-h-screen bg-slate-100 flex items-center justify-center">
       <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
