@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
-import { Plus, LogOut, Edit2, Check, X, ChevronRight, ArrowLeft, Loader2, Users } from "lucide-react";
+import { Plus, LogOut, Edit2, Check, X, ChevronRight, ArrowLeft, Loader2, Users, Trash2 } from "lucide-react";
 import { format, differenceInDays, parseISO } from "date-fns";
 
 const STATUS_COLORS = {
