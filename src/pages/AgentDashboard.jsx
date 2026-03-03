@@ -95,10 +95,11 @@ export default function AgentDashboard() {
       invited_date: new Date().toISOString(),
       billing_status: "pending",
     });
+    const appUrl = `${window.location.origin}`;
     await base44.integrations.Core.SendEmail({
       to: form.email,
-      subject: `🎉 Welcome to EZ Move AI — Your moving plan is ready`,
-      body: `Hi ${form.name},\n\nCongratulations on your home sale! Your agent has set up EZ Move AI to guide your move.\n\nYour estimated close date: ${form.close_date}\n\n🔑 Your invite code: ${code}\n\nVisit the app, enter your code, and your personalized week-by-week plan will be ready in seconds.\n\nWelcome!\n— EZ Move AI Team`,
+      subject: `Welcome to EZ Move AI`,
+      body: `Welcome ${form.name},\n\nYour invite code: ${code}\n\nRegister here: ${appUrl}\n\n---\nTo unsubscribe, reply with "unsubscribe".`,
     });
     setClients(prev => [newClient, ...prev]);
     setInviteSent({ name: form.name, code });
