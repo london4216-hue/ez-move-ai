@@ -126,14 +126,20 @@ export default function AgentDashboard() {
     setPaying(false);
   };
 
+  const [resendingId, setResendingId] = useState(null);
+  const [resentId, setResentId] = useState(null);
+
   const resendCode = async (client) => {
+    setResendingId(client.id);
     await base44.functions.invoke("sendWelcomeEmail", {
       user_name: client.user_name,
       user_email: client.user_email,
       invite_code: client.invitation_code,
       app_url: window.location.origin,
     });
-    alert(`Code ${client.invitation_code} resent to ${client.user_email}`);
+    setResendingId(null);
+    setResentId(client.id);
+    setTimeout(() => setResentId(null), 3000);
   };
 
   const deleteClient = async (clientId) => {
