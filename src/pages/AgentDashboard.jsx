@@ -31,6 +31,8 @@ export default function AgentDashboard() {
   const [inviteSent, setInviteSent] = useState(null); // { name, code }
   const [editingClientId, setEditingClientId] = useState(null);
   const [editCloseDate, setEditCloseDate] = useState("");
+  const [editingFullId, setEditingFullId] = useState(null);
+  const [editForm, setEditForm] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
