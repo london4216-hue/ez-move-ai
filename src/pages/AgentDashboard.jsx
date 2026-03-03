@@ -213,38 +213,29 @@ export default function AgentDashboard() {
                           </div>
                         )}
                       </div>
-                      <div className="flex-shrink-0 text-right">
-                        {editingClientId === client.id ? (
-                          <div className="flex items-center gap-1">
-                            <input type="date" value={editCloseDate}
-                              onChange={e => setEditCloseDate(e.target.value)}
-                              className="text-xs border border-orange-300 rounded-lg px-2 py-1 focus:outline-none w-28"
-                            />
-                            <button onClick={() => saveCloseDate(client.id)} className="w-6 h-6 bg-orange-500 rounded-lg flex items-center justify-center">
-                              <Check className="w-3 h-3 text-white" />
-                            </button>
-                            <button onClick={() => setEditingClientId(null)} className="w-6 h-6 bg-slate-100 rounded-lg flex items-center justify-center">
-                              <X className="w-3 h-3 text-slate-500" />
-                            </button>
-                          </div>
-                        ) : (
-                          <div>
-                            {client.close_date ? (
-                              <p className={`text-xs font-bold ${daysLeft !== null && daysLeft < 14 ? "text-red-500" : "text-slate-600"}`}>
-                                {daysLeft !== null ? (daysLeft < 0 ? "Closed ✓" : `${daysLeft}d left`) : ""}
-                              </p>
-                            ) : null}
-                            {client.close_date && (
-                              <p className="text-[10px] text-slate-400">{format(parseISO(client.close_date), "MMM d, yyyy")}</p>
-                            )}
-                            <button
-                              onClick={() => { setEditingClientId(client.id); setEditCloseDate(client.close_date || ""); }}
-                              className="text-[10px] text-orange-400 font-bold flex items-center gap-0.5 ml-auto mt-0.5"
-                            >
-                              <Edit2 className="w-2.5 h-2.5" /> Edit
-                            </button>
-                          </div>
+                      <div className="flex-shrink-0 text-right flex flex-col items-end gap-1">
+                        {client.close_date ? (
+                          <p className={`text-xs font-bold ${daysLeft !== null && daysLeft < 14 ? "text-red-500" : "text-slate-600"}`}>
+                            {daysLeft !== null ? (daysLeft < 0 ? "Closed ✓" : `${daysLeft}d left`) : ""}
+                          </p>
+                        ) : null}
+                        {client.close_date && (
+                          <p className="text-[10px] text-slate-400">{format(parseISO(client.close_date), "MMM d, yyyy")}</p>
                         )}
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <button
+                            onClick={() => openEditFull(client)}
+                            className="text-[10px] text-orange-400 font-bold flex items-center gap-0.5 bg-orange-50 px-2 py-0.5 rounded-lg"
+                          >
+                            <Edit2 className="w-2.5 h-2.5" /> Edit
+                          </button>
+                          <button
+                            onClick={() => deleteClient(client.id)}
+                            className="text-[10px] text-red-400 font-bold flex items-center gap-0.5 bg-red-50 px-2 py-0.5 rounded-lg"
+                          >
+                            <Trash2 className="w-2.5 h-2.5" /> Delete
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
