@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Sparkles, ChevronDown, ChevronUp, FileText, Package, Clock, MapPin, DollarSign, FileCheck, Truck, Save, Check } from "lucide-react";
+import { Sparkles, ChevronDown, ChevronUp, FileText, Package, Clock, MapPin, DollarSign, FileCheck, Save, Check, UtensilsCrossed } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import FoodFinder from "./FoodFinder";
 
 const FEATURES = [
   {
