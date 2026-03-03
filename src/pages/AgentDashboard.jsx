@@ -252,8 +252,22 @@ export default function AgentDashboard() {
                           <button onClick={() => openEditFull(client)} className="text-[10px] text-orange-400 font-bold flex items-center gap-0.5 bg-orange-50 px-2 py-0.5 rounded-lg">
                             <Edit2 className="w-2.5 h-2.5" /> Edit
                           </button>
-                          <button onClick={() => resendCode(client)} className="text-[10px] text-blue-400 font-bold flex items-center gap-0.5 bg-blue-50 px-2 py-0.5 rounded-lg">
-                            📨 Resend
+                          <button
+                            onClick={() => resendCode(client)}
+                            disabled={resendingId === client.id}
+                            className={`text-[10px] font-bold flex items-center gap-0.5 px-2 py-0.5 rounded-lg transition-all ${
+                              resentId === client.id
+                                ? "text-green-600 bg-green-50"
+                                : "text-blue-400 bg-blue-50"
+                            }`}
+                          >
+                            {resendingId === client.id ? (
+                              <><span className="w-2.5 h-2.5 border border-blue-400 border-t-transparent rounded-full animate-spin inline-block" /> Sending...</>
+                            ) : resentId === client.id ? (
+                              <>✓ Sent!</>
+                            ) : (
+                              <>📨 Resend Code</>
+                            )}
                           </button>
                           <button onClick={() => deleteClient(client.id)} className="text-[10px] text-red-400 font-bold flex items-center gap-0.5 bg-red-50 px-2 py-0.5 rounded-lg">
                             <Trash2 className="w-2.5 h-2.5" /> Delete
