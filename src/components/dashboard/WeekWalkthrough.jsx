@@ -62,7 +62,7 @@ export default function WeekWalkthrough({ weekData, weekNum, onDone }) {
 
           <p className="text-xs text-slate-400 font-semibold mb-3">Will you do this this week?</p>
 
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             <button
               onClick={() => handleAnswer("yes")}
               className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-orange-500/30 active:scale-[0.98] transition-transform"
@@ -72,10 +72,16 @@ export default function WeekWalkthrough({ weekData, weekNum, onDone }) {
               <ChevronRight className="w-4 h-4 ml-auto" />
             </button>
             <button
-              onClick={() => handleAnswer("skip")}
-              className="w-full py-3 rounded-2xl border border-slate-200 text-slate-500 text-sm font-semibold active:scale-[0.98] transition-transform"
+              onClick={() => handleAnswer("maybe")}
+              className="w-full py-3.5 rounded-2xl border-2 border-amber-300 bg-amber-50 text-amber-700 text-sm font-bold active:scale-[0.98] transition-transform"
             >
-              Skip for now
+              🤔 Maybe — add later
+            </button>
+            <button
+              onClick={() => handleAnswer("skip")}
+              className="w-full py-3 rounded-2xl border border-slate-200 text-slate-400 text-sm font-semibold active:scale-[0.98] transition-transform"
+            >
+              No, don't add to my plan
             </button>
           </div>
         </div>
