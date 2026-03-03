@@ -104,6 +104,8 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
   const [addingTask, setAddingTask] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newTaskDesc, setNewTaskDesc] = useState("");
+  const [showWalkthrough, setShowWalkthrough] = useState(false);
+  const [walkthroughWeek, setWalkthroughWeek] = useState(null);
 
   useEffect(() => {
     const saved = localStorage.getItem(`checklist_complete_${user?.id}`);
@@ -113,6 +115,29 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
     if (savedRemoved) setRemovedIds(new Set(JSON.parse(savedRemoved)));
     if (savedCustom) setCustomItems(JSON.parse(savedCustom));
   }, [user?.id]);
+
+  // Check if walkthrough needed for current week
+  useEffect(() => {
+    if (!user?.id) return;
+    const walkthroughDone = localStorage.getItem(`walkthrough_done_w${currentWeek}_${user.id}`);
+    if (!walkthroughDone) {
+      setWalkthroughWeek(currentWeek);
+      setShowWalkthrough(true);
+    }
+  }, [user?.id, currentWeek]);
+
+  const handleWalkthroughDone = (answers) => {
+    // Mark items as skipped if user said "skip"
+    const newRemoved = new Set(removedIds);
+    Object.entries(answers).forEach(([id, answer]) => {
+      if (answer === "skip") newRemoved.add(id);
+    });
+    setRemovedIds(newRemoved);
+    persist(completedIds, newRemoved, customItems);
+    localStorage.setItem(`walkthrough_done_w${walkthroughWeek}_${user.id}`, "1");
+    setShowWalkthrough(false);
+    setWalkthroughWeek(null);
+  };
 
   const persist = (completed, removed, custom) => {
     if (!user?.id) return;
