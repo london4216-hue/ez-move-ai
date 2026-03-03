@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { differenceInDays, parseISO, addDays, format } from "date-fns";
 
 import ChecklistItemCard from "./ChecklistItemCard";
+import WeekWalkthrough from "./WeekWalkthrough";
 
 const BASE_WEEKS = {
   1: {
