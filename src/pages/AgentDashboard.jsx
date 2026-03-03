@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
-import { Plus, LogOut, Edit2, Check, X, ChevronRight, ArrowLeft, Loader2, Users, Trash2 } from "lucide-react";
+import { Plus, LogOut, Edit2, X, ArrowLeft, Loader2, Users, Trash2, CreditCard, CheckCircle2 } from "lucide-react";
 import { format, differenceInDays, parseISO } from "date-fns";
 
 const STATUS_COLORS = {
@@ -13,26 +13,27 @@ const STATUS_COLORS = {
 };
 
 const DEMO_CLIENTS = [
-  { user_name: "Sarah Johnson", user_email: "sarah.johnson@demo.com", phone: "555-201-0001", close_date: "2026-04-15", invitation_code: "2201", status: "active", billing_status: "charged" },
-  { user_name: "Mike & Dana Torres", user_email: "mike.torres@demo.com", phone: "555-201-0002", close_date: "2026-05-01", invitation_code: "3305", status: "registered", billing_status: "pending" },
-  { user_name: "Carol Webb", user_email: "carol.webb@demo.com", phone: "555-201-0003", close_date: "2026-03-28", invitation_code: "4412", status: "invited", billing_status: "pending" },
+  { user_name: "Sarah Johnson", user_email: "sarah.johnson@demo.com", close_date: "2026-04-15", invitation_code: "2201", status: "active", billing_status: "charged" },
+  { user_name: "Mike Torres", user_email: "mike.torres@demo.com", close_date: "2026-05-01", invitation_code: "3305", status: "active", billing_status: "charged" },
+  { user_name: "Carol Webb", user_email: "carol.webb@demo.com", close_date: "2026-03-28", invitation_code: "4412", status: "invited", billing_status: "pending" },
 ];
-
-const STEPS = ["Seller Info", "Address", "Close Date", "Send Invite"];
 
 export default function AgentDashboard() {
   const [agent, setAgent] = useState(null);
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showAdd, setShowAdd] = useState(false);
-  const [step, setStep] = useState(0);
-  const [form, setForm] = useState({ name: "", email: "", phone: "", address: "", close_date: "" });
-  const [inviting, setInviting] = useState(false);
-  const [inviteSent, setInviteSent] = useState(null); // { name, code }
-  const [editingClientId, setEditingClientId] = useState(null);
-  const [editCloseDate, setEditCloseDate] = useState("");
+
+  // Add client flow: "form" | "payment" | "done"
+  const [addStep, setAddStep] = useState(null); // null = closed
+  const [form, setForm] = useState({ name: "", email: "", close_date: "" });
+  const [pendingClient, setPendingClient] = useState(null); // saved client before payment
+  const [paying, setPaying] = useState(false);
+  const [doneData, setDoneData] = useState(null); // { name, code }
+
+  // Edit modal
   const [editingFullId, setEditingFullId] = useState(null);
   const [editForm, setEditForm] = useState({});
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -47,8 +48,6 @@ export default function AgentDashboard() {
         setAgent(agentRecord);
 
         let clientList = await base44.entities.Client.filter({ agent_id: agentRecord.id });
-
-        // Seed demo clients if empty
         if (clientList.length === 0) {
           const seeded = await Promise.all(
             DEMO_CLIENTS.map(c =>
@@ -57,7 +56,6 @@ export default function AgentDashboard() {
           );
           clientList = seeded;
         }
-
         setClients(clientList.sort((a, b) => new Date(b.invited_date) - new Date(a.invited_date)));
       } catch (err) {
         console.error(err);
@@ -69,51 +67,63 @@ export default function AgentDashboard() {
   }, []);
 
   const resetAdd = () => {
-    setForm({ name: "", email: "", phone: "", address: "", close_date: "" });
-    setStep(0);
-    setInviteSent(null);
-    setShowAdd(false);
+    setAddStep(null);
+    setForm({ name: "", email: "", close_date: "" });
+    setPendingClient(null);
+    setDoneData(null);
   };
 
-  const canNext = () => {
-    if (step === 0) return form.name.trim() && form.email.trim() && form.phone.trim();
-    if (step === 1) return form.address.trim();
-    if (step === 2) return form.close_date;
-    return true;
-  };
+  const canSaveForm = form.name.trim() && form.email.trim() && form.close_date;
 
-  const handleSendInvite = async () => {
-    setInviting(true);
+  // Step 1: Save client info → move to payment
+  const handleSaveClient = async () => {
     const code = Math.floor(1000 + Math.random() * 9000).toString();
     const newClient = await base44.entities.Client.create({
       agent_id: agent.id,
       user_email: form.email,
       user_name: form.name,
-      phone: form.phone,
-      home_address: form.address,
       close_date: form.close_date,
       invitation_code: code,
       status: "invited",
       invited_date: new Date().toISOString(),
       billing_status: "pending",
     });
-    const appUrl = `${window.location.origin}`;
-    await base44.functions.invoke('sendWelcomeEmail', {
-      user_name: form.name,
-      user_email: form.email,
-      invite_code: code,
-      app_url: appUrl,
-    });
-    setClients(prev => [newClient, ...prev]);
-    setInviteSent({ name: form.name, code });
-    setInviting(false);
+    setPendingClient({ ...newClient, invitation_code: code });
+    setClients(prev => [{ ...newClient, invitation_code: code }, ...prev]);
+    setAddStep("payment");
   };
 
-  const saveCloseDate = async (clientId) => {
-    if (!editCloseDate) return;
-    await base44.entities.Client.update(clientId, { close_date: editCloseDate });
-    setClients(prev => prev.map(c => c.id === clientId ? { ...c, close_date: editCloseDate } : c));
-    setEditingClientId(null);
+  // Step 2: Process payment → mark active, send email
+  const handlePayment = async () => {
+    if (!pendingClient) return;
+    setPaying(true);
+    // Mark as active + charged
+    await base44.entities.Client.update(pendingClient.id, {
+      status: "active",
+      billing_status: "charged",
+      charge_date: new Date().toISOString().split("T")[0],
+    });
+    // Update agent stats
+    if (agent) {
+      await base44.entities.Agent.update(agent.id, {
+        clients_count: (agent.clients_count || 0) + 1,
+        total_charged: (agent.total_charged || 0) + 40,
+      });
+    }
+    // Send invite email
+    await base44.functions.invoke("sendWelcomeEmail", {
+      user_name: pendingClient.user_name,
+      user_email: pendingClient.user_email,
+      invite_code: pendingClient.invitation_code,
+      app_url: window.location.origin,
+    });
+    // Update local list
+    setClients(prev => prev.map(c =>
+      c.id === pendingClient.id ? { ...c, status: "active", billing_status: "charged" } : c
+    ));
+    setDoneData({ name: pendingClient.user_name, code: pendingClient.invitation_code });
+    setAddStep("done");
+    setPaying(false);
   };
 
   const deleteClient = async (clientId) => {
@@ -123,7 +133,7 @@ export default function AgentDashboard() {
   };
 
   const openEditFull = (client) => {
-    setEditForm({ user_name: client.user_name, user_email: client.user_email, phone: client.phone, home_address: client.home_address, close_date: client.close_date });
+    setEditForm({ user_name: client.user_name, user_email: client.user_email, home_address: client.home_address, close_date: client.close_date });
     setEditingFullId(client.id);
   };
 
@@ -141,7 +151,7 @@ export default function AgentDashboard() {
 
   return (
     <div className="min-h-screen bg-slate-100">
-      {/* Compact header */}
+      {/* Header */}
       <div className="bg-white border-b border-slate-100 px-6 pt-12 pb-4 shadow-sm">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -155,10 +165,10 @@ export default function AgentDashboard() {
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => { setShowAdd(true); setStep(0); }}
+              onClick={() => { setAddStep("form"); }}
               className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs px-3 py-2 rounded-xl transition-colors"
             >
-              <Plus className="w-3.5 h-3.5" /> Add Seller
+              <Plus className="w-3.5 h-3.5" /> Add Client
             </button>
             <button
               onClick={() => base44.auth.logout(createPageUrl("AgentLogin"))}
@@ -171,7 +181,6 @@ export default function AgentDashboard() {
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-5">
-        {/* Clients list */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
           <div className="px-5 py-3 border-b border-slate-50 flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -185,7 +194,7 @@ export default function AgentDashboard() {
             <div className="py-14 text-center">
               <div className="text-4xl mb-3">👥</div>
               <p className="text-slate-600 font-semibold mb-1">No clients yet</p>
-              <button onClick={() => setShowAdd(true)} className="text-orange-500 font-bold text-sm">+ Add your first seller</button>
+              <button onClick={() => setAddStep("form")} className="text-orange-500 font-bold text-sm">+ Add your first client</button>
             </div>
           ) : (
             <div className="divide-y divide-slate-50">
@@ -207,7 +216,7 @@ export default function AgentDashboard() {
                           </span>
                         </div>
                         <p className="text-[11px] text-slate-400 truncate">{client.user_email}</p>
-                        {client.invitation_code && client.status === "invited" && (
+                        {client.invitation_code && (
                           <div className="inline-flex items-center gap-1.5 mt-1 bg-slate-50 rounded-lg px-2 py-0.5">
                             <span className="text-[9px] text-slate-400 font-medium">Code:</span>
                             <span className="text-xs font-black text-orange-500 tracking-widest">{client.invitation_code}</span>
@@ -224,16 +233,10 @@ export default function AgentDashboard() {
                           <p className="text-[10px] text-slate-400">{format(parseISO(client.close_date), "MMM d, yyyy")}</p>
                         )}
                         <div className="flex items-center gap-1.5 mt-0.5">
-                          <button
-                            onClick={() => openEditFull(client)}
-                            className="text-[10px] text-orange-400 font-bold flex items-center gap-0.5 bg-orange-50 px-2 py-0.5 rounded-lg"
-                          >
+                          <button onClick={() => openEditFull(client)} className="text-[10px] text-orange-400 font-bold flex items-center gap-0.5 bg-orange-50 px-2 py-0.5 rounded-lg">
                             <Edit2 className="w-2.5 h-2.5" /> Edit
                           </button>
-                          <button
-                            onClick={() => deleteClient(client.id)}
-                            className="text-[10px] text-red-400 font-bold flex items-center gap-0.5 bg-red-50 px-2 py-0.5 rounded-lg"
-                          >
+                          <button onClick={() => deleteClient(client.id)} className="text-[10px] text-red-400 font-bold flex items-center gap-0.5 bg-red-50 px-2 py-0.5 rounded-lg">
                             <Trash2 className="w-2.5 h-2.5" /> Delete
                           </button>
                         </div>
@@ -262,7 +265,6 @@ export default function AgentDashboard() {
               {[
                 { label: "Full Name", key: "user_name", type: "text" },
                 { label: "Email", key: "user_email", type: "email" },
-                { label: "Phone", key: "phone", type: "tel" },
                 { label: "Address", key: "home_address", type: "text" },
                 { label: "Close Date", key: "close_date", type: "date" },
               ].map(f => (
@@ -284,55 +286,34 @@ export default function AgentDashboard() {
         </div>
       )}
 
-      {/* Add Seller Modal */}
-      {showAdd && (
+      {/* Add Client Modal */}
+      {addStep && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end md:items-center justify-center p-4 z-50">
           <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden">
-            {/* Modal header */}
-            <div className="px-6 pt-5 pb-4 border-b border-slate-100">
-              <div className="flex items-center justify-between mb-3">
-                <button
-                  onClick={inviteSent ? resetAdd : step === 0 ? resetAdd : () => setStep(s => s - 1)}
-                  className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center"
-                >
-                  {(step === 0 || inviteSent) ? <X className="w-4 h-4 text-slate-500" /> : <ArrowLeft className="w-4 h-4 text-slate-500" />}
-                </button>
-                <p className="font-bold text-slate-800 text-sm">
-                  {inviteSent ? "Invite Sent! 🎉" : `Add Seller — Step ${step + 1} of ${STEPS.length}`}
-                </p>
-                <div className="w-8" />
-              </div>
-              {!inviteSent && (
-                <div className="flex gap-1.5">
-                  {STEPS.map((s, i) => (
-                    <div key={i} className={`flex-1 h-1 rounded-full transition-all ${i <= step ? "bg-orange-500" : "bg-slate-100"}`} />
-                  ))}
-                </div>
-              )}
+            <div className="px-6 pt-5 pb-4 border-b border-slate-100 flex items-center justify-between">
+              <button
+                onClick={addStep === "done" ? resetAdd : addStep === "payment" ? () => setAddStep("form") : resetAdd}
+                className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center"
+              >
+                {addStep === "payment" ? <ArrowLeft className="w-4 h-4 text-slate-500" /> : <X className="w-4 h-4 text-slate-500" />}
+              </button>
+              <p className="font-bold text-slate-800 text-sm">
+                {addStep === "form" && "New Client"}
+                {addStep === "payment" && "Complete Payment"}
+                {addStep === "done" && "Client Added! 🎉"}
+              </p>
+              <div className="w-8" />
             </div>
 
             <div className="px-6 py-5">
-              {inviteSent ? (
-                <div className="text-center py-4">
-                  <div className="text-5xl mb-4">📬</div>
-                  <p className="text-xl font-bold text-slate-800 mb-1">Invite Sent!</p>
-                  <p className="text-sm text-slate-500 mb-5">{inviteSent.name} will receive an email with their invite code.</p>
-                  <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4 mb-5">
-                    <p className="text-xs text-slate-500 mb-1">Their 4-digit invite code</p>
-                    <p className="text-4xl font-black text-orange-500 tracking-widest">{inviteSent.code}</p>
-                  </div>
-                  <button onClick={resetAdd} className="w-full py-3 rounded-2xl bg-orange-500 text-white font-bold text-sm">Done</button>
-                </div>
-              ) : step === 0 ? (
-                <div className="space-y-3">
-                  <div>
-                    <p className="text-base font-bold text-slate-800 mb-1">Seller's info</p>
-                    <p className="text-xs text-slate-400">Who is moving?</p>
-                  </div>
+              {/* Step: Form */}
+              {addStep === "form" && (
+                <div className="space-y-4">
+                  <p className="text-xs text-slate-400">Enter the client's details. You'll pay after saving.</p>
                   {[
-                    { label: "Full Name", key: "name", type: "text", placeholder: "Jane Smith" },
+                    { label: "First & Last Name", key: "name", type: "text", placeholder: "Jane Smith" },
                     { label: "Email Address", key: "email", type: "email", placeholder: "jane@email.com" },
-                    { label: "Phone Number", key: "phone", type: "tel", placeholder: "555-123-4567" },
+                    { label: "Estimated Close Date", key: "close_date", type: "date" },
                   ].map(f => (
                     <div key={f.key}>
                       <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wide block mb-1">{f.label}</label>
@@ -340,81 +321,64 @@ export default function AgentDashboard() {
                         type={f.type}
                         value={form[f.key]}
                         onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))}
-                        placeholder={f.placeholder}
+                        placeholder={f.placeholder || ""}
                         className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10"
                       />
                     </div>
                   ))}
-                </div>
-              ) : step === 1 ? (
-                <div className="space-y-3">
-                  <div>
-                    <p className="text-base font-bold text-slate-800 mb-1">Property address</p>
-                    <p className="text-xs text-slate-400">The home they're selling/moving from</p>
-                  </div>
-                  <input
-                    type="text"
-                    value={form.address}
-                    onChange={e => setForm(p => ({ ...p, address: e.target.value }))}
-                    placeholder="123 Main St, City, State"
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10"
-                  />
-                </div>
-              ) : step === 2 ? (
-                <div className="space-y-3">
-                  <div>
-                    <p className="text-base font-bold text-slate-800 mb-1">Estimated close date</p>
-                    <p className="text-xs text-slate-400">This drives their week-by-week moving plan</p>
-                  </div>
-                  <input
-                    type="date"
-                    value={form.close_date}
-                    onChange={e => setForm(p => ({ ...p, close_date: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10"
-                  />
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-base font-bold text-slate-800 mb-1">Review & send invite</p>
-                    <p className="text-xs text-slate-400">A welcome email with their code will be sent</p>
-                  </div>
-                  <div className="bg-slate-50 rounded-2xl p-4 space-y-2">
-                    {[
-                      { label: "Name", value: form.name },
-                      { label: "Email", value: form.email },
-                      { label: "Phone", value: form.phone },
-                      { label: "Address", value: form.address },
-                      { label: "Close Date", value: form.close_date },
-                    ].map(r => (
-                      <div key={r.label} className="flex justify-between gap-3">
-                        <span className="text-xs text-slate-400 font-semibold">{r.label}</span>
-                        <span className="text-xs text-slate-700 font-bold text-right flex-1 truncate">{r.value}</span>
-                      </div>
-                    ))}
-                  </div>
+                  <button
+                    onClick={handleSaveClient}
+                    disabled={!canSaveForm}
+                    className="w-full py-3.5 rounded-2xl bg-orange-500 text-white font-bold text-sm disabled:opacity-40 mt-2"
+                  >
+                    Save & Continue to Payment
+                  </button>
                 </div>
               )}
 
-              {!inviteSent && (
-                <div className="mt-5">
-                  {step < 3 ? (
-                    <button
-                      onClick={() => setStep(s => s + 1)}
-                      disabled={!canNext()}
-                      className="w-full py-3.5 rounded-2xl bg-orange-500 text-white font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-40 transition-all"
-                    >
-                      Continue <ChevronRight className="w-4 h-4" />
-                    </button>
-                  ) : (
-                    <button
-                      onClick={handleSendInvite}
-                      disabled={inviting}
-                      className="w-full py-3.5 rounded-2xl bg-orange-500 text-white font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50 transition-all"
-                    >
-                      {inviting ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</> : "Send Invite 📬"}
-                    </button>
-                  )}
+              {/* Step: Payment */}
+              {addStep === "payment" && pendingClient && (
+                <div className="space-y-4">
+                  <div className="bg-slate-50 rounded-2xl p-4 space-y-2">
+                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Client Summary</p>
+                    <div className="flex justify-between"><span className="text-xs text-slate-400">Name</span><span className="text-xs font-bold text-slate-700">{pendingClient.user_name}</span></div>
+                    <div className="flex justify-between"><span className="text-xs text-slate-400">Email</span><span className="text-xs font-bold text-slate-700">{pendingClient.user_email}</span></div>
+                    <div className="flex justify-between"><span className="text-xs text-slate-400">Close Date</span><span className="text-xs font-bold text-slate-700">{pendingClient.close_date}</span></div>
+                    <div className="flex justify-between"><span className="text-xs text-slate-400">Invite Code</span><span className="text-xs font-black text-orange-500 tracking-widest">{pendingClient.invitation_code}</span></div>
+                  </div>
+
+                  <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4 flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-black text-slate-800">EZ Move AI — 1 Client</p>
+                      <p className="text-xs text-slate-500">Includes full moving assistant access</p>
+                    </div>
+                    <p className="text-2xl font-black text-orange-500">$40</p>
+                  </div>
+
+                  <button
+                    onClick={handlePayment}
+                    disabled={paying}
+                    className="w-full py-3.5 rounded-2xl bg-orange-500 text-white font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    {paying
+                      ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</>
+                      : <><CreditCard className="w-4 h-4" /> Pay $40 & Send Invite</>}
+                  </button>
+                  <p className="text-[10px] text-slate-400 text-center">Client will receive an invite email with their code after payment.</p>
+                </div>
+              )}
+
+              {/* Step: Done */}
+              {addStep === "done" && doneData && (
+                <div className="text-center py-4">
+                  <CheckCircle2 className="w-14 h-14 text-green-500 mx-auto mb-4" />
+                  <p className="text-xl font-bold text-slate-800 mb-1">All Set!</p>
+                  <p className="text-sm text-slate-500 mb-5">{doneData.name} is now active and has been emailed their invite code.</p>
+                  <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4 mb-5">
+                    <p className="text-xs text-slate-500 mb-1">Their 4-digit invite code</p>
+                    <p className="text-4xl font-black text-orange-500 tracking-widest">{doneData.code}</p>
+                  </div>
+                  <button onClick={resetAdd} className="w-full py-3 rounded-2xl bg-orange-500 text-white font-bold text-sm">Done</button>
                 </div>
               )}
             </div>
