@@ -1,5 +1,35 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+
+async function sendEmail({ to, subject, body }) {
+  // Use Resend if API key is set, otherwise log a warning
+  if (RESEND_API_KEY) {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "EZ Move AI <onboarding@resend.dev>",
+        to: [to],
+        subject,
+        text: body,
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`Email send failed: ${err}`);
+    }
+    return await res.json();
+  } else {
+    // Fallback: log the email (for development/testing)
+    console.log(`[EMAIL] To: ${to}\nSubject: ${subject}\n\n${body}`);
+    return { id: "logged" };
+  }
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -9,51 +39,13 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { user_name, user_email } = await req.json();
+    const { user_name, user_email, invite_code, app_url } = await req.json();
 
-    // Send setup email to new user
-    await base44.integrations.Core.SendEmail({
+    await sendEmail({
       to: user_email,
-      subject: '🏠 Welcome to EZ Move AI - Your Moving Starts Now',
-      body: `Hi ${user_name},
-
-Welcome to EZ Move AI! Your real estate agent has set up your personalized moving timeline.
-
-What you can do now:
-✓ View your 4-week moving plan
-✓ Track your progress
-✓ Book local services (movers, cleaners, etc)
-✓ Get reminders and updates via text
-
-Log in to your dashboard to get started.
-
-Questions? Contact your agent or reply to this email.
-
-Best regards,
-EZ Move AI Team`
+      subject: `Welcome to EZ Move AI`,
+      body: `Welcome ${user_name},\n\nYour invite code: ${invite_code}\n\nRegister here: ${app_url}\n\n---\nTo unsubscribe, reply with "unsubscribe".`,
     });
-
-    // Send congratulations email to agent
-    const agents = await base44.entities.Agent.filter({});
-    if (agents.length > 0) {
-      const agent = agents[0];
-      await base44.integrations.Core.SendEmail({
-        to: user.email,
-        subject: `🎉 New Client Registered - ${user_name}`,
-        body: `Hi ${agent.company_name || 'Agent'},
-
-Great news! ${user_name} (${user_email}) has just registered with EZ Move AI.
-
-They're now in your client dashboard and you can track their progress.
-
-$40 has been charged to your account for this client.
-
-Log in to your agent portal to manage their details.
-
-Best regards,
-EZ Move AI Team`
-      });
-    }
 
     return Response.json({ success: true });
   } catch (error) {
