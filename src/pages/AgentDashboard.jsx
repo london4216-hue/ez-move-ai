@@ -126,6 +126,16 @@ export default function AgentDashboard() {
     setPaying(false);
   };
 
+  const resendCode = async (client) => {
+    await base44.functions.invoke("sendWelcomeEmail", {
+      user_name: client.user_name,
+      user_email: client.user_email,
+      invite_code: client.invitation_code,
+      app_url: window.location.origin,
+    });
+    alert(`Code ${client.invitation_code} resent to ${client.user_email}`);
+  };
+
   const deleteClient = async (clientId) => {
     if (!confirm("Delete this client? This cannot be undone.")) return;
     await base44.entities.Client.delete(clientId);
@@ -368,6 +378,18 @@ export default function AgentDashboard() {
                       : <><CreditCard className="w-4 h-4" /> Pay $40 & Send Invite</>}
                   </button>
                   <p className="text-[10px] text-slate-400 text-center">Client will receive an invite email with their code after payment.</p>
+                  <button
+                    onClick={() => {
+                      setClients(prev => prev.map(c =>
+                        c.id === pendingClient.id ? { ...c, status: "active", billing_status: "charged" } : c
+                      ));
+                      setDoneData({ name: pendingClient.user_name, code: pendingClient.invitation_code });
+                      setAddStep("done");
+                    }}
+                    className="w-full py-2.5 rounded-2xl border border-slate-200 text-slate-400 text-xs font-semibold"
+                  >
+                    Skip Payment (Demo)
+                  </button>
                 </div>
               )}
 
