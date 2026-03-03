@@ -232,9 +232,12 @@ export default function AgentDashboard() {
                         {client.close_date && (
                           <p className="text-[10px] text-slate-400">{format(parseISO(client.close_date), "MMM d, yyyy")}</p>
                         )}
-                        <div className="flex items-center gap-1.5 mt-0.5">
+                        <div className="flex items-center gap-1.5 mt-0.5 flex-wrap justify-end">
                           <button onClick={() => openEditFull(client)} className="text-[10px] text-orange-400 font-bold flex items-center gap-0.5 bg-orange-50 px-2 py-0.5 rounded-lg">
                             <Edit2 className="w-2.5 h-2.5" /> Edit
+                          </button>
+                          <button onClick={() => resendCode(client)} className="text-[10px] text-blue-400 font-bold flex items-center gap-0.5 bg-blue-50 px-2 py-0.5 rounded-lg">
+                            📨 Resend
                           </button>
                           <button onClick={() => deleteClient(client.id)} className="text-[10px] text-red-400 font-bold flex items-center gap-0.5 bg-red-50 px-2 py-0.5 rounded-lg">
                             <Trash2 className="w-2.5 h-2.5" /> Delete
