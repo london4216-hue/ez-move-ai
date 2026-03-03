@@ -246,6 +246,43 @@ export default function AgentDashboard() {
         </div>
       </div>
 
+      {/* Edit Client Modal */}
+      {editingFullId && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end md:items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden">
+            <div className="px-6 pt-5 pb-4 border-b border-slate-100 flex items-center justify-between">
+              <button onClick={() => setEditingFullId(null)} className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center">
+                <X className="w-4 h-4 text-slate-500" />
+              </button>
+              <p className="font-bold text-slate-800 text-sm">Edit Client</p>
+              <div className="w-8" />
+            </div>
+            <div className="px-6 py-5 space-y-3">
+              {[
+                { label: "Full Name", key: "user_name", type: "text" },
+                { label: "Email", key: "user_email", type: "email" },
+                { label: "Phone", key: "phone", type: "tel" },
+                { label: "Address", key: "home_address", type: "text" },
+                { label: "Close Date", key: "close_date", type: "date" },
+              ].map(f => (
+                <div key={f.key}>
+                  <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wide block mb-1">{f.label}</label>
+                  <input
+                    type={f.type}
+                    value={editForm[f.key] || ""}
+                    onChange={e => setEditForm(p => ({ ...p, [f.key]: e.target.value }))}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10"
+                  />
+                </div>
+              ))}
+              <button onClick={saveEditFull} className="w-full py-3.5 rounded-2xl bg-orange-500 text-white font-bold text-sm mt-2">
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Add Seller Modal */}
       {showAdd && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end md:items-center justify-center p-4 z-50">
