@@ -190,6 +190,13 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
 
   return (
     <div className="space-y-4">
+      {showWalkthrough && walkthroughWeek && (
+        <WeekWalkthrough
+          weekData={weeksData[walkthroughWeek]}
+          weekNum={walkthroughWeek}
+          onDone={handleWalkthroughDone}
+        />
+      )}
       {/* Close date banner */}
       {user?.estimated_close_date && (
         <div className="bg-[#0F172A] rounded-2xl px-4 py-3 flex items-center justify-between">
