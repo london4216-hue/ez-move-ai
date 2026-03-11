@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -11,7 +10,15 @@
     -moz-osx-font-smoothing: grayscale;
     overscroll-behavior: none;
   }
-  * { -webkit-tap-highlight-color: transparent; }
+  * { 
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Fix iOS bold text rendering */
+  b, strong, .font-bold, .font-black, .font-extrabold, .font-semibold {
+    -webkit-text-stroke: 0.3px;
+    text-rendering: optimizeLegibility;
+  }
 }
 
 @layer utilities {
