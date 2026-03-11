@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronRight, CheckCircle2 } from "lucide-react";
+import { ChevronRight, CheckCircle2, ChevronLeft } from "lucide-react";
 
 export default function WeekWalkthrough({ weekData, weekNum, onDone }) {
   const items = weekData?.items || [];
