@@ -34,8 +34,19 @@ export default function WeekWalkthrough({ weekData, weekNum, onDone }) {
         </div>
 
         <div className="px-5 pt-4 pb-2 flex items-center justify-between">
-          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-            Week {weekNum} Setup · {stepIdx + 1} of {items.length}
+          {stepIdx > 0 ? (
+            <button
+              onClick={() => setStepIdx(i => i - 1)}
+              className="text-slate-400 hover:text-slate-600 transition-colors flex items-center gap-1"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span className="text-[11px] font-bold">Back</span>
+            </button>
+          ) : (
+            <div className="w-16" />
+          )}
+          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">
+            Week {weekNum} · {stepIdx + 1}/{items.length}
           </p>
           <div className="flex gap-1">
             {items.map((_, i) => (
