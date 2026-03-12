@@ -193,15 +193,25 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
                 />
               </div>
 
-              <button
-                onClick={handleAddContact}
-                disabled={!newContact.name || !newContact.role}
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold
-                  disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                <Check className="w-4 h-4 inline mr-2" />
-                Add Contact
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowAddModal(false)}
+                  className="flex-1 py-3 rounded-xl border-2 border-slate-200 text-slate-700 font-bold"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={async () => {
+                    await handleAddContact();
+                  }}
+                  disabled={!newContact.name || !newContact.role}
+                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold
+                    disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  <Check className="w-4 h-4" />
+                  Save
+                </button>
+              </div>
             </div>
           </div>
         </div>
