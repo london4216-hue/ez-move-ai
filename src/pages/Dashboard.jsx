@@ -12,9 +12,7 @@ import Week1OnboardingModal from "@/components/dashboard/Week1OnboardingModal";
 import AIMoveAssist from "@/components/dashboard/AIMoveAssist";
 
 const TABS = [
-  { id: "plan", label: "My Plan", Icon: LayoutList },
-  { id: "mymove", label: "Move Info", Icon: Home },
-  { id: "calendar", label: "Calendar", Icon: CalendarDays },
+  { id: "plan", label: "My Move", Icon: Home },
   { id: "inventory", label: "My Stuff", Icon: Package },
   { id: "ai", label: "AI Assist", Icon: Sparkles },
 ];
@@ -123,9 +121,7 @@ export default function Dashboard() {
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto px-4 pt-4 pb-24">
-        {activeTab === "mymove" && <MoveCommandCenter user={user} onNavigate={setActiveTab} />}
         {activeTab === "plan" && <ChecklistPanel user={user} />}
-        {activeTab === "calendar" && <CalendarSheet user={user} />}
         {activeTab === "inventory" && <MyStuffTab user={user} onNavigate={setActiveTab} />}
         {activeTab === "ai" && <AIMoveAssist user={user} />}
       </div>
