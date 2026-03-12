@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
-import { Loader2, ChevronRight, CheckCircle2, ChevronLeft } from "lucide-react";
+import { Loader2, ChevronRight, CheckCircle2, ChevronLeft, LogOut } from "lucide-react";
 
 const week1Questions = [
   { id: "inventory", title: "Confirm What Stays & Goes", description: "Walk through your home and decide what to move, donate, or junk" },
@@ -235,6 +235,14 @@ export default function Register() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-5">
+      <button
+        onClick={() => base44.auth.logout()}
+        className="absolute top-5 right-5 flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all text-sm font-semibold"
+      >
+        <LogOut className="w-4 h-4" />
+        Exit
+      </button>
+      
       <div className="absolute top-12 left-1/2 -translate-x-1/2">
         <div className="flex items-center gap-2.5">
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-200">
