@@ -287,6 +287,20 @@ export default function Register() {
         )}
 
         <div className="space-y-3 mb-4">
+          {!detailsSaved ? (
+            <button
+              onClick={handleSaveDetails}
+              className="w-full py-3 rounded-xl bg-orange-500 text-white font-bold text-sm active:scale-[0.98] transition-all"
+            >
+              Save Details
+            </button>
+          ) : (
+            <div className="flex items-center justify-center gap-2 py-3 bg-emerald-50 rounded-xl">
+              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+              <span className="text-sm font-bold text-emerald-600">Details saved</span>
+            </div>
+          )}
+          
           <div>
             <label className="text-xs font-semibold text-slate-600 mb-1.5 block">Move Date</label>
             <input
@@ -320,20 +334,6 @@ export default function Register() {
             />
             <p className="text-xs text-slate-400 mt-1">{phoneNumber.length}/10 digits</p>
           </div>
-          
-          {!detailsSaved ? (
-            <button
-              onClick={handleSaveDetails}
-              className="w-full py-3 rounded-xl bg-orange-500 text-white font-bold text-sm active:scale-[0.98] transition-all"
-            >
-              Save Details
-            </button>
-          ) : (
-            <div className="flex items-center justify-center gap-2 py-3 bg-emerald-50 rounded-xl">
-              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-              <span className="text-sm font-bold text-emerald-600">Details saved</span>
-            </div>
-          )}
         </div>
 
         <button
