@@ -472,6 +472,8 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
                         userAddress={user?.home_address}
                         onProviderSaved={onProviderSaved}
                         user={user}
+                        completedIds={completedIds}
+                        allItems={Object.values(weeksData).flatMap(w => w.items)}
                       />
                     ))}
                   </div>
