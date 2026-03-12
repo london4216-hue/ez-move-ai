@@ -14,6 +14,7 @@ export default function ChecklistItemCard({ item, completed, skipped, onComplete
   const [showInventory, setShowInventory] = useState(false);
   const [appointmentProvider, setAppointmentProvider] = useState(null);
   const [showWorkflow, setShowWorkflow] = useState(false);
+  const [showStuffLists, setShowStuffLists] = useState(false);
 
   const handleFindLocal = async () => {
     setLoadingAI(true);
