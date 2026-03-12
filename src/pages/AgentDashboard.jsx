@@ -73,7 +73,12 @@ export default function AgentDashboard() {
 
   const resetAdd = () => {
     setAddStep(null);
-    setForm({ firstName: "", lastName: "", email: "", close_date: "" });
+    setForm({ 
+      firstName: "", 
+      lastName: "", 
+      email: "", 
+      close_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    });
     setPendingClient(null);
     setDoneData(null);
   };
