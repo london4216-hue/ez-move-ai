@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { differenceInDays, parseISO, addDays, format } from "date-fns";
+import { differenceInDays, parseISO, addDays, format, isWithinInterval, startOfWeek, endOfWeek } from "date-fns";
+import { CalendarDays, Phone } from "lucide-react";
 
 import ChecklistItemCard from "./ChecklistItemCard";
 import WeekWalkthrough from "./WeekWalkthrough";
+import MoveDirectory from "./MoveDirectory";
 
 const BASE_WEEKS = {
   1: {
@@ -106,6 +108,19 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
   const [newTaskDesc, setNewTaskDesc] = useState("");
   const [showWalkthrough, setShowWalkthrough] = useState(false);
   const [walkthroughWeek, setWalkthroughWeek] = useState(null);
+  const [appointments, setAppointments] = useState([]);
+  const [contacts, setContacts] = useState([]);
+
+  useEffect(() => {
+    if (!user) return;
+    Promise.all([
+      base44.entities.Appointment.filter({ user_id: user.id }),
+      base44.entities.Contact.filter({ user_id: user.id })
+    ]).then(([appts, cnts]) => {
+      setAppointments(appts);
+      setContacts(cnts);
+    });
+  }, [user]);
 
   useEffect(() => {
     const saved = localStorage.getItem(`checklist_complete_${user?.id}`);
@@ -197,6 +212,58 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
           onDone={handleWalkthroughDone}
         />
       )}
+      
+      {/* Quick Stats */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="bg-white rounded-2xl border border-slate-100 p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <CalendarDays className="w-4 h-4 text-orange-500" />
+            <span className="text-xs font-bold text-slate-600">Appointments</span>
+          </div>
+          <p className="text-2xl font-black text-slate-800">{appointments?.length || 0}</p>
+          <p className="text-xs text-slate-400 mt-1">Scheduled</p>
+        </div>
+        
+        <div className="bg-white rounded-2xl border border-slate-100 p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Phone className="w-4 h-4 text-orange-500" />
+            <span className="text-xs font-bold text-slate-600">Contacts</span>
+          </div>
+          <p className="text-2xl font-black text-slate-800">{contacts?.length || 0}</p>
+          <p className="text-xs text-slate-400 mt-1">Saved</p>
+        </div>
+      </div>
+
+      {/* This Week's Appointments */}
+      {appointments.length > 0 && (
+        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+          <div className="px-4 py-3 border-b border-slate-100">
+            <h3 className="text-sm font-bold text-slate-800">📅 This Week</h3>
+          </div>
+          <div className="divide-y divide-slate-50 max-h-48 overflow-y-auto">
+            {appointments.filter(a => {
+              try {
+                const d = parseISO(a.date);
+                return isWithinInterval(d, { start: startOfWeek(new Date()), end: endOfWeek(new Date()) });
+              } catch { return false; }
+            }).slice(0, 3).map((appt, i) => (
+              <div key={i} className="px-4 py-2.5 flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center">
+                  <CalendarDays className="w-3.5 h-3.5 text-orange-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-slate-800 truncate">{appt.title}</p>
+                  <p className="text-xs text-slate-500">{format(parseISO(appt.date), "EEE, MMM d")}{appt.time ? ` · ${appt.time}` : ""}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Move Directory */}
+      <MoveDirectory user={user} />
+
       {/* Close date banner */}
       {user?.estimated_close_date && (
         <div className="bg-[#0F172A] rounded-2xl px-4 py-3 flex items-center justify-between">
