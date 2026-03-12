@@ -56,6 +56,18 @@ export default function Register() {
           estimated_close_date: client.close_date || "",
           registration_date: new Date().toISOString().split("T")[0],
         });
+        
+        // Send welcome email to registered user
+        try {
+          await base44.functions.invoke('sendWelcomeEmail', {
+            user_name: currentUser.full_name,
+            user_email: currentUser.email,
+            invite_code: code,
+            app_url: window.location.origin
+          });
+        } catch (emailError) {
+          console.error('Failed to send welcome email:', emailError);
+        }
       } else {
         await base44.auth.updateMe({
           registration_date: new Date().toISOString().split("T")[0],
