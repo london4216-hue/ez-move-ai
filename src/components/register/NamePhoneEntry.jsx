@@ -56,6 +56,7 @@ export default function NamePhoneEntry({ onComplete }) {
               onChange={e => setFirstName(e.target.value)}
               placeholder="First name"
               className="input-field"
+              required
             />
             <input
               type="text"
@@ -63,6 +64,7 @@ export default function NamePhoneEntry({ onComplete }) {
               onChange={e => setLastName(e.target.value)}
               placeholder="Last name"
               className="input-field"
+              required
             />
           </div>
 
@@ -74,6 +76,7 @@ export default function NamePhoneEntry({ onComplete }) {
               onChange={e => setPhone(formatPhone(e.target.value))}
               placeholder="Phone number"
               className="input-field pl-10"
+              required
             />
           </div>
 

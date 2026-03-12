@@ -61,6 +61,7 @@ export default function AddressAutocomplete({ label, value, onChange, placeholde
           onChange={e => handleInput(e.target.value)}
           onFocus={() => suggestions.length > 0 && setShowDropdown(true)}
           autoComplete="off"
+          required={required}
           className="w-full px-4 py-3 pr-10 rounded-xl border border-[#E5E7EB] bg-white text-[#1A1A2E] text-sm focus:outline-none focus:border-[#F97316] focus:shadow-[0_0_0_3px_rgba(249,115,22,0.15)]"
         />
         {loading && (
