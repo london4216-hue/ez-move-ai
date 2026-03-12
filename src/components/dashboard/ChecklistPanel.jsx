@@ -13,9 +13,9 @@ const BASE_WEEKS = {
     subtitle: "Invite day! Get clarity and line up the big moving pieces.",
     items: [
       { id: "w1-1", title: "Confirm what stays vs. goes", description: "Furniture, appliances, personal items", ai_search_query: null, inventory_walkthrough: true },
-      { id: "w1-2", title: "Estate sale decision", description: "Find local estate sale professionals", ai_search_query: "top rated estate sale professionals near me" },
-      { id: "w1-3", title: "Request mover quotes", description: "Compare 3 top-rated movers side by side", ai_search_query: "top rated local movers near me" },
-      { id: "w1-4", title: "Start donation / sell pile", description: "What's worth selling vs. donating", ai_search_query: null },
+      { id: "w1-2", title: "Start donation / sell pile", description: "What's worth selling vs. donating", ai_search_query: null },
+      { id: "w1-3", title: "Estate sale decision", description: "Find local estate sale professionals", ai_search_query: "top rated estate sale professionals near me" },
+      { id: "w1-4", title: "Request mover quotes", description: "Compare 3 top-rated movers side by side", ai_search_query: "top rated local movers near me" },
     ]
   },
   2: {
@@ -33,10 +33,10 @@ const BASE_WEEKS = {
     title: "Week 3 — Home Prep",
     subtitle: "Make the house buyer-ready with minimal effort.",
     items: [
-      { id: "w3-1", title: "Painting (if needed)", description: "Find top-rated painters, neutral color guidance", ai_search_query: "top rated painters near me" },
-      { id: "w3-2", title: "Junk removal", description: "Same-day or next-day local haulers", ai_search_query: "local junk removal same day near me" },
+      { id: "w3-1", title: "Patch & repair checklist", description: "Nail holes, touch-ups, minor fixes", ai_search_query: null },
+      { id: "w3-2", title: "Painting (if needed)", description: "Find top-rated painters, neutral color guidance", ai_search_query: "top rated painters near me" },
       { id: "w3-3", title: "Deep cleaning", description: "Kitchen, baths, windows, appliances", ai_search_query: "professional house cleaning near me" },
-      { id: "w3-4", title: "Patch & repair checklist", description: "Nail holes, touch-ups, minor fixes", ai_search_query: null },
+      { id: "w3-4", title: "Junk removal", description: "Same-day or next-day local haulers", ai_search_query: "local junk removal same day near me" },
     ]
   },
   4: {
@@ -46,7 +46,6 @@ const BASE_WEEKS = {
       { id: "w4-1", title: "Final packing", description: "Daily mini-checklists so nothing piles up", ai_search_query: null },
       { id: "w4-2", title: "Move-out day guidance", description: "What stays, what leaves, final walkthrough prep", ai_search_query: null },
       { id: "w4-3", title: "Utility transfers", description: "Electric, water, gas, internet", ai_search_query: null },
-      { id: "w4-4", title: "Final clean", description: "Quick refresh before buyer walkthrough", ai_search_query: "professional house cleaning near me" },
       { id: "w4-5", title: "Cancel security system", description: "Contact provider to terminate or transfer service", ai_search_query: null },
       { id: "w4-6", title: "Cancel electric service", description: "Schedule final meter reading and disconnect date", ai_search_query: null },
       { id: "w4-7", title: "Cancel gas service", description: "Arrange final billing and service end date", ai_search_query: null },
@@ -56,6 +55,7 @@ const BASE_WEEKS = {
       { id: "w4-11", title: "Cancel lawn/pool service", description: "End recurring maintenance contracts", ai_search_query: null },
       { id: "w4-12", title: "Return garage/gate remotes", description: "Gather all access devices for new owner", ai_search_query: null },
       { id: "w4-13", title: "Leave manuals & warranties", description: "Organize appliance docs for buyer", ai_search_query: null },
+      { id: "w4-4", title: "Final clean", description: "Quick refresh before buyer walkthrough", ai_search_query: "professional house cleaning near me" },
       { id: "w4-14", title: "Closing day checklist", description: "Keys, remotes, final walkthrough ✅", ai_search_query: null },
     ]
   }
