@@ -404,8 +404,8 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
           <h3 className="text-sm font-bold text-slate-800">📋 All Tasks (Week 1-4)</h3>
         </div>
 
-        {/* All Weeks Consolidated */}
-        <div className="px-3 pb-3 space-y-3 max-h-[520px] overflow-y-auto">
+        {/* All Weeks Consolidated - Collapsable */}
+        <div className="px-3 pb-3 space-y-2 max-h-[520px] overflow-y-auto">
           {Array.from({ length: totalWeeks }, (_, i) => i + 1).map(weekNum => {
             const wData = weeksData[weekNum];
             const wItems = [
@@ -415,46 +415,62 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
             const wCompleted = wItems.filter(i => completedIds.has(i.id)).length;
             const wProgress = wItems.length ? Math.round((wCompleted / wItems.length) * 100) : 0;
             const isSetup = weekNum === 1 ? true : localStorage.getItem(`walkthrough_done_w${weekNum}_${user?.id}`);
+            const isExpanded = expandedWeeks.has(weekNum);
 
             return (
               <div key={weekNum} className="rounded-2xl border border-slate-200 overflow-hidden">
-                <div className="px-3 py-2.5 bg-slate-50 border-b border-slate-100">
-                  <div className="flex items-center justify-between mb-1.5">
+                <button
+                  onClick={() => {
+                    const newExpanded = new Set(expandedWeeks);
+                    isExpanded ? newExpanded.delete(weekNum) : newExpanded.add(weekNum);
+                    setExpandedWeeks(newExpanded);
+                  }}
+                  className="w-full px-3 py-2.5 bg-slate-50 border-b border-slate-100 flex items-center justify-between hover:bg-slate-100 transition-colors"
+                >
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
                     <h4 className="text-xs font-bold text-slate-700">Week {weekNum}</h4>
+                    <div className="flex-1 max-w-[120px]">
+                      <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-orange-500 to-orange-400 rounded-full transition-all duration-500"
+                          style={{ width: `${wProgress}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     <span className="text-[10px] font-bold text-orange-500">{wProgress}%</span>
+                    {isExpanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
                   </div>
-                  {!isSetup && weekNum !== 1 && (
-                    <button
-                      onClick={() => launchWeekSetup(weekNum)}
-                      className="w-full mb-2 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-bold flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98] transition-transform"
-                    >
-                      ⚡ Start Week {weekNum}
-                    </button>
-                  )}
-                  <div className="h-1 bg-slate-200 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-orange-500 to-orange-400 rounded-full transition-all duration-500"
-                      style={{ width: `${wProgress}%` }}
-                    />
+                </button>
+
+                {isExpanded && (
+                  <div className="p-2 space-y-1.5 border-t border-slate-100">
+                    {!isSetup && weekNum !== 1 && (
+                      <button
+                        onClick={() => launchWeekSetup(weekNum)}
+                        className="w-full mb-2 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-bold flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98] transition-transform"
+                      >
+                        ⚡ Start Week {weekNum}
+                      </button>
+                    )}
+                    {wItems.map(item => (
+                      <ChecklistItemCard
+                        key={item.id}
+                        item={item}
+                        completed={completedIds.has(item.id)}
+                        skipped={false}
+                        onComplete={() => handleComplete(item.id)}
+                        onSkip={() => item.custom
+                          ? setCustomItems(prev => { const u = { ...prev, [weekNum]: prev[weekNum].filter(i => i.id !== item.id) }; persist(completedIds, removedIds, u); return u; })
+                          : handleRemove(item.id)}
+                        userAddress={user?.home_address}
+                        onProviderSaved={onProviderSaved}
+                        user={user}
+                      />
+                    ))}
                   </div>
-                </div>
-                <div className="p-2 space-y-1.5">
-                  {wItems.map(item => (
-                    <ChecklistItemCard
-                      key={item.id}
-                      item={item}
-                      completed={completedIds.has(item.id)}
-                      skipped={false}
-                      onComplete={() => handleComplete(item.id)}
-                      onSkip={() => item.custom
-                        ? setCustomItems(prev => { const u = { ...prev, [weekNum]: prev[weekNum].filter(i => i.id !== item.id) }; persist(completedIds, removedIds, u); return u; })
-                        : handleRemove(item.id)}
-                      userAddress={user?.home_address}
-                      onProviderSaved={onProviderSaved}
-                      user={user}
-                    />
-                  ))}
-                </div>
+                )}
               </div>
             );
           })}
