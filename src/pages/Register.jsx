@@ -29,6 +29,21 @@ export default function Register() {
     base44.auth.me().then(user => {
       if (user?.registration_date) navigate(createPageUrl("Dashboard"));
     }).catch(() => {});
+    
+    // Restore saved progress
+    const savedProgress = localStorage.getItem('register_progress');
+    if (savedProgress) {
+      try {
+        const state = JSON.parse(savedProgress);
+        setDigits(state.digits || ["", "", "", ""]);
+        setEstimatedMoveCost(state.estimatedMoveCost || "");
+        setMoveDate(state.moveDate || "");
+        setPhoneNumber(state.phoneNumber || "");
+        setDetailsSaved(state.detailsSaved || false);
+      } catch (e) {
+        console.error('Failed to restore progress:', e);
+      }
+    }
   }, []);
 
   const handleChange = (i, val) => {
@@ -240,11 +255,23 @@ export default function Register() {
       </div>
       
       <button
-        onClick={() => base44.auth.logout()}
+        onClick={() => {
+          // Save current state before exiting
+          const currentState = {
+            digits,
+            estimatedMoveCost,
+            moveDate,
+            phoneNumber,
+            detailsSaved,
+            timestamp: Date.now()
+          };
+          localStorage.setItem('register_progress', JSON.stringify(currentState));
+          base44.auth.logout();
+        }}
         className="absolute top-5 right-5 flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all text-sm font-semibold"
       >
         <LogOut className="w-4 h-4" />
-        Exit
+        Save & Exit
       </button>
       
       <div className="absolute top-12 left-1/2 -translate-x-1/2">
