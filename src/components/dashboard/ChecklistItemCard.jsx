@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Phone, UserPlus, Check, ShoppingCart, ClipboardList } from "lucide-react";
 import RoomSetupWizard from "./RoomSetupWizard";
 import ProviderAppointmentModal from "./ProviderAppointmentModal";
+import TaskWorkflowModal from "./TaskWorkflowModal";
 
 export default function ChecklistItemCard({ item, completed, skipped, onComplete, onSkip, userAddress, onProviderSaved, user }) {
   const [expanded, setExpanded] = useState(false);
@@ -11,6 +12,7 @@ export default function ChecklistItemCard({ item, completed, skipped, onComplete
   const [savedIdx, setSavedIdx] = useState(null);
   const [showInventory, setShowInventory] = useState(false);
   const [appointmentProvider, setAppointmentProvider] = useState(null);
+  const [showWorkflow, setShowWorkflow] = useState(false);
 
   const handleFindLocal = async () => {
     setLoadingAI(true);
@@ -130,10 +132,10 @@ export default function ChecklistItemCard({ item, completed, skipped, onComplete
           )}
           {item.ai_search_query && !completed && (
             <button
-              onClick={() => expanded ? setExpanded(false) : handleFindLocal()}
+              onClick={() => setShowWorkflow(true)}
               className="px-2 py-1 rounded-lg bg-[#FFF7ED] text-[#F97316] text-[10px] font-bold whitespace-nowrap"
             >
-              {expanded ? "Close" : "Find Local"}
+              Start Task →
             </button>
           )}
         </div>
@@ -211,6 +213,14 @@ export default function ChecklistItemCard({ item, completed, skipped, onComplete
         user={user}
         onClose={() => setAppointmentProvider(null)}
         onSaved={onProviderSaved}
+      />
+    )}
+    {showWorkflow && (
+      <TaskWorkflowModal
+        task={item}
+        user={user}
+        onClose={() => setShowWorkflow(false)}
+        onComplete={onComplete}
       />
     )}
     </>

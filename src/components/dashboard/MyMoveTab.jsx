@@ -2,10 +2,11 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import {
   AlertTriangle, CheckCircle2, CalendarDays,
-  Phone, Star, ChevronDown, ChevronRight
+  Phone, Star, ChevronDown, ChevronRight, DollarSign
 } from "lucide-react";
 import { parseISO, differenceInDays, isPast, isToday, format, isWithinInterval, startOfWeek, endOfWeek } from "date-fns";
 import SavedInsights from "./SavedInsights";
+import MoveDirectory from "./MoveDirectory";
 
 export default function MyMoveTab({ user, onNavigate }) {
   const [appointments, setAppointments] = useState([]);
@@ -100,8 +101,21 @@ export default function MyMoveTab({ user, onNavigate }) {
     </div>
   );
 
+  const movingCost = user?.moving_cost_estimate || 0;
+
   return (
     <div className="space-y-3">
+      {/* Current Move Cost */}
+      {movingCost > 0 && (
+        <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl px-4 py-3 flex items-center gap-3 text-white">
+          <DollarSign className="w-6 h-6 flex-shrink-0" />
+          <div className="flex-1">
+            <p className="text-xs font-semibold text-white/80">Current Move Cost</p>
+            <p className="text-2xl font-black">${movingCost.toLocaleString()}</p>
+          </div>
+        </div>
+      )}
+
       {/* Saved Insights from AI Assist */}
       <SavedInsights user={user} />
 
@@ -216,6 +230,9 @@ export default function MyMoveTab({ user, onNavigate }) {
           </div>
         )}
       </div>
+
+      {/* Move Directory */}
+      <MoveDirectory user={user} />
 
       {/* Quick stats row */}
       <div className="grid grid-cols-3 gap-2">
