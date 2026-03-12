@@ -5,10 +5,10 @@ import { useNavigate } from "react-router-dom";
 import { Loader2, ChevronRight, CheckCircle2, ChevronLeft, LogOut } from "lucide-react";
 
 const week1Questions = [
-  { id: "inventory", title: "Confirm What Stays & Goes", description: "Walk through your home and decide what to move, donate, or junk" },
-  { id: "movers", title: "Research Moving Companies", description: "Get quotes and book your movers early" },
-  { id: "supplies", title: "Order Packing Supplies", description: "Stock up on boxes, tape, and bubble wrap" },
-  { id: "utilities", title: "Schedule Utility Transfers", description: "Arrange for electric, gas, water, internet at new home" }
+  { id: "w1-1", title: "Confirm what stays vs. goes", description: "Furniture, appliances, personal items" },
+  { id: "w1-2", title: "Estate sale decision", description: "Find local estate sale professionals" },
+  { id: "w1-3", title: "Request mover quotes", description: "Compare 3 top-rated movers side by side" },
+  { id: "w1-4", title: "Start donation / sell pile", description: "What's worth selling vs. donating" }
 ];
 
 export default function Register() {
@@ -151,13 +151,8 @@ export default function Register() {
       // Save Week 1 selections and mark as complete
       const user = await base44.auth.me();
       
-      // Map the answers to task IDs (w1-1, w1-2, w1-3, w1-4)
-      const taskSelections = {
-        "w1-1": updatedAnswers.inventory || "skip",
-        "w1-2": updatedAnswers.movers || "skip",
-        "w1-3": updatedAnswers.supplies || "skip",
-        "w1-4": updatedAnswers.utilities || "skip"
-      };
+      // Save the answers directly (IDs already match w1-1, w1-2, w1-3, w1-4)
+      const taskSelections = updatedAnswers;
       
       localStorage.setItem(`user_selections_${user.id}`, JSON.stringify(taskSelections));
       localStorage.setItem(`walkthrough_done_w1_${user.id}`, "1");
