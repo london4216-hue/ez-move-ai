@@ -83,12 +83,18 @@ export default function ChecklistItemCard({ item, completed, skipped, onComplete
 
   return (
     <>
-    <div className={`rounded-xl border transition-all ${completed ? "border-[#FED7AA] bg-[#FFF7ED]" : "border-[#F3F4F6] bg-[#FAFAFA]"}`}>
+    <div className={`rounded-xl border transition-all ${
+      completed ? "border-[#FED7AA] bg-[#FFF7ED]" 
+      : !prereqsMet ? "border-[#FECACA] bg-[#FEE2E2]"
+      : "border-[#F3F4F6] bg-[#FAFAFA]"
+    }`}>
       <div className="flex items-center gap-3 p-3">
         <button
           onClick={onComplete}
+          disabled={!prereqsMet}
           className={`w-6 h-6 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all
             ${completed ? "bg-[#F97316] border-[#F97316]"
+              : !prereqsMet ? "border-[#FECACA] bg-[#FEE2E2] cursor-not-allowed"
               : savedIdx !== null ? "bg-[#059669] border-[#059669]"
               : "border-[#D1D5DB] hover:border-[#F97316]"}`}
         >
