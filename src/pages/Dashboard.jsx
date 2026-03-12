@@ -61,50 +61,50 @@ export default function Dashboard() {
     <div className="min-h-screen bg-slate-100 flex flex-col max-w-md mx-auto">
       {showOnboarding && <Week1OnboardingModal user={user} onDone={handleOnboardingDone} />}
       {/* Header */}
-      <div className="bg-white border-b border-slate-200 px-5 pt-12 pb-5">
+      <div className="bg-white border-b border-slate-200 px-4 pt-14 pb-4 safe-area-top">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-900/40">
-              <span className="text-white text-xs font-black tracking-tight">EZ</span>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-900/30">
+              <span className="text-white text-[10px] font-black tracking-tight">EZ</span>
             </div>
             <div>
-              <p className="text-slate-900 font-bold text-base leading-tight">
+              <p className="text-slate-900 font-bold text-sm leading-tight">
                 EZ Move <span className="text-orange-500">AI</span>
               </p>
               {user?.full_name && (
-                <p className="text-slate-400 text-[11px] leading-tight">Hi, {user.full_name.split(" ")[0]}</p>
+                <p className="text-slate-400 text-[10px] leading-tight">Hi, {user.full_name.split(" ")[0]}</p>
               )}
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             {closeStatus && (
-              <div className={`${closeStatus.color} rounded-full px-3 py-1`}>
-                <span className="text-white text-[11px] font-bold">{closeStatus.label}</span>
+              <div className={`${closeStatus.color} rounded-full px-2.5 py-1`}>
+                <span className="text-white text-[10px] font-bold">{closeStatus.label}</span>
               </div>
             )}
             <button
               onClick={() => base44.auth.logout(createPageUrl("Register"))}
-              className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-colors"
+              className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-colors"
             >
-              <span className="text-slate-600 text-xs font-bold">{user?.full_name?.[0] || "U"}</span>
+              <span className="text-slate-600 text-[10px] font-bold">{user?.full_name?.[0] || "U"}</span>
             </button>
           </div>
         </div>
 
         {/* Progress bar toward close */}
         {user?.estimated_close_date && user?.registration_date && (
-          <div className="mt-4">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-slate-500 text-[10px] font-semibold uppercase tracking-wider">Move Timeline</span>
-              <span className="text-orange-400 text-[10px] font-bold">
+          <div className="mt-3">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-slate-500 text-[9px] font-semibold uppercase tracking-wider">Move Timeline</span>
+              <span className="text-orange-400 text-[9px] font-bold">
                 {Math.max(0, Math.min(100, Math.round(
                   (differenceInDays(new Date(), parseISO(user.registration_date)) /
                     differenceInDays(parseISO(user.estimated_close_date), parseISO(user.registration_date))) * 100
                 )))}% complete
               </span>
             </div>
-            <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-orange-500 to-orange-400 rounded-full transition-all duration-700"
                 style={{
