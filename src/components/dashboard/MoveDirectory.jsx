@@ -284,6 +284,12 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
 
               <div className="flex gap-3 pt-2">
                 <button
+                  onClick={() => { setShowEditModal(false); setSelectedContact(null); }}
+                  className="flex-1 py-3 rounded-xl border-2 border-slate-200 text-slate-700 font-bold"
+                >
+                  Close
+                </button>
+                <button
                   onClick={async () => {
                     await base44.entities.Contact.update(selectedContact.id, {
                       ...selectedContact,
@@ -298,7 +304,7 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
                     disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   <Check className="w-4 h-4" />
-                  Save Changes
+                  Save
                 </button>
                 <button
                   onClick={async () => {
