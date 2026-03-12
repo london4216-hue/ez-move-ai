@@ -144,7 +144,7 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
     if (savedSelections) setUserSelections(JSON.parse(savedSelections));
   }, [user?.id]);
 
-  // Check if walkthrough needed for current week
+  // Check if walkthrough needed for current week (auto-prompt on login)
   useEffect(() => {
     if (!user?.id) return;
     const walkthroughDone = localStorage.getItem(`walkthrough_done_w${currentWeek}_${user.id}`);
@@ -153,6 +153,12 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
       setShowWalkthrough(true);
     }
   }, [user?.id, currentWeek]);
+
+  // Allow users to manually launch future week setup
+  const launchWeekSetup = (weekNum) => {
+    setWalkthroughWeek(weekNum);
+    setShowWalkthrough(true);
+  };
 
   const handleWalkthroughDone = (answers) => {
     // Store user selections: yes, maybe, skip
@@ -433,20 +439,26 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
       {/* Week tabs */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
         <div className="flex overflow-x-auto no-scrollbar border-b border-slate-100">
-          {Array.from({ length: totalWeeks }, (_, i) => i + 1).map(w => (
-            <button
-              key={w}
-              onClick={() => { setActiveWeek(w); setAddingTask(false); }}
-              className={`flex-1 min-w-[60px] py-3 px-2 text-xs font-bold transition-all whitespace-nowrap relative
-                ${activeWeek === w ? "text-orange-500" : isWeekLocked(w) ? "text-slate-300" : "text-slate-400"}`}
-            >
-              {w === currentWeek && (
-                <div className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-orange-500" />
-              )}
-              {`Wk ${w}`}
-              {activeWeek === w && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500 rounded-full" />}
-            </button>
-          ))}
+          {Array.from({ length: totalWeeks }, (_, i) => i + 1).map(w => {
+            const isSetup = localStorage.getItem(`walkthrough_done_w${w}_${user?.id}`);
+            return (
+              <button
+                key={w}
+                onClick={() => { setActiveWeek(w); setAddingTask(false); }}
+                className={`flex-1 min-w-[60px] py-3 px-2 text-xs font-bold transition-all whitespace-nowrap relative
+                  ${activeWeek === w ? "text-orange-500" : isWeekLocked(w) ? "text-slate-300" : "text-slate-400"}`}
+              >
+                {w === currentWeek && (
+                  <div className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-orange-500" />
+                )}
+                {!isSetup && w > 1 && (
+                  <div className="absolute top-1.5 left-1.5 w-1.5 h-1.5 rounded-full bg-amber-400" />
+                )}
+                {`Wk ${w}`}
+                {activeWeek === w && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500 rounded-full" />}
+              </button>
+            );
+          })}
         </div>
 
         {/* Week header */}
@@ -457,6 +469,15 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
           </div>
           {weekDateRange && <p className="text-[10px] text-slate-400 mb-1">{weekDateRange}</p>}
           <p className="text-xs text-slate-500 mb-2.5">{weekData?.subtitle}</p>
+          
+          {!localStorage.getItem(`walkthrough_done_w${activeWeek}_${user?.id}`) && (
+            <button
+              onClick={() => launchWeekSetup(activeWeek)}
+              className="w-full mb-3 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-md"
+            >
+              ⚡ Set Up Week {activeWeek}
+            </button>
+          )}
           <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
             <div
               className="h-full bg-gradient-to-r from-orange-500 to-orange-400 rounded-full transition-all duration-500"
