@@ -96,56 +96,88 @@ export default function WeekWalkthrough({ weekData, weekNum, onDone }) {
         </div>
 
         <div className="px-5 pt-4 pb-8">
-          <div className="mb-6">
-            <p className="text-2xl mb-3">
-              {stepIdx === 0 ? "📋" : stepIdx === 1 ? "🎯" : stepIdx === 2 ? "⚡" : "✅"}
-            </p>
-            <h2 className="text-xl font-black text-slate-900 mb-2">{item.title}</h2>
-            {item.description && (
-              <p className="text-sm text-slate-500 leading-relaxed">{item.description}</p>
-            )}
-          </div>
+          {!subStep ? (
+            <>
+              <div className="mb-6">
+                <p className="text-2xl mb-3">
+                  {stepIdx === 0 ? "📋" : stepIdx === 1 ? "🎯" : stepIdx === 2 ? "⚡" : "✅"}
+                </p>
+                <h2 className="text-xl font-black text-slate-900 mb-2">{item.title}</h2>
+                {item.description && (
+                  <p className="text-sm text-slate-500 leading-relaxed">{item.description}</p>
+                )}
+              </div>
 
-          <p className="text-xs text-slate-400 font-semibold mb-3">Will you do this this week?</p>
+              <p className="text-xs text-slate-400 font-semibold mb-3">Will you do this this week?</p>
 
-          <div className="space-y-2.5">
-            <button
-              onClick={() => handleAnswer("yes")}
-              className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-orange-500/30 active:scale-[0.98] transition-transform"
-            >
-              <CheckCircle2 className="w-4 h-4" />
-              Yes, add to my plan
-              <ChevronRight className="w-4 h-4 ml-auto" />
-            </button>
-            <button
-              onClick={() => handleAnswer("maybe")}
-              className="w-full py-3.5 rounded-2xl border-2 border-amber-300 bg-amber-50 text-amber-700 text-sm font-bold active:scale-[0.98] transition-transform"
-            >
-              🤔 Maybe — add later
-            </button>
-            <button
-              onClick={() => handleAnswer("skip")}
-              className="w-full py-3 rounded-2xl border border-slate-200 text-slate-400 text-sm font-semibold active:scale-[0.98] transition-transform"
-            >
-              No, don't add to my plan
-            </button>
-          </div>
+              <div className="space-y-2.5">
+                <button
+                  onClick={() => handleMainAnswer("yes")}
+                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-orange-500/30 active:scale-[0.98] transition-transform"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  Yes, add to my plan
+                  <ChevronRight className="w-4 h-4 ml-auto" />
+                </button>
+                <button
+                  onClick={() => handleMainAnswer("maybe")}
+                  className="w-full py-3.5 rounded-2xl border-2 border-amber-300 bg-amber-50 text-amber-700 text-sm font-bold active:scale-[0.98] transition-transform"
+                >
+                  🤔 Maybe — add later
+                </button>
+                <button
+                  onClick={() => handleMainAnswer("skip")}
+                  className="w-full py-3 rounded-2xl border border-slate-200 text-slate-400 text-sm font-semibold active:scale-[0.98] transition-transform"
+                >
+                  No, don't add to my plan
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="mb-6">
+                <p className="text-2xl mb-3">🗑️</p>
+                <h2 className="text-xl font-black text-slate-900 mb-2">What's happening to this?</h2>
+                <p className="text-sm text-slate-500 leading-relaxed">For each item you're getting rid of, where is it going?</p>
+              </div>
 
-          <div className="flex gap-2 mt-6 pt-4 border-t border-slate-100">
-            <button
-              onClick={() => onDone(answers)}
-              className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm active:scale-[0.98] transition-transform"
-            >
-              <ChevronLeft className="w-4 h-4 inline mr-1" />
-              Back
-            </button>
-            <button
-              onClick={handleSave}
-              className="flex-1 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm active:scale-[0.98] transition-transform"
-            >
-              Save & Close
-            </button>
-          </div>
+              <div className="space-y-2.5">
+                <button
+                  onClick={() => handleSubAnswer("junk")}
+                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-red-500 to-red-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-red-500/30 active:scale-[0.98] transition-transform"
+                >
+                  🗑️ Junk It
+                  <ChevronRight className="w-4 h-4 ml-auto" />
+                </button>
+                <button
+                  onClick={() => handleSubAnswer("donate")}
+                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/30 active:scale-[0.98] transition-transform"
+                >
+                  🫶 Donate
+                  <ChevronRight className="w-4 h-4 ml-auto" />
+                </button>
+                <button
+                  onClick={() => handleSubAnswer("sell")}
+                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30 active:scale-[0.98] transition-transform"
+                >
+                  💰 Sell It
+                  <ChevronRight className="w-4 h-4 ml-auto" />
+                </button>
+              </div>
+            </>
+          )}
+
+          {!subStep && (
+            <div className="flex gap-2 mt-6 pt-4 border-t border-slate-100">
+              <button
+                onClick={() => onDone(answers)}
+                className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm active:scale-[0.98] transition-transform"
+              >
+                <ChevronLeft className="w-4 h-4 inline mr-1" />
+                Close
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
