@@ -4,10 +4,17 @@ import { CheckCircle2, ChevronRight, X, Loader2, Phone } from "lucide-react";
 
 const STEPS = [
   {
+    id: "mover_question",
+    emoji: "🚛",
+    title: "Will you need a mover?",
+    subtitle: "This helps us customize your plan and recommendations.",
+    cta: "Continue →",
+  },
+  {
     id: "welcome",
     emoji: "👋",
     title: "Welcome to EZ Move AI!",
-    subtitle: "Let's get your Week 1 set up in 3 quick steps so nothing falls through the cracks.",
+    subtitle: "Let's get your Week 1 set up in 4 quick steps so nothing falls through the cracks.",
     cta: "Let's Go →",
   },
   {
@@ -44,6 +51,7 @@ const STAYS_GOES_ITEMS = [
 
 export default function Week1OnboardingModal({ user, onDone }) {
   const [stepIdx, setStepIdx] = useState(0);
+  const [needsMover, setNeedsMover] = useState(null);
   const [decisions, setDecisions] = useState({}); // itemLabel -> "moving"|"donate"|null
   const [movers, setMovers] = useState([]);
   const [loadingMovers, setLoadingMovers] = useState(false);
@@ -88,8 +96,18 @@ export default function Week1OnboardingModal({ user, onDone }) {
     setMoversLoaded(true);
   };
 
+  const handleMoverAnswer = async (answer) => {
+    setNeedsMover(answer);
+    try {
+      await base44.auth.updateMe({ needs_mover: answer });
+    } catch (e) {
+      console.error('Failed to save mover preference:', e);
+    }
+    setStepIdx(i => i + 1);
+  };
+
   const handleNext = () => {
-    if (stepIdx === 1) {
+    if (stepIdx === 2) {
       // entering movers step — preload
       fetchMovers();
     }
@@ -128,6 +146,31 @@ export default function Week1OnboardingModal({ user, onDone }) {
 
         {/* Content */}
         <div className="px-5 pt-3 pb-6">
+
+          {/* Mover Question */}
+          {step.id === "mover_question" && (
+            <div className="text-center pt-2 pb-4">
+              <div className="text-5xl mb-4">{step.emoji}</div>
+              <h2 className="text-xl font-black text-slate-900 mb-2">{step.title}</h2>
+              <p className="text-sm text-slate-500 leading-relaxed mb-6">{step.subtitle}</p>
+              <div className="space-y-3">
+                <button
+                  onClick={() => handleMoverAnswer(true)}
+                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm
+                    active:scale-[0.98] transition-all shadow-lg shadow-orange-200"
+                >
+                  Yes, I need a mover
+                </button>
+                <button
+                  onClick={() => handleMoverAnswer(false)}
+                  className="w-full py-4 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm
+                    active:scale-[0.98] transition-all hover:border-orange-400 hover:bg-orange-50"
+                >
+                  No, I'll move myself
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Welcome step */}
           {step.id === "welcome" && (
@@ -235,14 +278,16 @@ export default function Week1OnboardingModal({ user, onDone }) {
             </div>
           )}
 
-          {/* CTA Button */}
-          <button
-            onClick={handleNext}
-            className="w-full mt-4 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-500/30 flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
-          >
-            {step.cta}
-            {stepIdx < STEPS.length - 1 && <ChevronRight className="w-4 h-4" />}
-          </button>
+          {/* CTA Button - hide for mover question since it has its own buttons */}
+          {step.id !== "mover_question" && (
+            <button
+              onClick={handleNext}
+              className="w-full mt-4 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-500/30 flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+            >
+              {step.cta}
+              {stepIdx < STEPS.length - 1 && <ChevronRight className="w-4 h-4" />}
+            </button>
+          )}
 
           {stepIdx > 0 && stepIdx < STEPS.length - 1 && (
             <button onClick={handleSkip} className="w-full mt-2 py-2 text-xs text-slate-400 font-semibold">
