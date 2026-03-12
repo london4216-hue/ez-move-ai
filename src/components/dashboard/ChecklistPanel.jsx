@@ -130,6 +130,7 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
   const [contacts, setContacts] = useState([]);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
+  const [expandedWeeks, setExpandedWeeks] = useState(new Set([currentWeek]));
 
   useEffect(() => {
     if (!user) return;
