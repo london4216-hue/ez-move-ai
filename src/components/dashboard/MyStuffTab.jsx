@@ -305,7 +305,7 @@ export default function MyStuffTab({ user }) {
   if (!activeList) {
     return (
       <div className="space-y-3">
-        <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl px-4 py-4 border border-slate-200">
+        <div className="bg-white rounded-2xl px-4 py-4 border border-slate-100">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-slate-800 font-black text-base">My Stuff</p>
