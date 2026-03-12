@@ -22,7 +22,7 @@ const BASE_WEEKS = {
     title: "Week 2 — Clearing & Logistics",
     subtitle: "Reduce clutter and lock in logistics.",
     items: [
-      { id: "w2-1", title: "Finalize mover", description: "Confirm date aligned with closing timeline", ai_search_query: null },
+      { id: "w2-1", title: "Finalize mover", description: "Confirm date aligned with closing timeline", ai_search_query: null, prerequisites: ["w1-1", "w1-4"] },
       { id: "w2-2", title: "Schedule estate sale", description: "Suggested date based on close date", ai_search_query: null },
       { id: "w2-3", title: "Order packing supplies", description: "Boxes, labels, tape, wardrobe boxes", ai_search_query: null },
       { id: "w2-4", title: "Begin packing non-essentials", description: "Seasonal items, storage rooms, decor", ai_search_query: null },
