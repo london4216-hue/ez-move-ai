@@ -148,10 +148,27 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
     const savedRemoved = localStorage.getItem(`checklist_removed_${user?.id}`);
     const savedCustom = localStorage.getItem(`checklist_custom_${user?.id}`);
     const savedSelections = localStorage.getItem(`user_selections_${user?.id}`);
+    const onboardingAnswers = localStorage.getItem(`week1_answers_${user?.id}`);
+    
     if (saved) setCompletedIds(new Set(JSON.parse(saved)));
     if (savedRemoved) setRemovedIds(new Set(JSON.parse(savedRemoved)));
     if (savedCustom) setCustomItems(JSON.parse(savedCustom));
-    if (savedSelections) setUserSelections(JSON.parse(savedSelections));
+    
+    // Initialize selections from onboarding answers first
+    let initSelections = {};
+    if (onboardingAnswers) {
+      const answers = JSON.parse(onboardingAnswers);
+      Object.entries(answers).forEach(([id, answer]) => {
+        initSelections[id] = answer; // "yes", "maybe", or "skip"
+      });
+    }
+    
+    // Merge with saved selections (saved ones take precedence)
+    if (savedSelections) {
+      initSelections = { ...initSelections, ...JSON.parse(savedSelections) };
+    }
+    
+    setUserSelections(initSelections);
   }, [user?.id]);
 
   // Mark Week 1 as already set up (done during registration)
