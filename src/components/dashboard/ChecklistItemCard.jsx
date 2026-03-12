@@ -6,7 +6,7 @@ import ProviderAppointmentModal from "./ProviderAppointmentModal";
 import TaskWorkflowModal from "./TaskWorkflowModal";
 import SavedStuffModal from "./SavedStuffModal";
 
-export default function ChecklistItemCard({ item, completed, skipped, onComplete, onSkip, userAddress, onProviderSaved, user }) {
+export default function ChecklistItemCard({ item, completed, skipped, onComplete, onSkip, userAddress, onProviderSaved, user, completedIds, allItems }) {
   const [expanded, setExpanded] = useState(false);
   const [aiResults, setAiResults] = useState(null);
   const [loadingAI, setLoadingAI] = useState(false);
@@ -15,6 +15,12 @@ export default function ChecklistItemCard({ item, completed, skipped, onComplete
   const [appointmentProvider, setAppointmentProvider] = useState(null);
   const [showWorkflow, setShowWorkflow] = useState(false);
   const [showStuffLists, setShowStuffLists] = useState(false);
+
+  // Check prerequisites
+  const prerequisites = item.prerequisites || [];
+  const prereqsMet = prerequisites.length === 0 || prerequisites.every(id => completedIds?.has(id));
+  const missingPrereqs = prerequisites.filter(id => !completedIds?.has(id));
+  const getPrereqTitle = (id) => allItems?.find(i => i.id === id)?.title || id;
 
   const handleFindLocal = async () => {
     setLoadingAI(true);
