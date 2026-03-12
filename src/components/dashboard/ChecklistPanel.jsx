@@ -420,11 +420,7 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
             return (
               <div key={weekNum} className="rounded-2xl border border-slate-200 overflow-hidden">
                 <button
-                  onClick={() => {
-                    const newExpanded = new Set(expandedWeeks);
-                    isExpanded ? newExpanded.delete(weekNum) : newExpanded.add(weekNum);
-                    setExpandedWeeks(newExpanded);
-                  }}
+                  onClick={() => launchWeekSetup(weekNum)}
                   className="w-full px-3 py-2.5 bg-slate-50 border-b border-slate-100 flex items-center justify-between hover:bg-slate-100 transition-colors"
                 >
                   <div className="flex items-center gap-2 flex-1 min-w-0">
