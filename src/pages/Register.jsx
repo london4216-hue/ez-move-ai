@@ -20,6 +20,7 @@ export default function Register() {
   const [answers, setAnswers] = useState({});
   const [estimatedMoveCost, setEstimatedMoveCost] = useState("");
   const [moveDate, setMoveDate] = useState("");
+  const [detailsSaved, setDetailsSaved] = useState(false);
   const refs = [null, null, null, null].map(() => ({ current: null }));
   const navigate = useNavigate();
 
@@ -42,9 +43,22 @@ export default function Register() {
     if (e.key === "Backspace" && !digits[i] && i > 0) refs[i - 1].current?.focus();
   };
 
+  const handleSaveDetails = () => {
+    if (!moveDate || !estimatedMoveCost) {
+      setError("Please fill in both fields");
+      return;
+    }
+    setDetailsSaved(true);
+    setError("");
+  };
+
   const handleVerify = async () => {
     const code = digits.join("");
     if (code.length !== 4) return;
+    if (!detailsSaved) {
+      setError("Please save your move details first");
+      return;
+    }
     setLoading(true);
     setError("");
     try {
@@ -256,8 +270,9 @@ export default function Register() {
             <input
               type="date"
               value={moveDate}
-              onChange={(e) => setMoveDate(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10 bg-white"
+              onChange={(e) => { setMoveDate(e.target.value); setDetailsSaved(false); }}
+              disabled={detailsSaved}
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10 bg-white disabled:bg-slate-50 disabled:text-slate-500"
             />
           </div>
           <div>
@@ -266,15 +281,30 @@ export default function Register() {
               type="text"
               placeholder="e.g., $2,500"
               value={estimatedMoveCost}
-              onChange={(e) => setEstimatedMoveCost(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10 bg-white"
+              onChange={(e) => { setEstimatedMoveCost(e.target.value); setDetailsSaved(false); }}
+              disabled={detailsSaved}
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10 bg-white disabled:bg-slate-50 disabled:text-slate-500"
             />
           </div>
+          
+          {!detailsSaved ? (
+            <button
+              onClick={handleSaveDetails}
+              className="w-full py-3 rounded-xl bg-orange-500 text-white font-bold text-sm active:scale-[0.98] transition-all"
+            >
+              Save Details
+            </button>
+          ) : (
+            <div className="flex items-center justify-center gap-2 py-3 bg-emerald-50 rounded-xl">
+              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+              <span className="text-sm font-bold text-emerald-600">Details saved</span>
+            </div>
+          )}
         </div>
 
         <button
           onClick={handleVerify}
-          disabled={!allFilled || loading}
+          disabled={!allFilled || loading || !detailsSaved}
           className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm
             disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all shadow-lg shadow-orange-200 flex items-center justify-center gap-2"
         >
