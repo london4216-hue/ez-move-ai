@@ -113,13 +113,21 @@ export default function ChecklistItemCard({ item, completed, skipped, onComplete
           <p className="text-[11px] text-[#6B7280]">{item.description}</p>
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 flex-wrap">
           {item.inventory_walkthrough && !completed && (
             <button
               onClick={() => setShowInventory(true)}
               className="flex items-center gap-1 px-2 py-1 rounded-lg bg-[#EEF2FF] text-[#4F46E5] text-[10px] font-bold whitespace-nowrap"
             >
               <ClipboardList className="w-2.5 h-2.5" />Walk-thru
+            </button>
+          )}
+          {item.inventory_walkthrough && !completed && (
+            <button
+              onClick={() => setShowStuffLists(true)}
+              className="flex items-center gap-1 px-2 py-1 rounded-lg bg-[#F3E8FF] text-[#7C3AED] text-[10px] font-bold whitespace-nowrap"
+            >
+              <Eye className="w-2.5 h-2.5" />My Stuff
             </button>
           )}
           {item.amazon_search && !completed && (
