@@ -99,6 +99,22 @@ export default function WeekWalkthrough({ weekData, weekNum, onDone }) {
               No, don't add to my plan
             </button>
           </div>
+
+          <div className="flex gap-2 mt-6 pt-4 border-t border-slate-100">
+            <button
+              onClick={() => onDone(answers)}
+              className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm active:scale-[0.98] transition-transform"
+            >
+              <ChevronLeft className="w-4 h-4 inline mr-1" />
+              Back
+            </button>
+            <button
+              onClick={handleSave}
+              className="flex-1 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm active:scale-[0.98] transition-transform"
+            >
+              Save & Close
+            </button>
+          </div>
         </div>
       </div>
     </div>
