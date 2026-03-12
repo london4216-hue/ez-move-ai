@@ -12,10 +12,14 @@ export default function WeekWalkthrough({ weekData, weekNum, onDone }) {
   const handleAnswer = (answer) => {
     setAnswers(a => ({ ...a, [item.id]: answer }));
     if (isLast) {
-      onDone(answers);
+      onDone({ ...answers, [item.id]: answer });
     } else {
       setStepIdx(i => i + 1);
     }
+  };
+
+  const handleSave = () => {
+    onDone(answers);
   };
 
   if (!item) return null;
