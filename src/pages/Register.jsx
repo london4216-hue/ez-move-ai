@@ -18,6 +18,8 @@ export default function Register() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingStep, setOnboardingStep] = useState(0);
   const [answers, setAnswers] = useState({});
+  const [estimatedMoveCost, setEstimatedMoveCost] = useState("");
+  const [moveDate, setMoveDate] = useState("");
   const refs = [null, null, null, null].map(() => ({ current: null }));
   const navigate = useNavigate();
 
@@ -65,6 +67,8 @@ export default function Register() {
           home_address: client.home_address || "",
           estimated_close_date: client.close_date || "",
           registration_date: new Date().toISOString().split("T")[0],
+          estimated_move_cost: estimatedMoveCost || "",
+          move_date: moveDate || "",
         });
         
         // Send welcome email to registered user
@@ -81,6 +85,8 @@ export default function Register() {
       } else {
         await base44.auth.updateMe({
           registration_date: new Date().toISOString().split("T")[0],
+          estimated_move_cost: estimatedMoveCost || "",
+          move_date: moveDate || "",
         });
       }
       
@@ -243,6 +249,28 @@ export default function Register() {
             <p className="text-sm text-red-600 text-center font-medium">{error}</p>
           </div>
         )}
+
+        <div className="space-y-3 mb-4">
+          <div>
+            <label className="text-xs font-semibold text-slate-600 mb-1.5 block">Move Date</label>
+            <input
+              type="date"
+              value={moveDate}
+              onChange={(e) => setMoveDate(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10 bg-white"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-semibold text-slate-600 mb-1.5 block">Estimated Move Cost</label>
+            <input
+              type="text"
+              placeholder="e.g., $2,500"
+              value={estimatedMoveCost}
+              onChange={(e) => setEstimatedMoveCost(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10 bg-white"
+            />
+          </div>
+        </div>
 
         <button
           onClick={handleVerify}
