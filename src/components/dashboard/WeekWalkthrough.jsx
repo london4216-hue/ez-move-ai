@@ -4,22 +4,57 @@ import { ChevronRight, CheckCircle2, ChevronLeft } from "lucide-react";
 export default function WeekWalkthrough({ weekData, weekNum, onDone }) {
   const items = weekData?.items || [];
   const [stepIdx, setStepIdx] = useState(0);
-  const [answers, setAnswers] = useState({}); // id -> "yes" | "skip"
+  const [answers, setAnswers] = useState({}); // id -> { answer, subAnswers: [] }
+  const [subStep, setSubStep] = useState(null); // null or "junk_donate_sell"
 
   const item = items[stepIdx];
+  const itemAnswer = answers[item?.id];
   const isLast = stepIdx === items.length - 1;
 
-  const handleAnswer = (answer) => {
-    setAnswers(a => ({ ...a, [item.id]: answer }));
+  const handleMainAnswer = (answer) => {
+    if (answer === "yes") {
+      // Start sub-questions for junk/donate/sell
+      setAnswers(a => ({
+        ...a,
+        [item.id]: { answer, subAnswers: [] }
+      }));
+      setSubStep("junk_donate_sell");
+    } else {
+      // Skip this item
+      setAnswers(a => ({
+        ...a,
+        [item.id]: { answer, subAnswers: [] }
+      }));
+      goToNext();
+    }
+  };
+
+  const handleSubAnswer = (subAnswer) => {
+    setAnswers(a => ({
+      ...a,
+      [item.id]: {
+        ...a[item.id],
+        subAnswers: [...(a[item.id]?.subAnswers || []), subAnswer]
+      }
+    }));
+    setSubStep(null);
+    goToNext();
+  };
+
+  const goToNext = () => {
     if (isLast) {
-      onDone({ ...answers, [item.id]: answer });
+      onDone(answers);
     } else {
       setStepIdx(i => i + 1);
     }
   };
 
-  const handleSave = () => {
-    onDone(answers);
+  const handleBack = () => {
+    if (subStep) {
+      setSubStep(null);
+    } else if (stepIdx > 0) {
+      setStepIdx(i => i - 1);
+    }
   };
 
   if (!item) return null;
