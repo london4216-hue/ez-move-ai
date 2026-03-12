@@ -162,15 +162,30 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
     }
   }, [user?.id]);
 
-  // Check if walkthrough needed for current week (auto-prompt on login)
+  // Check if walkthrough needed - trigger on Friday before the week starts
   useEffect(() => {
-    if (!user?.id || currentWeek === 1) return;
-    const walkthroughDone = localStorage.getItem(`walkthrough_done_w${currentWeek}_${user.id}`);
-    if (!walkthroughDone) {
-      setWalkthroughWeek(currentWeek);
-      setShowWalkthrough(true);
+    if (!user?.id || !user?.registration_date) return;
+    
+    const now = new Date();
+    const regDate = parseISO(user.registration_date);
+    
+    // For each week 2+, check if we should trigger the walkthrough
+    for (let weekNum = 2; weekNum <= totalWeeks; weekNum++) {
+      const walkthroughDone = localStorage.getItem(`walkthrough_done_w${weekNum}_${user.id}`);
+      if (walkthroughDone) continue;
+      
+      // Calculate the Friday before the week starts
+      const weekStartDate = addDays(regDate, (weekNum - 1) * 7);
+      const fridayBefore = addDays(weekStartDate, -3); // 3 days before Monday = Friday
+      
+      // Trigger if today is on or after that Friday and before the week starts
+      if (now >= fridayBefore && now < weekStartDate) {
+        setWalkthroughWeek(weekNum);
+        setShowWalkthrough(true);
+        break; // Only show one at a time
+      }
     }
-  }, [user?.id, currentWeek]);
+  }, [user?.id, user?.registration_date, totalWeeks]);
 
   // Allow users to manually launch future week setup
   const launchWeekSetup = (weekNum) => {
