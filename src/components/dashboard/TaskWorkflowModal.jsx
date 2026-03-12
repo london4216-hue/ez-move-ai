@@ -244,11 +244,12 @@ export default function TaskWorkflowModal({ task, user, onClose, onComplete }) {
                       avatar_initials: selectedProvider?.name?.slice(0, 2).toUpperCase() || "NA",
                       color: "orange"
                     });
+                    onComplete();
                     onClose();
                   }}
-                  className="flex-1 py-3 rounded-xl border-2 border-slate-200 text-slate-700 font-bold"
+                  className="flex-1 py-3 rounded-xl bg-green-500 text-white font-bold"
                 >
-                  Save & Exit
+                  Save
                 </button>
                 {callSuccess !== null && (
                   <button
