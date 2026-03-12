@@ -25,7 +25,7 @@ export default function AgentDashboard() {
 
   // Add client flow: "form" | "payment" | "done"
   const [addStep, setAddStep] = useState(null); // null = closed
-  const [form, setForm] = useState({ name: "", email: "", close_date: "" });
+  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", close_date: "" });
   const [pendingClient, setPendingClient] = useState(null); // saved client before payment
   const [paying, setPaying] = useState(false);
   const [doneData, setDoneData] = useState(null); // { name, code }
@@ -68,20 +68,21 @@ export default function AgentDashboard() {
 
   const resetAdd = () => {
     setAddStep(null);
-    setForm({ name: "", email: "", close_date: "" });
+    setForm({ firstName: "", lastName: "", email: "", close_date: "" });
     setPendingClient(null);
     setDoneData(null);
   };
 
-  const canSaveForm = form.name.trim() && form.email.trim() && form.close_date;
+  const canSaveForm = form.firstName.trim() && form.lastName.trim() && form.email.trim() && form.close_date;
 
   // Step 1: Save client info → move to payment
   const handleSaveClient = async () => {
     const code = Math.floor(1000 + Math.random() * 9000).toString();
+    const fullName = `${form.firstName} ${form.lastName}`;
     const newClient = await base44.entities.Client.create({
       agent_id: agent.id,
       user_email: form.email,
-      user_name: form.name,
+      user_name: fullName,
       close_date: form.close_date,
       invitation_code: code,
       status: "invited",
@@ -343,8 +344,29 @@ export default function AgentDashboard() {
               {addStep === "form" && (
                 <div className="space-y-4">
                   <p className="text-xs text-slate-400">Enter the client's details. You'll pay after saving.</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wide block mb-1">First Name</label>
+                      <input
+                        type="text"
+                        value={form.firstName}
+                        onChange={e => setForm(p => ({ ...p, firstName: e.target.value }))}
+                        placeholder="Jane"
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wide block mb-1">Last Name</label>
+                      <input
+                        type="text"
+                        value={form.lastName}
+                        onChange={e => setForm(p => ({ ...p, lastName: e.target.value }))}
+                        placeholder="Smith"
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10"
+                      />
+                    </div>
+                  </div>
                   {[
-                    { label: "First & Last Name", key: "name", type: "text", placeholder: "Jane Smith" },
                     { label: "Email Address", key: "email", type: "email", placeholder: "jane@email.com" },
                     { label: "Estimated Close Date", key: "close_date", type: "date" },
                   ].map(f => (
