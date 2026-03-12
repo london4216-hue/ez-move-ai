@@ -362,14 +362,34 @@ export default function Register() {
           </div>
         </div>
 
-        <button
-          onClick={handleVerify}
-          disabled={!allFilled || loading || !detailsSaved}
-          className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm
-            disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all shadow-lg shadow-orange-200 flex items-center justify-center gap-2"
-        >
-          {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Verifying...</> : "Continue →"}
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={() => {
+              const currentState = {
+                digits,
+                estimatedMoveCost,
+                moveDate,
+                phoneNumber,
+                detailsSaved,
+                timestamp: Date.now()
+              };
+              localStorage.setItem('register_progress', JSON.stringify(currentState));
+              navigate(-1);
+            }}
+            className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 hover:bg-slate-50"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            Back
+          </button>
+          <button
+            onClick={handleVerify}
+            disabled={!allFilled || loading || !detailsSaved}
+            className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm
+              disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all shadow-lg shadow-orange-200 flex items-center justify-center gap-2"
+          >
+            {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Verifying...</> : "Continue →"}
+          </button>
+        </div>
 
         <p className="text-center text-xs text-slate-400 mt-4">
           No code? <span className="text-orange-500 font-semibold">Contact your agent</span>
