@@ -8,6 +8,8 @@ export default function Register() {
   const [digits, setDigits] = useState(["", "", "", ""]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showMoverQuestion, setShowMoverQuestion] = useState(false);
+  const [needsMover, setNeedsMover] = useState(null);
   const refs = [null, null, null, null].map(() => ({ current: null }));
   const navigate = useNavigate();
 
@@ -51,11 +53,6 @@ export default function Register() {
           status: "registered",
           user_email: currentUser.email,
         });
-        await base44.auth.updateMe({
-          home_address: client.home_address || "",
-          estimated_close_date: client.close_date || "",
-          registration_date: new Date().toISOString().split("T")[0],
-        });
         
         // Send welcome email to registered user
         try {
@@ -68,11 +65,40 @@ export default function Register() {
         } catch (emailError) {
           console.error('Failed to send welcome email:', emailError);
         }
+      }
+      
+      // Show mover question before completing registration
+      setShowMoverQuestion(true);
+      setLoading(false);
+    } catch (e) {
+      console.error(e);
+      setError("Something went wrong. Please try again.");
+    }
+    setLoading(false);
+  };
+
+  const handleMoverAnswer = async (answer) => {
+    setNeedsMover(answer);
+    setLoading(true);
+    try {
+      const currentUser = await base44.auth.me();
+      const clients = await base44.entities.Client.filter({ invitation_code: digits.join("") });
+      
+      if (clients.length > 0) {
+        const client = clients[0];
+        await base44.auth.updateMe({
+          home_address: client.home_address || "",
+          estimated_close_date: client.close_date || "",
+          registration_date: new Date().toISOString().split("T")[0],
+          needs_mover: answer,
+        });
       } else {
         await base44.auth.updateMe({
           registration_date: new Date().toISOString().split("T")[0],
+          needs_mover: answer,
         });
       }
+      
       navigate(createPageUrl("Dashboard"));
     } catch (e) {
       console.error(e);
@@ -82,6 +108,57 @@ export default function Register() {
   };
 
   const allFilled = digits.every(d => d !== "");
+
+  if (showMoverQuestion) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-5">
+        <div className="absolute top-12 left-1/2 -translate-x-1/2">
+          <div className="flex items-center gap-2.5">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-200">
+              <span className="text-white text-sm font-black">EZ</span>
+            </div>
+            <span className="text-slate-800 font-bold text-lg tracking-tight">
+              EZ Move <span className="text-orange-500">AI</span>
+            </span>
+          </div>
+        </div>
+
+        <div className="w-full max-w-sm bg-white rounded-3xl p-7 shadow-2xl mt-16">
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-bold text-slate-800 mb-2">Welcome! 👋</h1>
+            <p className="text-sm text-slate-500 leading-relaxed">
+              Let's get started with a quick question
+            </p>
+          </div>
+
+          <div className="mb-6">
+            <p className="text-lg font-semibold text-slate-700 text-center mb-4">
+              Will you need a mover?
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <button
+              onClick={() => handleMoverAnswer(true)}
+              disabled={loading}
+              className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm
+                disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all shadow-lg shadow-orange-200"
+            >
+              Yes, I need a mover
+            </button>
+            <button
+              onClick={() => handleMoverAnswer(false)}
+              disabled={loading}
+              className="w-full py-4 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm
+                disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all hover:border-orange-400 hover:bg-orange-50"
+            >
+              No, I'll move myself
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-5">
