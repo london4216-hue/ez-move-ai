@@ -155,6 +155,7 @@ export default function Register() {
       const taskSelections = updatedAnswers;
       
       localStorage.setItem(`user_selections_${user.id}`, JSON.stringify(taskSelections));
+      localStorage.setItem(`week1_answers_${user.id}`, JSON.stringify(taskSelections));
       localStorage.setItem(`walkthrough_done_w1_${user.id}`, "1");
       navigate(createPageUrl("Dashboard"));
     } else {
