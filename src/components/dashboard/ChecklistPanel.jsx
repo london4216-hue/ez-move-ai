@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { differenceInDays, parseISO, addDays, format, isWithinInterval, startOfWeek, endOfWeek } from "date-fns";
-import { CalendarDays, Phone, X, Save } from "lucide-react";
+import { CalendarDays, Phone, X, Save, ChevronDown, ChevronUp } from "lucide-react";
 
 import ChecklistItemCard from "./ChecklistItemCard";
 import WeekWalkthrough from "./WeekWalkthrough";
