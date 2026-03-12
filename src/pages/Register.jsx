@@ -93,13 +93,25 @@ export default function Register() {
     }
   };
 
-  const handleAnswer = (answer) => {
+  const handleAnswer = async (answer) => {
     const question = week1Questions[onboardingStep];
-    setAnswers(prev => ({ ...prev, [question.id]: answer }));
+    const updatedAnswers = { ...answers, [question.id]: answer };
+    setAnswers(updatedAnswers);
     
     if (onboardingStep === week1Questions.length - 1) {
-      localStorage.setItem(`user_selections_${Date.now()}`, JSON.stringify(answers));
-      localStorage.setItem(`walkthrough_done_w1_temp`, "1");
+      // Save Week 1 selections and mark as complete
+      const user = await base44.auth.me();
+      
+      // Map the answers to task IDs (w1-1, w1-2, w1-3, w1-4)
+      const taskSelections = {
+        "w1-1": updatedAnswers.inventory || "skip",
+        "w1-2": updatedAnswers.movers || "skip",
+        "w1-3": updatedAnswers.supplies || "skip",
+        "w1-4": updatedAnswers.utilities || "skip"
+      };
+      
+      localStorage.setItem(`user_selections_${user.id}`, JSON.stringify(taskSelections));
+      localStorage.setItem(`walkthrough_done_w1_${user.id}`, "1");
       navigate(createPageUrl("Dashboard"));
     } else {
       setOnboardingStep(prev => prev + 1);
