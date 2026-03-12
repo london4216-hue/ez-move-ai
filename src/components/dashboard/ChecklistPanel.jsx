@@ -47,7 +47,16 @@ const BASE_WEEKS = {
       { id: "w4-2", title: "Move-out day guidance", description: "What stays, what leaves, final walkthrough prep", ai_search_query: null },
       { id: "w4-3", title: "Utility transfers", description: "Electric, water, gas, internet", ai_search_query: null },
       { id: "w4-4", title: "Final clean", description: "Quick refresh before buyer walkthrough", ai_search_query: "professional house cleaning near me" },
-      { id: "w4-5", title: "Closing day checklist", description: "Keys, garage remotes, peace of mind ✅", ai_search_query: null },
+      { id: "w4-5", title: "Cancel security system", description: "Contact provider to terminate or transfer service", ai_search_query: null },
+      { id: "w4-6", title: "Cancel electric service", description: "Schedule final meter reading and disconnect date", ai_search_query: null },
+      { id: "w4-7", title: "Cancel gas service", description: "Arrange final billing and service end date", ai_search_query: null },
+      { id: "w4-8", title: "Cancel internet/cable", description: "Return equipment and close account", ai_search_query: null },
+      { id: "w4-9", title: "Cancel homeowners insurance", description: "Notify insurance company of sale date", ai_search_query: null },
+      { id: "w4-10", title: "Forward mail", description: "Set up USPS mail forwarding to new address", ai_search_query: null },
+      { id: "w4-11", title: "Cancel lawn/pool service", description: "End recurring maintenance contracts", ai_search_query: null },
+      { id: "w4-12", title: "Return garage/gate remotes", description: "Gather all access devices for new owner", ai_search_query: null },
+      { id: "w4-13", title: "Leave manuals & warranties", description: "Organize appliance docs for buyer", ai_search_query: null },
+      { id: "w4-14", title: "Closing day checklist", description: "Keys, remotes, final walkthrough ✅", ai_search_query: null },
     ]
   }
 };
