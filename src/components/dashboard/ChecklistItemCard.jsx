@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Phone, UserPlus, Check, ShoppingCart, ClipboardList } from "lucide-react";
+import { Phone, UserPlus, Check, ShoppingCart, ClipboardList, Eye } from "lucide-react";
 import RoomSetupWizard from "./RoomSetupWizard";
 import ProviderAppointmentModal from "./ProviderAppointmentModal";
 import TaskWorkflowModal from "./TaskWorkflowModal";
+import SavedStuffModal from "./SavedStuffModal";
 
 export default function ChecklistItemCard({ item, completed, skipped, onComplete, onSkip, userAddress, onProviderSaved, user }) {
   const [expanded, setExpanded] = useState(false);
