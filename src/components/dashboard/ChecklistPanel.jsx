@@ -442,14 +442,6 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
 
                 {isExpanded && (
                   <div className="p-2 space-y-1.5 border-t border-slate-100">
-                    {!isSetup && weekNum !== 1 && (
-                      <button
-                        onClick={() => launchWeekSetup(weekNum)}
-                        className="w-full mb-2 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-bold flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98] transition-transform"
-                      >
-                        ⚡ Start Week {weekNum}
-                      </button>
-                    )}
                     {wItems.map(item => (
                       <ChecklistItemCard
                         key={item.id}
