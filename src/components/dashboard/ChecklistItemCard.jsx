@@ -216,6 +216,9 @@ export default function ChecklistItemCard({ item, completed, skipped, onComplete
     {showInventory && (
       <RoomSetupWizard user={user} onClose={() => setShowInventory(false)} />
     )}
+    {showStuffLists && (
+      <SavedStuffModal user={user} onClose={() => setShowStuffLists(false)} />
+    )}
     {appointmentProvider && (
       <ProviderAppointmentModal
         provider={appointmentProvider}
