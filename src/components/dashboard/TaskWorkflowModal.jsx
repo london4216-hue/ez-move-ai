@@ -205,14 +205,32 @@ export default function TaskWorkflowModal({ task, user, onClose, onComplete }) {
                 rows={3}
               />
 
-              {callSuccess !== null && (
+              <div className="flex gap-3 mt-4">
                 <button
-                  onClick={handleCallComplete}
-                  className="w-full mt-4 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold"
+                  onClick={async () => {
+                    await base44.entities.Contact.create({
+                      user_id: user.id,
+                      name: selectedProvider?.name || "",
+                      role: task.title,
+                      phone: selectedProvider?.phone || "",
+                      avatar_initials: selectedProvider?.name?.slice(0, 2).toUpperCase() || "NA",
+                      color: "orange"
+                    });
+                    onClose();
+                  }}
+                  className="flex-1 py-3 rounded-xl border-2 border-slate-200 text-slate-700 font-bold"
                 >
-                  Continue →
+                  Save & Exit
                 </button>
-              )}
+                {callSuccess !== null && (
+                  <button
+                    onClick={handleCallComplete}
+                    className="flex-1 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold"
+                  >
+                    Continue →
+                  </button>
+                )}
+              </div>
             </div>
           )}
 
