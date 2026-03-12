@@ -89,9 +89,11 @@ export default function AgentDashboard() {
   const handleSaveClient = async () => {
     const code = Math.floor(1000 + Math.random() * 9000).toString();
     const fullName = `${form.firstName} ${form.lastName}`;
+    const isDemoEmail = form.email === "london4216@gmail.com";
+    const emailToUse = isDemoEmail ? `demo+${code}@london4216.gmail.com` : form.email;
     const newClient = await base44.entities.Client.create({
       agent_id: agent.id,
-      user_email: form.email,
+      user_email: emailToUse,
       user_name: fullName,
       close_date: form.close_date,
       invitation_code: code,
@@ -99,8 +101,8 @@ export default function AgentDashboard() {
       invited_date: new Date().toISOString(),
       billing_status: "pending",
     });
-    setPendingClient({ ...newClient, invitation_code: code });
-    setClients(prev => [{ ...newClient, invitation_code: code }, ...prev]);
+    setPendingClient({ ...newClient, invitation_code: code, display_email: form.email });
+    setClients(prev => [{ ...newClient, invitation_code: code, display_email: form.email }, ...prev]);
     setAddStep("payment");
   };
 
@@ -242,7 +244,7 @@ export default function AgentDashboard() {
                             {client.status}
                           </span>
                         </div>
-                        <p className="text-[11px] text-slate-400 truncate">{client.user_email}</p>
+                        <p className="text-[11px] text-slate-400 truncate">{client.display_email || client.user_email}</p>
                         {client.invitation_code && (
                           <div className="inline-flex items-center gap-1.5 mt-1 bg-slate-50 rounded-lg px-2 py-0.5">
                             <span className="text-[9px] text-slate-400 font-medium">Code:</span>
@@ -410,7 +412,7 @@ export default function AgentDashboard() {
                   <div className="bg-slate-50 rounded-2xl p-4 space-y-2">
                     <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Client Summary</p>
                     <div className="flex justify-between"><span className="text-xs text-slate-400">Name</span><span className="text-xs font-bold text-slate-700">{pendingClient.user_name}</span></div>
-                    <div className="flex justify-between"><span className="text-xs text-slate-400">Email</span><span className="text-xs font-bold text-slate-700">{pendingClient.user_email}</span></div>
+                    <div className="flex justify-between"><span className="text-xs text-slate-400">Email</span><span className="text-xs font-bold text-slate-700">{pendingClient.display_email || pendingClient.user_email}</span></div>
                     <div className="flex justify-between"><span className="text-xs text-slate-400">Close Date</span><span className="text-xs font-bold text-slate-700">{pendingClient.close_date}</span></div>
                     <div className="flex justify-between"><span className="text-xs text-slate-400">Invite Code</span><span className="text-xs font-black text-orange-500 tracking-widest">{pendingClient.invitation_code}</span></div>
                   </div>
