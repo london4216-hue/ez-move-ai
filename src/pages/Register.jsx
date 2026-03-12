@@ -180,7 +180,7 @@ export default function Register() {
               <div className="w-16" />
             )}
             <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">
-              Week 1 Foundation · {onboardingStep + 1}/{week1Questions.length}
+              {onboardingStep + 1}/{week1Questions.length}
             </p>
             <div className="flex gap-1">
               {week1Questions.map((_, i) => (
