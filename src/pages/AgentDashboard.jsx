@@ -362,6 +362,7 @@ export default function AgentDashboard() {
                         value={form.firstName}
                         onChange={e => setForm(p => ({ ...p, firstName: e.target.value }))}
                         placeholder="Jane"
+                        required
                         className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10"
                       />
                     </div>
@@ -372,6 +373,7 @@ export default function AgentDashboard() {
                         value={form.lastName}
                         onChange={e => setForm(p => ({ ...p, lastName: e.target.value }))}
                         placeholder="Smith"
+                        required
                         className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10"
                       />
                     </div>
@@ -387,6 +389,7 @@ export default function AgentDashboard() {
                         value={form[f.key]}
                         onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))}
                         placeholder={f.placeholder || ""}
+                        required
                         className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10"
                       />
                     </div>
