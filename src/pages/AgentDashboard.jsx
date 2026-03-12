@@ -25,7 +25,12 @@ export default function AgentDashboard() {
 
   // Add client flow: "form" | "payment" | "done"
   const [addStep, setAddStep] = useState(null); // null = closed
-  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", close_date: "" });
+  const [form, setForm] = useState({ 
+    firstName: "", 
+    lastName: "", 
+    email: "", 
+    close_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+  });
   const [pendingClient, setPendingClient] = useState(null); // saved client before payment
   const [paying, setPaying] = useState(false);
   const [doneData, setDoneData] = useState(null); // { name, code }
