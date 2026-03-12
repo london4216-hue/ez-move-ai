@@ -282,7 +282,7 @@ export default function Register() {
 
       <div className="w-full max-w-sm bg-white rounded-3xl p-7 shadow-2xl mt-16">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-slate-800 mb-2">Enter your code</h1>
+          <h1 className="text-xs font-semibold text-slate-800 mb-2 uppercase tracking-wider">Enter your code</h1>
           <p className="text-sm text-slate-500 leading-relaxed">
             Your agent sent you a 4-digit invitation code via email
           </p>
