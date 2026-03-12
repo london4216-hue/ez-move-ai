@@ -491,12 +491,12 @@ function ToolShell({ emoji, title, tagline, color, onGenerate, loading, fetched,
 export default function AIMoveAssist({ user }) {
   return (
     <div className="space-y-3">
-      <div className="bg-[#0F172A] rounded-2xl px-4 py-4">
+      <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl px-4 py-4 border border-slate-200">
         <div className="flex items-center gap-2 mb-1">
-          <Sparkles className="w-4 h-4 text-orange-400" />
-          <p className="font-black text-white text-base">AI Move Assist</p>
+          <Sparkles className="w-4 h-4 text-orange-500" />
+          <p className="font-black text-slate-800 text-base">AI Move Assist</p>
         </div>
-        <p className="text-slate-400 text-xs">Real tools. Tap any to get started.</p>
+        <p className="text-slate-500 text-xs">Real tools. Tap any to get started.</p>
       </div>
 
       <MoversCard user={user} />
