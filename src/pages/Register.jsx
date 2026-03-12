@@ -20,6 +20,7 @@ export default function Register() {
   const [answers, setAnswers] = useState({});
   const [estimatedMoveCost, setEstimatedMoveCost] = useState("");
   const [moveDate, setMoveDate] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [detailsSaved, setDetailsSaved] = useState(false);
   const refs = [null, null, null, null].map(() => ({ current: null }));
   const navigate = useNavigate();
@@ -43,9 +44,20 @@ export default function Register() {
     if (e.key === "Backspace" && !digits[i] && i > 0) refs[i - 1].current?.focus();
   };
 
+  const handlePhoneChange = (val) => {
+    const digits = val.replace(/\D/g, "");
+    if (digits.length <= 10) {
+      setPhoneNumber(digits);
+    }
+  };
+
   const handleSaveDetails = () => {
-    if (!moveDate || !estimatedMoveCost) {
-      setError("Please fill in both fields");
+    if (!moveDate || !estimatedMoveCost || !phoneNumber) {
+      setError("Please fill in all fields");
+      return;
+    }
+    if (phoneNumber.length !== 10) {
+      setError("Phone number must be 10 digits");
       return;
     }
     setDetailsSaved(true);
@@ -83,6 +95,7 @@ export default function Register() {
           registration_date: new Date().toISOString().split("T")[0],
           estimated_move_cost: estimatedMoveCost || "",
           move_date: moveDate || "",
+          phone: phoneNumber || "",
         });
         
         // Send welcome email to registered user
@@ -101,6 +114,7 @@ export default function Register() {
           registration_date: new Date().toISOString().split("T")[0],
           estimated_move_cost: estimatedMoveCost || "",
           move_date: moveDate || "",
+          phone: phoneNumber || "",
         });
       }
       
@@ -285,6 +299,18 @@ export default function Register() {
               disabled={detailsSaved}
               className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10 bg-white disabled:bg-slate-50 disabled:text-slate-500"
             />
+          </div>
+          <div>
+            <label className="text-xs font-semibold text-slate-600 mb-1.5 block">Phone Number</label>
+            <input
+              type="tel"
+              placeholder="1234567890"
+              value={phoneNumber}
+              onChange={(e) => { handlePhoneChange(e.target.value); setDetailsSaved(false); }}
+              disabled={detailsSaved}
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10 bg-white disabled:bg-slate-50 disabled:text-slate-500"
+            />
+            <p className="text-xs text-slate-400 mt-1">{phoneNumber.length}/10 digits</p>
           </div>
           
           {!detailsSaved ? (
