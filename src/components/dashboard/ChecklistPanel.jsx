@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { differenceInDays, parseISO, addDays, format, isWithinInterval, startOfWeek, endOfWeek } from "date-fns";
-import { CalendarDays, Phone } from "lucide-react";
+import { CalendarDays, Phone, X, Save } from "lucide-react";
 
 import ChecklistItemCard from "./ChecklistItemCard";
 import WeekWalkthrough from "./WeekWalkthrough";
@@ -110,6 +110,8 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
   const [walkthroughWeek, setWalkthroughWeek] = useState(null);
   const [appointments, setAppointments] = useState([]);
   const [contacts, setContacts] = useState([]);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [showAppointmentModal, setShowAppointmentModal] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -247,7 +249,11 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
                 return isWithinInterval(d, { start: startOfWeek(new Date()), end: endOfWeek(new Date()) });
               } catch { return false; }
             }).slice(0, 3).map((appt, i) => (
-              <div key={i} className="px-4 py-2.5 flex items-center gap-3">
+              <button
+                key={i}
+                onClick={() => { setSelectedAppointment(appt); setShowAppointmentModal(true); }}
+                className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-slate-50 transition-colors text-left"
+              >
                 <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center">
                   <CalendarDays className="w-3.5 h-3.5 text-orange-400" />
                 </div>
@@ -255,14 +261,140 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
                   <p className="text-sm font-bold text-slate-800 truncate">{appt.title}</p>
                   <p className="text-xs text-slate-500">{format(parseISO(appt.date), "EEE, MMM d")}{appt.time ? ` · ${appt.time}` : ""}</p>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         </div>
       )}
 
       {/* Move Directory */}
-      <MoveDirectory user={user} />
+      <MoveDirectory user={user} contacts={contacts} onContactsChange={setContacts} />
+
+      {/* Appointment Edit Modal */}
+      {showAppointmentModal && selectedAppointment && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end justify-center">
+          <div className="w-full max-w-md bg-white rounded-t-3xl shadow-2xl max-h-[85vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-slate-100 px-5 py-4 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-slate-800">Edit Appointment</h3>
+              <button
+                onClick={() => { setShowAppointmentModal(false); setSelectedAppointment(null); }}
+                className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center"
+              >
+                <X className="w-4 h-4 text-slate-500" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-4">
+              <div>
+                <label className="text-xs font-semibold text-slate-600 mb-1.5 block">Title *</label>
+                <input
+                  value={selectedAppointment.title}
+                  onChange={(e) => setSelectedAppointment({...selectedAppointment, title: e.target.value})}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-600 mb-1.5 block">Provider Name</label>
+                <input
+                  value={selectedAppointment.provider_name || ""}
+                  onChange={(e) => setSelectedAppointment({...selectedAppointment, provider_name: e.target.value})}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-600 mb-1.5 block">Phone</label>
+                <input
+                  value={selectedAppointment.phone || ""}
+                  onChange={(e) => setSelectedAppointment({...selectedAppointment, phone: e.target.value})}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 mb-1.5 block">Date *</label>
+                  <input
+                    type="date"
+                    value={selectedAppointment.date}
+                    onChange={(e) => setSelectedAppointment({...selectedAppointment, date: e.target.value})}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 mb-1.5 block">Time</label>
+                  <input
+                    type="time"
+                    value={selectedAppointment.time || ""}
+                    onChange={(e) => setSelectedAppointment({...selectedAppointment, time: e.target.value})}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-600 mb-1.5 block">Status</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {["scheduled", "tentative", "completed", "cancelled"].map(s => (
+                    <button
+                      key={s}
+                      onClick={() => setSelectedAppointment({...selectedAppointment, status: s})}
+                      className={`py-2 px-3 rounded-xl text-xs font-bold capitalize transition-all ${
+                        selectedAppointment.status === s
+                          ? "bg-orange-500 text-white"
+                          : "bg-slate-100 text-slate-600"
+                      }`}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-600 mb-1.5 block">Notes</label>
+                <textarea
+                  value={selectedAppointment.notes || ""}
+                  onChange={(e) => setSelectedAppointment({...selectedAppointment, notes: e.target.value})}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm"
+                  rows={3}
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={async () => {
+                    await base44.entities.Appointment.update(selectedAppointment.id, selectedAppointment);
+                    const updated = await base44.entities.Appointment.filter({ user_id: user.id });
+                    setAppointments(updated);
+                    setShowAppointmentModal(false);
+                    setSelectedAppointment(null);
+                  }}
+                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold flex items-center justify-center gap-2"
+                >
+                  <Save className="w-4 h-4" />
+                  Save Changes
+                </button>
+                <button
+                  onClick={async () => {
+                    if (confirm("Delete this appointment?")) {
+                      await base44.entities.Appointment.delete(selectedAppointment.id);
+                      const updated = await base44.entities.Appointment.filter({ user_id: user.id });
+                      setAppointments(updated);
+                      setShowAppointmentModal(false);
+                      setSelectedAppointment(null);
+                    }
+                  }}
+                  className="px-4 py-3 rounded-xl bg-red-50 text-red-600 font-bold"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Close date banner */}
       {user?.estimated_close_date && (

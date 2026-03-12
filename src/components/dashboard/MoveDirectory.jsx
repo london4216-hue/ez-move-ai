@@ -2,20 +2,27 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Phone, Mail, User, Plus, X, Check, ChevronDown, ChevronUp } from "lucide-react";
 
-export default function MoveDirectory({ user }) {
+export default function MoveDirectory({ user, contacts: externalContacts, onContactsChange }) {
   const [contacts, setContacts] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedContact, setSelectedContact] = useState(null);
   const [expanded, setExpanded] = useState(false);
   const [newContact, setNewContact] = useState({ name: "", role: "", phone: "", email: "" });
 
   useEffect(() => {
-    loadContacts();
-  }, [user]);
+    if (externalContacts) {
+      setContacts(externalContacts);
+    } else {
+      loadContacts();
+    }
+  }, [user, externalContacts]);
 
   const loadContacts = async () => {
     if (!user) return;
     const data = await base44.entities.Contact.filter({ user_id: user.id });
     setContacts(data);
+    if (onContactsChange) onContactsChange(data);
   };
 
   const handleAddContact = async () => {
@@ -83,7 +90,11 @@ export default function MoveDirectory({ user }) {
                 </div>
               ) : (
                 contacts.map((contact, i) => (
-                  <div key={i} className="px-4 py-2.5 flex items-center gap-3">
+                  <button
+                    key={i}
+                    onClick={() => { setSelectedContact(contact); setShowEditModal(true); }}
+                    className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-slate-50 transition-colors text-left"
+                  >
                     <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
                       <span className="text-[10px] font-bold text-orange-600">{contact.avatar_initials}</span>
                     </div>
@@ -91,7 +102,7 @@ export default function MoveDirectory({ user }) {
                       <p className="text-xs font-bold text-slate-800 truncate">{contact.name}</p>
                       <p className="text-[10px] text-orange-500 font-semibold">{contact.role}</p>
                     </div>
-                    <div className="flex gap-1.5">
+                    <div className="flex gap-1.5" onClick={(e) => e.stopPropagation()}>
                       {contact.phone && (
                         <a
                           href={`tel:${contact.phone}`}
@@ -109,7 +120,7 @@ export default function MoveDirectory({ user }) {
                         </a>
                       )}
                     </div>
-                  </div>
+                  </button>
                 ))
               )}
             </div>
@@ -191,6 +202,108 @@ export default function MoveDirectory({ user }) {
                 <Check className="w-4 h-4 inline mr-2" />
                 Add Contact
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showEditModal && selectedContact && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end justify-center">
+          <div className="w-full max-w-md bg-white rounded-t-3xl shadow-2xl max-h-[85vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-slate-100 px-5 py-4 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-slate-800">Edit Contact</h3>
+              <button
+                onClick={() => { setShowEditModal(false); setSelectedContact(null); }}
+                className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center"
+              >
+                <X className="w-4 h-4 text-slate-500" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-4">
+              <div>
+                <label className="text-xs font-semibold text-slate-600 mb-1.5 block">Name *</label>
+                <input
+                  value={selectedContact.name}
+                  onChange={(e) => setSelectedContact({...selectedContact, name: e.target.value})}
+                  placeholder="John Doe"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-600 mb-1.5 block">Role *</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {roles.map((r, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setSelectedContact({...selectedContact, role: r.label})}
+                      className={`p-3 rounded-xl border-2 text-left transition-all ${
+                        selectedContact.role === r.label
+                          ? "border-orange-500 bg-orange-50"
+                          : "border-slate-200"
+                      }`}
+                    >
+                      <span className="text-base">{r.emoji}</span>
+                      <p className="text-xs font-semibold text-slate-700 mt-1">{r.label}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-600 mb-1.5 block">Phone</label>
+                <input
+                  value={selectedContact.phone || ""}
+                  onChange={(e) => setSelectedContact({...selectedContact, phone: e.target.value})}
+                  placeholder="(555) 123-4567"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-600 mb-1.5 block">Email</label>
+                <input
+                  value={selectedContact.email || ""}
+                  onChange={(e) => setSelectedContact({...selectedContact, email: e.target.value})}
+                  placeholder="john@example.com"
+                  type="email"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={async () => {
+                    await base44.entities.Contact.update(selectedContact.id, {
+                      ...selectedContact,
+                      avatar_initials: selectedContact.name.slice(0, 2).toUpperCase()
+                    });
+                    loadContacts();
+                    setShowEditModal(false);
+                    setSelectedContact(null);
+                  }}
+                  disabled={!selectedContact.name || !selectedContact.role}
+                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold
+                    disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  <Check className="w-4 h-4" />
+                  Save Changes
+                </button>
+                <button
+                  onClick={async () => {
+                    if (confirm("Delete this contact?")) {
+                      await base44.entities.Contact.delete(selectedContact.id);
+                      loadContacts();
+                      setShowEditModal(false);
+                      setSelectedContact(null);
+                    }
+                  }}
+                  className="px-4 py-3 rounded-xl bg-red-50 text-red-600 font-bold"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
         </div>
