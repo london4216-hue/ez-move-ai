@@ -305,15 +305,15 @@ export default function MyStuffTab({ user }) {
   if (!activeList) {
     return (
       <div className="space-y-3">
-        <div className="bg-[#0F172A] rounded-2xl px-4 py-4">
+        <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl px-4 py-4 border border-slate-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-white font-black text-base">My Stuff</p>
-              <p className="text-slate-400 text-xs mt-0.5">Build your move, junk & donate lists</p>
+              <p className="text-slate-800 font-black text-base">My Stuff</p>
+              <p className="text-slate-500 text-xs mt-0.5">Build your move, junk & donate lists</p>
             </div>
             <div className="text-right">
               <p className="text-slate-400 text-[10px]">Total Items</p>
-              <p className="text-orange-400 text-2xl font-black">{totalItems}</p>
+              <p className="text-orange-500 text-2xl font-black">{totalItems}</p>
             </div>
           </div>
         </div>
