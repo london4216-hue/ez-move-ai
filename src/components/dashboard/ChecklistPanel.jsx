@@ -111,6 +111,7 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
   const [completedIds, setCompletedIds] = useState(new Set());
   const [removedIds, setRemovedIds] = useState(new Set());
   const [customItems, setCustomItems] = useState({});
+  const [userSelections, setUserSelections] = useState({});
   const [addingTask, setAddingTask] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newTaskDesc, setNewTaskDesc] = useState("");
@@ -136,9 +137,11 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
     const saved = localStorage.getItem(`checklist_complete_${user?.id}`);
     const savedRemoved = localStorage.getItem(`checklist_removed_${user?.id}`);
     const savedCustom = localStorage.getItem(`checklist_custom_${user?.id}`);
+    const savedSelections = localStorage.getItem(`user_selections_${user?.id}`);
     if (saved) setCompletedIds(new Set(JSON.parse(saved)));
     if (savedRemoved) setRemovedIds(new Set(JSON.parse(savedRemoved)));
     if (savedCustom) setCustomItems(JSON.parse(savedCustom));
+    if (savedSelections) setUserSelections(JSON.parse(savedSelections));
   }, [user?.id]);
 
   // Check if walkthrough needed for current week
@@ -151,14 +154,13 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
     }
   }, [user?.id, currentWeek]);
 
+  const [userSelections, setUserSelections] = useState({});
+
   const handleWalkthroughDone = (answers) => {
-    // Mark items as skipped if user said "skip"
-    const newRemoved = new Set(removedIds);
-    Object.entries(answers).forEach(([id, answer]) => {
-      if (answer === "skip") newRemoved.add(id);
-    });
-    setRemovedIds(newRemoved);
-    persist(completedIds, newRemoved, customItems);
+    // Store user selections: yes, maybe, skip
+    const newSelections = { ...userSelections, ...answers };
+    setUserSelections(newSelections);
+    localStorage.setItem(`user_selections_${user.id}`, JSON.stringify(newSelections));
     localStorage.setItem(`walkthrough_done_w${walkthroughWeek}_${user.id}`, "1");
     setShowWalkthrough(false);
     setWalkthroughWeek(null);
@@ -201,7 +203,13 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
   const isWeekLocked = (_w) => false;
 
   const weekData = weeksData[activeWeek];
-  const allItems = [...(weekData?.items || []).filter(i => !removedIds.has(i.id)), ...(customItems[activeWeek] || [])];
+  // Only show items user selected "yes" for, plus custom items
+  const allItems = [
+    ...(weekData?.items || []).filter(i => userSelections[i.id] === "yes"),
+    ...(customItems[activeWeek] || [])
+  ];
+  // Include "maybe" items as grayed out
+  const maybeItems = (weekData?.items || []).filter(i => userSelections[i.id] === "maybe");
   const completed = allItems.filter(i => completedIds.has(i.id)).length;
   const progress = allItems.length ? Math.round((completed / allItems.length) * 100) : 0;
 
@@ -480,6 +488,22 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
               onProviderSaved={onProviderSaved}
               user={user}
             />
+          ))}
+          
+          {maybeItems.map(item => (
+            <button
+              key={item.id}
+              onClick={() => {
+                const newSelections = { ...userSelections, [item.id]: "yes" };
+                setUserSelections(newSelections);
+                localStorage.setItem(`user_selections_${user.id}`, JSON.stringify(newSelections));
+              }}
+              className="w-full rounded-2xl border-2 border-slate-200 bg-slate-50 p-3 text-left opacity-60 hover:opacity-100 transition-opacity"
+            >
+              <p className="text-xs font-bold text-slate-400">🤔 {item.title}</p>
+              <p className="text-[10px] text-slate-400 mt-0.5">{item.description}</p>
+              <p className="text-[10px] text-amber-600 font-semibold mt-1">Tap to add to your plan</p>
+            </button>
           ))}
 
           {addingTask ? (
