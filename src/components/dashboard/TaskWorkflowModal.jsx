@@ -144,12 +144,40 @@ export default function TaskWorkflowModal({ task, user, onClose, onComplete }) {
                         </div>
                         <div className="flex flex-col items-end gap-2">
                           <span className="text-xs text-amber-600 font-semibold">⭐ {p.rating}</span>
-                          <button
-                            onClick={() => handleSelectProvider(p)}
-                            className="px-3 py-1.5 rounded-lg bg-orange-500 text-white text-xs font-bold"
-                          >
-                            Select
-                          </button>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={async () => {
+                                await base44.entities.SavedProvider.create({
+                                  user_id: user.id,
+                                  name: p.name,
+                                  role: task.title,
+                                  phone: p.phone || "",
+                                  rating: p.rating || "",
+                                  week: task.week || 1,
+                                  checklist_item: task.title
+                                });
+                                await base44.entities.Contact.create({
+                                  user_id: user.id,
+                                  name: p.name,
+                                  role: task.title,
+                                  phone: p.phone || "",
+                                  avatar_initials: p.name?.slice(0, 2).toUpperCase() || "NA",
+                                  color: "orange"
+                                });
+                                onComplete();
+                                onClose();
+                              }}
+                              className="px-3 py-1.5 rounded-lg bg-green-500 text-white text-xs font-bold"
+                            >
+                              Save
+                            </button>
+                            <button
+                              onClick={() => handleSelectProvider(p)}
+                              className="px-3 py-1.5 rounded-lg bg-orange-500 text-white text-xs font-bold"
+                            >
+                              Select
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
