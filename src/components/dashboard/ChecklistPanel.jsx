@@ -244,58 +244,6 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
         />
       )}
       
-      {/* Quick Stats */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="bg-white rounded-2xl border border-slate-100 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <CalendarDays className="w-4 h-4 text-orange-500" />
-            <span className="text-xs font-bold text-slate-600">Appointments</span>
-          </div>
-          <p className="text-2xl font-black text-slate-800">{appointments?.length || 0}</p>
-          <p className="text-xs text-slate-400 mt-1">Scheduled</p>
-        </div>
-        
-        <div className="bg-white rounded-2xl border border-slate-100 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Phone className="w-4 h-4 text-orange-500" />
-            <span className="text-xs font-bold text-slate-600">Contacts</span>
-          </div>
-          <p className="text-2xl font-black text-slate-800">{contacts?.length || 0}</p>
-          <p className="text-xs text-slate-400 mt-1">Saved</p>
-        </div>
-      </div>
-
-      {/* This Week's Appointments */}
-      {appointments.length > 0 && (
-        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
-          <div className="px-4 py-3 border-b border-slate-100">
-            <h3 className="text-sm font-bold text-slate-800">📅 This Week</h3>
-          </div>
-          <div className="divide-y divide-slate-50 max-h-48 overflow-y-auto">
-            {appointments.filter(a => {
-              try {
-                const d = parseISO(a.date);
-                return isWithinInterval(d, { start: startOfWeek(new Date()), end: endOfWeek(new Date()) });
-              } catch { return false; }
-            }).slice(0, 3).map((appt, i) => (
-              <button
-                key={i}
-                onClick={() => { setSelectedAppointment(appt); setShowAppointmentModal(true); }}
-                className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-slate-50 transition-colors text-left"
-              >
-                <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center">
-                  <CalendarDays className="w-3.5 h-3.5 text-orange-400" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-slate-800 truncate">{appt.title}</p>
-                  <p className="text-xs text-slate-500">{format(parseISO(appt.date), "EEE, MMM d")}{appt.time ? ` · ${appt.time}` : ""}</p>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Move Directory */}
       <MoveDirectory user={user} contacts={contacts} onContactsChange={setContacts} />
 
@@ -425,128 +373,57 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
         </div>
       )}
 
-      {/* Week tabs */}
+      {/* Consolidated All Weeks */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-        <div className="flex overflow-x-auto no-scrollbar border-b border-slate-100">
-          {Array.from({ length: totalWeeks }, (_, i) => i + 1).map(w => {
-            const isSetup = w === 1 ? true : localStorage.getItem(`walkthrough_done_w${w}_${user?.id}`);
+        <div className="px-4 py-3 border-b border-slate-100">
+          <h3 className="text-sm font-bold text-slate-800">📋 All Tasks (Week 1-4)</h3>
+        </div>
+
+        {/* All Weeks Consolidated */}
+        <div className="px-3 pb-3 space-y-3 max-h-[520px] overflow-y-auto">
+          {Array.from({ length: totalWeeks }, (_, i) => i + 1).map(weekNum => {
+            const wData = weeksData[weekNum];
+            const wItems = [
+              ...(wData?.items || []).filter(i => userSelections[i.id] === "yes"),
+              ...(customItems[weekNum] || [])
+            ];
+            const wCompleted = wItems.filter(i => completedIds.has(i.id)).length;
+            const wProgress = wItems.length ? Math.round((wCompleted / wItems.length) * 100) : 0;
+
             return (
-              <button
-                key={w}
-                onClick={() => { setActiveWeek(w); setAddingTask(false); }}
-                className={`flex-1 min-w-[60px] py-3 px-2 text-xs font-bold transition-all whitespace-nowrap relative
-                  ${activeWeek === w ? "text-orange-500" : isWeekLocked(w) ? "text-slate-300" : "text-slate-400"}`}
-              >
-                {w === currentWeek && (
-                  <div className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-orange-500" />
-                )}
-                {w === 1 && isSetup && (
-                  <div className="absolute top-1.5 left-1.5 w-1.5 h-1.5 rounded-full bg-orange-500" />
-                )}
-                {!isSetup && w > 1 && (
-                  <div className="absolute top-1.5 left-1.5 w-1.5 h-1.5 rounded-full bg-amber-400" />
-                )}
-                {`Wk ${w}`}
-                {activeWeek === w && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500 rounded-full" />}
-              </button>
+              <div key={weekNum} className="rounded-2xl border border-slate-200 overflow-hidden">
+                <div className="px-3 py-2.5 bg-slate-50 border-b border-slate-100">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-bold text-slate-700">Week {weekNum}</h4>
+                    <span className="text-[10px] font-bold text-orange-500">{wProgress}%</span>
+                  </div>
+                  <div className="h-1 bg-slate-200 rounded-full overflow-hidden mt-1.5">
+                    <div
+                      className="h-full bg-gradient-to-r from-orange-500 to-orange-400 rounded-full transition-all duration-500"
+                      style={{ width: `${wProgress}%` }}
+                    />
+                  </div>
+                </div>
+                <div className="p-2 space-y-1.5">
+                  {wItems.map(item => (
+                    <ChecklistItemCard
+                      key={item.id}
+                      item={item}
+                      completed={completedIds.has(item.id)}
+                      skipped={false}
+                      onComplete={() => handleComplete(item.id)}
+                      onSkip={() => item.custom
+                        ? setCustomItems(prev => { const u = { ...prev, [weekNum]: prev[weekNum].filter(i => i.id !== item.id) }; persist(completedIds, removedIds, u); return u; })
+                        : handleRemove(item.id)}
+                      userAddress={user?.home_address}
+                      onProviderSaved={onProviderSaved}
+                      user={user}
+                    />
+                  ))}
+                </div>
+              </div>
             );
           })}
-        </div>
-
-        {/* Week header */}
-        <div className="px-4 pt-4 pb-3">
-          <div className="flex items-center justify-between mb-0.5">
-            <p className="text-sm font-bold text-slate-800">{weekData?.title}</p>
-            <span className="text-xs font-bold text-orange-500">{progress}%</span>
-          </div>
-          {weekDateRange && <p className="text-[10px] text-slate-400 mb-1">{weekDateRange}</p>}
-          <p className="text-xs text-slate-500 mb-2.5">{weekData?.subtitle}</p>
-          
-          {activeWeek !== 1 && !localStorage.getItem(`walkthrough_done_w${activeWeek}_${user?.id}`) && (
-            <button
-              onClick={() => launchWeekSetup(activeWeek)}
-              className="w-full mb-3 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-md"
-            >
-              ⚡ Set Up Week {activeWeek}
-            </button>
-          )}
-          <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-orange-500 to-orange-400 rounded-full transition-all duration-500"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-          {progress === 100 && (
-            <p className="text-xs text-emerald-600 font-bold mt-2">🎉 Week {activeWeek} complete!</p>
-          )}
-        </div>
-
-
-
-        {/* Items */}
-        <div className="px-3 pb-3 space-y-2 max-h-[420px] overflow-y-auto">
-          {allItems.map(item => (
-            <ChecklistItemCard
-              key={item.id}
-              item={item}
-              completed={completedIds.has(item.id)}
-              skipped={false}
-              onComplete={() => handleComplete(item.id)}
-              onSkip={() => item.custom
-                ? setCustomItems(prev => { const u = { ...prev, [activeWeek]: prev[activeWeek].filter(i => i.id !== item.id) }; persist(completedIds, removedIds, u); return u; })
-                : handleRemove(item.id)}
-              userAddress={user?.home_address}
-              onProviderSaved={onProviderSaved}
-              user={user}
-            />
-          ))}
-          
-          {maybeItems.map(item => (
-            <button
-              key={item.id}
-              onClick={() => {
-                const newSelections = { ...userSelections, [item.id]: "yes" };
-                setUserSelections(newSelections);
-                localStorage.setItem(`user_selections_${user.id}`, JSON.stringify(newSelections));
-              }}
-              className="w-full rounded-2xl border-2 border-slate-200 bg-slate-50 p-3 text-left opacity-60 hover:opacity-100 transition-opacity"
-            >
-              <p className="text-xs font-bold text-slate-400">🤔 {item.title}</p>
-              <p className="text-[10px] text-slate-400 mt-0.5">{item.description}</p>
-              <p className="text-[10px] text-amber-600 font-semibold mt-1">Tap to add to your plan</p>
-            </button>
-          ))}
-
-          {addingTask ? (
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 space-y-2">
-              <p className="text-xs font-bold text-slate-700">New Task</p>
-              <input
-                autoFocus
-                value={newTaskTitle}
-                onChange={e => setNewTaskTitle(e.target.value)}
-                placeholder="Task title *"
-                className="w-full text-xs border border-slate-200 rounded-xl px-3 py-2 outline-none focus:border-orange-500 bg-white"
-              />
-              <input
-                value={newTaskDesc}
-                onChange={e => setNewTaskDesc(e.target.value)}
-                placeholder="Description (optional)"
-                className="w-full text-xs border border-slate-200 rounded-xl px-3 py-2 outline-none focus:border-orange-500 bg-white"
-              />
-              <div className="flex gap-2">
-                <button onClick={handleAddTask} className="flex-1 py-2 rounded-xl bg-orange-500 text-white text-xs font-bold">Add</button>
-                <button onClick={() => { setAddingTask(false); setNewTaskTitle(""); setNewTaskDesc(""); }}
-                  className="flex-1 py-2 rounded-xl border border-slate-200 text-slate-500 text-xs font-bold">Cancel</button>
-              </div>
-            </div>
-          ) : (
-            <button
-              onClick={() => setAddingTask(true)}
-              className="w-full py-3 rounded-2xl border-2 border-dashed border-slate-200 text-xs text-slate-400 font-bold hover:border-orange-400 hover:text-orange-400 transition-all"
-            >
-              + Add Custom Task
-            </button>
-          )}
         </div>
       </div>
     </div>
