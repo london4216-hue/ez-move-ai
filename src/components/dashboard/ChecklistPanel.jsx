@@ -398,14 +398,14 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
 
       {/* Close date banner */}
       {user?.estimated_close_date && (
-        <div className="bg-[#0F172A] rounded-2xl px-4 py-3 flex items-center justify-between">
+        <div className="bg-[#0F172A] rounded-2xl px-4 py-2.5 flex items-center justify-between">
           <div>
-            <p className="text-white text-xs font-bold">Close Date</p>
-            <p className="text-orange-400 text-sm font-black">{format(parseISO(user.estimated_close_date), "MMMM d, yyyy")}</p>
+            <p className="text-white text-[10px] font-bold">Close Date</p>
+            <p className="text-orange-400 text-xs font-black">{format(parseISO(user.estimated_close_date), "MMM d, yyyy")}</p>
           </div>
           <div className="text-right">
-            <p className="text-slate-400 text-[10px]">Total Weeks</p>
-            <p className="text-white text-lg font-black">{totalWeeks}</p>
+            <p className="text-slate-400 text-[9px]">Total Weeks</p>
+            <p className="text-white text-base font-black">{totalWeeks}</p>
           </div>
         </div>
       )}
