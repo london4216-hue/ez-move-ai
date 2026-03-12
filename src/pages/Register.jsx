@@ -235,6 +235,10 @@ export default function Register() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-5">
+      <div className="absolute top-5 left-5">
+        <h1 className="text-2xl font-black text-slate-800">Version 7</h1>
+      </div>
+      
       <button
         onClick={() => base44.auth.logout()}
         className="absolute top-5 right-5 flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all text-sm font-semibold"
