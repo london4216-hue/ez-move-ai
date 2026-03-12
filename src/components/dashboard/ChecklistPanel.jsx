@@ -144,9 +144,18 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
     if (savedSelections) setUserSelections(JSON.parse(savedSelections));
   }, [user?.id]);
 
-  // Check if walkthrough needed for current week (auto-prompt on login)
+  // Mark Week 1 as already set up (done during registration)
   useEffect(() => {
     if (!user?.id) return;
+    const week1Done = localStorage.getItem(`walkthrough_done_w1_${user.id}`);
+    if (!week1Done) {
+      localStorage.setItem(`walkthrough_done_w1_${user.id}`, "1");
+    }
+  }, [user?.id]);
+
+  // Check if walkthrough needed for current week (auto-prompt on login)
+  useEffect(() => {
+    if (!user?.id || currentWeek === 1) return;
     const walkthroughDone = localStorage.getItem(`walkthrough_done_w${currentWeek}_${user.id}`);
     if (!walkthroughDone) {
       setWalkthroughWeek(currentWeek);
@@ -420,7 +429,7 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
         <div className="flex overflow-x-auto no-scrollbar border-b border-slate-100">
           {Array.from({ length: totalWeeks }, (_, i) => i + 1).map(w => {
-            const isSetup = localStorage.getItem(`walkthrough_done_w${w}_${user?.id}`);
+            const isSetup = w === 1 ? true : localStorage.getItem(`walkthrough_done_w${w}_${user?.id}`);
             return (
               <button
                 key={w}
@@ -430,6 +439,9 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
               >
                 {w === currentWeek && (
                   <div className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-orange-500" />
+                )}
+                {w === 1 && isSetup && (
+                  <div className="absolute top-1.5 left-1.5 w-1.5 h-1.5 rounded-full bg-orange-500" />
                 )}
                 {!isSetup && w > 1 && (
                   <div className="absolute top-1.5 left-1.5 w-1.5 h-1.5 rounded-full bg-amber-400" />
@@ -450,7 +462,7 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
           {weekDateRange && <p className="text-[10px] text-slate-400 mb-1">{weekDateRange}</p>}
           <p className="text-xs text-slate-500 mb-2.5">{weekData?.subtitle}</p>
           
-          {!localStorage.getItem(`walkthrough_done_w${activeWeek}_${user?.id}`) && (
+          {activeWeek !== 1 && !localStorage.getItem(`walkthrough_done_w${activeWeek}_${user?.id}`) && (
             <button
               onClick={() => launchWeekSetup(activeWeek)}
               className="w-full mb-3 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-md"
