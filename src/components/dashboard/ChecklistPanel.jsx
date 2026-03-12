@@ -99,6 +99,14 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
     return Math.min(totalWeeks, Math.max(1, Math.ceil((elapsed / totalDays) * totalWeeks)));
   })();
 
+  // Calculate estimated total cost from user profile
+  const estimatedCost = (() => {
+    let total = 0;
+    if (user?.packing_supplies_cost) total += parseFloat(user.packing_supplies_cost);
+    if (user?.moving_supplies_cost) total += parseFloat(user.moving_supplies_cost);
+    return total;
+  })();
+
   const [activeWeek, setActiveWeek] = useState(currentWeek);
   const [completedIds, setCompletedIds] = useState(new Set());
   const [removedIds, setRemovedIds] = useState(new Set());
