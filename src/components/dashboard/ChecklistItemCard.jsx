@@ -112,17 +112,25 @@ export default function ChecklistItemCard({ item, completed, skipped, onComplete
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <p className={`text-sm font-semibold ${completed ? "text-[#F97316] line-through" : "text-[#1A1A2E]"}`}>
+            <p className={`text-sm font-semibold ${completed ? "text-[#F97316] line-through" : !prereqsMet ? "text-red-600" : "text-[#1A1A2E]"}`}>
               {item.title}
             </p>
             {completed && (
               <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[#F97316] text-white">Done ✓</span>
             )}
+            {!completed && !prereqsMet && (
+              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-red-100 text-red-700">Blocked</span>
+            )}
             {!completed && savedIdx !== null && (
               <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[#059669] text-white">Found 📍</span>
             )}
           </div>
-          <p className="text-[11px] text-[#6B7280]">{item.description}</p>
+          <p className={`text-[11px] ${!prereqsMet ? "text-red-600" : "text-[#6B7280]"}`}>{item.description}</p>
+          {!prereqsMet && (
+            <p className="text-[10px] text-red-600 font-semibold mt-1">
+              ⚠️ Complete first: {missingPrereqs.map(getPrereqTitle).join(", ")}
+            </p>
+          )}
         </div>
 
         <div className="flex items-center gap-1 flex-wrap">
