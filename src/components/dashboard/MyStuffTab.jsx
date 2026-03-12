@@ -279,7 +279,8 @@ export default function MyStuffTab({ user }) {
     const movers = calcMoverCost(currentLists.move);
     await base44.auth.updateMe({
       packing_supplies_cost: supplies.cost,
-      moving_supplies_cost: movers.low
+      moving_supplies_cost: movers.low,
+      stuff_lists: JSON.stringify(currentLists)
     });
   };
 
