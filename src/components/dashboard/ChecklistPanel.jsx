@@ -398,15 +398,24 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
             ];
             const wCompleted = wItems.filter(i => completedIds.has(i.id)).length;
             const wProgress = wItems.length ? Math.round((wCompleted / wItems.length) * 100) : 0;
+            const isSetup = weekNum === 1 ? true : localStorage.getItem(`walkthrough_done_w${weekNum}_${user?.id}`);
 
             return (
               <div key={weekNum} className="rounded-2xl border border-slate-200 overflow-hidden">
                 <div className="px-3 py-2.5 bg-slate-50 border-b border-slate-100">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between mb-1.5">
                     <h4 className="text-xs font-bold text-slate-700">Week {weekNum}</h4>
                     <span className="text-[10px] font-bold text-orange-500">{wProgress}%</span>
                   </div>
-                  <div className="h-1 bg-slate-200 rounded-full overflow-hidden mt-1.5">
+                  {!isSetup && weekNum !== 1 && (
+                    <button
+                      onClick={() => launchWeekSetup(weekNum)}
+                      className="w-full mb-2 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-bold flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98] transition-transform"
+                    >
+                      ⚡ Start Week {weekNum}
+                    </button>
+                  )}
+                  <div className="h-1 bg-slate-200 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-gradient-to-r from-orange-500 to-orange-400 rounded-full transition-all duration-500"
                       style={{ width: `${wProgress}%` }}
