@@ -16,8 +16,25 @@ const QUICK_ITEMS = [
   "Storage Bins", "Boxes", "Tools", "Lawn Mower", "Artwork", "Mirrors",
 ];
 
-// Item size weight map for estimating truck/supplies
-const ITEM_WEIGHT = {
+const ITEM_SIZES = ["Small", "Medium", "Large", "X-Large"];
+
+// Size multipliers for weight and cost
+const SIZE_MULTIPLIERS = {
+  "Small": 0.5,
+  "Medium": 1.0,
+  "Large": 1.8,
+  "X-Large": 3.0
+};
+
+const SIZE_BOX_NEEDS = {
+  "Small": { small: 1, medium: 0, large: 0 },
+  "Medium": { small: 0, medium: 1, large: 0 },
+  "Large": { small: 0, medium: 1, large: 1 },
+  "X-Large": { small: 0, medium: 2, large: 2 }
+};
+
+// Base item weights
+const ITEM_BASE_WEIGHT = {
   "Sofa": 150, "Couch": 150, "Bed Frame": 80, "Mattress": 100, "Dresser": 120,
   "Dining Table": 100, "Chairs": 20, "TV": 30, "TV Stand": 40, "Bookcase": 80,
   "Desk": 90, "Office Chair": 30, "Refrigerator": 200, "Microwave": 35, "Washer": 150,
@@ -27,25 +44,44 @@ const ITEM_WEIGHT = {
 };
 
 function calcSupplies(moveItems) {
-  const count = moveItems.length;
-  const small  = Math.max(2, Math.ceil(count * 0.4));
-  const medium = Math.max(2, Math.ceil(count * 0.35));
-  const large  = Math.max(1, Math.ceil(count * 0.15));
-  const tape   = Math.max(2, Math.ceil((small + medium + large) / 10));
-  const paper  = Math.ceil((small + medium) * 2.5);
-  const bubble = Math.ceil(count * 3);
-  return { small, medium, large, tape, paper, bubble };
+  let small = 0, medium = 0, large = 0;
+  
+  moveItems.forEach(item => {
+    const needs = SIZE_BOX_NEEDS[item.size] || { small: 0, medium: 1, large: 0 };
+    small += needs.small;
+    medium += needs.medium;
+    large += needs.large;
+  });
+
+  const tape = Math.max(2, Math.ceil((small + medium + large) / 10));
+  const paper = Math.ceil((small + medium) * 2.5);
+  const bubble = Math.ceil(moveItems.length * 3);
+  
+  // Calculate cost
+  const boxCost = (small * 2) + (medium * 3) + (large * 5);
+  const tapeCost = tape * 6;
+  const paperCost = Math.ceil(paper / 25) * 12;
+  const bubbleCost = Math.ceil(bubble / 50) * 18;
+  const suppliesCost = boxCost + tapeCost + paperCost + bubbleCost;
+  
+  return { small, medium, large, tape, paper, bubble, cost: suppliesCost };
 }
 
 function calcMoverCost(moveItems) {
-  const totalWeight = moveItems.reduce((s, item) => s + (ITEM_WEIGHT[item] || 40), 0);
+  const totalWeight = moveItems.reduce((sum, item) => {
+    const baseName = item.name.replace(/\s*\(.*?\)\s*/g, '');
+    const baseWeight = ITEM_BASE_WEIGHT[baseName] || 40;
+    const multiplier = SIZE_MULTIPLIERS[item.size] || 1.0;
+    return sum + (baseWeight * multiplier);
+  }, 0);
+  
   const base = totalWeight < 500 ? 800 : totalWeight < 1500 ? 1500 : totalWeight < 3000 ? 2800 : 4500;
-  const top  = Math.round(base * 1.6 / 100) * 100;
+  const top = Math.round(base * 1.6 / 100) * 100;
   return { low: base, high: top };
 }
 
 // ── Move Summary screen ────────────────────────────────────────────────────────
-function SummaryScreen({ lists, setLists, onBack, user }) {
+function SummaryScreen({ lists, setLists, onBack, user, saveEstimates }) {
   const [movingItem, setMovingItem] = useState(null); // { item, fromKey }
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
@@ -53,15 +89,17 @@ function SummaryScreen({ lists, setLists, onBack, user }) {
   const moveItem = (item, fromKey, toKey) => {
     setLists(prev => ({
       ...prev,
-      [fromKey]: prev[fromKey].filter(i => i !== item),
+      [fromKey]: prev[fromKey].filter(i => i.id !== item.id),
       [toKey]: [...prev[toKey], item],
     }));
     setMovingItem(null);
+    setTimeout(() => saveEstimates(lists), 100);
   };
 
   const removeItem = (item, fromKey) => {
-    setLists(prev => ({ ...prev, [fromKey]: prev[fromKey].filter(i => i !== item) }));
+    setLists(prev => ({ ...prev, [fromKey]: prev[fromKey].filter(i => i.id !== item.id) }));
     setMovingItem(null);
+    setTimeout(() => saveEstimates({ ...lists, [fromKey]: lists[fromKey].filter(i => i.id !== item.id) }), 100);
   };
 
   const supplies = calcSupplies(lists.move);
@@ -70,8 +108,8 @@ function SummaryScreen({ lists, setLists, onBack, user }) {
   const handleEmailAll = async () => {
     setSending(true);
     const body = LISTS.map(l =>
-      `${l.emoji} ${l.label.toUpperCase()}\n${"─".repeat(30)}\n${lists[l.key].length === 0 ? "(empty)" : lists[l.key].map((it, i) => `${i + 1}. ${it}`).join("\n")}`
-    ).join("\n\n");
+      `${l.emoji} ${l.label.toUpperCase()}\n${"─".repeat(30)}\n${lists[l.key].length === 0 ? "(empty)" : lists[l.key].map((it, i) => `${i + 1}. ${it.name} (${it.size})`).join("\n")}`
+    ).join("\n\n") + `\n\nESTIMATES\n${"─".repeat(30)}\nPacking Supplies: $${supplies.cost}\nMovers: $${cost.low.toLocaleString()}–$${cost.high.toLocaleString()}`;
     await base44.integrations.Core.SendEmail({ to: user?.email, subject: "My Full Move Inventory — EZ Move AI", body });
     setSending(false);
     setSent(true);
@@ -99,11 +137,14 @@ function SummaryScreen({ lists, setLists, onBack, user }) {
           ) : (
             <div className="divide-y divide-slate-50">
               {lists[list.key].map(item => (
-                <div key={item}>
+                <div key={item.id}>
                   <div className="flex items-center gap-2 px-4 py-2.5">
-                    <p className="flex-1 text-sm font-semibold text-slate-700">{item}</p>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-slate-700">{item.name}</p>
+                      <p className="text-[10px] text-slate-400 font-semibold">{item.size}</p>
+                    </div>
                     <button
-                      onClick={() => setMovingItem(movingItem?.item === item && movingItem?.fromKey === list.key ? null : { item, fromKey: list.key })}
+                      onClick={() => setMovingItem(movingItem?.item?.id === item.id && movingItem?.fromKey === list.key ? null : { item, fromKey: list.key })}
                       className="text-[10px] font-bold text-blue-500 bg-blue-50 px-2 py-1 rounded-lg"
                     >
                       Move →
@@ -111,9 +152,9 @@ function SummaryScreen({ lists, setLists, onBack, user }) {
                     <button onClick={() => removeItem(item, list.key)} className="text-slate-300 hover:text-red-400 transition-colors">
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
-                  </div>
-                  {/* Move-to picker */}
-                  {movingItem?.item === item && movingItem?.fromKey === list.key && (
+                    </div>
+                    {/* Move-to picker */}
+                    {movingItem?.item?.id === item.id && movingItem?.fromKey === list.key && (
                     <div className="px-4 pb-2.5 flex gap-2 flex-wrap">
                       <p className="text-[10px] text-slate-400 w-full font-semibold">Move to:</p>
                       {LISTS.filter(l => l.key !== list.key).map(target => (
@@ -157,6 +198,10 @@ function SummaryScreen({ lists, setLists, onBack, user }) {
                 <p className="text-[9px] text-slate-500 font-bold mt-0.5 leading-tight">{s.label}</p>
               </div>
             ))}
+          </div>
+          <div className="bg-amber-500 px-4 py-2.5 text-center">
+            <p className="text-white text-xs font-semibold">Estimated Supplies Cost</p>
+            <p className="text-white text-2xl font-black">${supplies.cost}</p>
           </div>
         </div>
       )}
@@ -207,26 +252,41 @@ export default function MyStuffTab({ user }) {
   const [customInput, setCustomInput] = useState("");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [selectingSize, setSelectingSize] = useState(null); // item name waiting for size
 
   const currentList = LISTS.find(l => l.key === activeList);
   const items = activeList && activeList !== "summary" ? lists[activeList] : [];
 
-  const addItem = (name) => {
+  const addItem = (name, size) => {
     const trimmed = name.trim();
-    if (!trimmed || !activeList) return;
-    if (lists[activeList]?.includes(trimmed)) return;
-    setLists(prev => ({ ...prev, [activeList]: [...prev[activeList], trimmed] }));
+    if (!trimmed || !activeList || !size) return;
+    if (lists[activeList]?.some(i => i.name === trimmed && i.size === size)) return;
+    const newItem = { id: `${trimmed}-${size}-${Date.now()}`, name: trimmed, size };
+    setLists(prev => ({ ...prev, [activeList]: [...prev[activeList], newItem] }));
     setCustomInput("");
+    setSelectingSize(null);
+    saveEstimates({ ...lists, [activeList]: [...lists[activeList], newItem] });
   };
 
-  const removeItem = (name) => {
-    setLists(prev => ({ ...prev, [activeList]: prev[activeList].filter(i => i !== name) }));
+  const removeItem = (id) => {
+    setLists(prev => ({ ...prev, [activeList]: prev[activeList].filter(i => i.id !== id) }));
+    saveEstimates({ ...lists, [activeList]: lists[activeList].filter(i => i.id !== id) });
+  };
+
+  const saveEstimates = async (currentLists) => {
+    if (currentLists.move.length === 0) return;
+    const supplies = calcSupplies(currentLists.move);
+    const movers = calcMoverCost(currentLists.move);
+    await base44.auth.updateMe({
+      packing_supplies_cost: supplies.cost,
+      moving_supplies_cost: movers.low
+    });
   };
 
   const handleEmail = async () => {
     setSending(true);
     const listLabel = currentList?.label;
-    const body = `${listLabel.toUpperCase()}\n${"=".repeat(40)}\n\n${items.map((item, i) => `${i + 1}. ${item}`).join("\n")}\n\n${"=".repeat(40)}\nTotal: ${items.length} items\n\nGenerated by EZ Move AI`;
+    const body = `${listLabel.toUpperCase()}\n${"=".repeat(40)}\n\n${items.map((item, i) => `${i + 1}. ${item.name} (${item.size})`).join("\n")}\n\n${"=".repeat(40)}\nTotal: ${items.length} items\n\nGenerated by EZ Move AI`;
     await base44.integrations.Core.SendEmail({ to: user?.email, subject: `My ${listLabel} — EZ Move AI`, body });
     setSending(false);
     setSent(true);
@@ -237,7 +297,7 @@ export default function MyStuffTab({ user }) {
 
   // ── Summary screen ──────────────────────────────────────────────────────────
   if (activeList === "summary") {
-    return <SummaryScreen lists={lists} setLists={setLists} onBack={() => setActiveList(null)} user={user} />;
+    return <SummaryScreen lists={lists} setLists={setLists} onBack={() => setActiveList(null)} user={user} saveEstimates={saveEstimates} />;
   }
 
   // ── Dashboard ───────────────────────────────────────────────────────────────
@@ -312,15 +372,43 @@ export default function MyStuffTab({ user }) {
         <div className="w-10" />
       </div>
 
+      {selectingSize && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end justify-center">
+          <div className="w-full max-w-md bg-white rounded-t-3xl shadow-2xl pb-6">
+            <div className="px-5 py-4 border-b border-slate-100">
+              <h3 className="text-lg font-bold text-slate-800">Select Size</h3>
+              <p className="text-xs text-slate-500 mt-1">How big is this {selectingSize}?</p>
+            </div>
+            <div className="px-5 pt-4 space-y-2">
+              {ITEM_SIZES.map(size => (
+                <button
+                  key={size}
+                  onClick={() => addItem(selectingSize, size)}
+                  className="w-full py-3 rounded-xl border-2 border-slate-200 bg-white text-slate-700 font-bold text-sm hover:border-orange-400 hover:bg-orange-50 transition-all"
+                >
+                  {size}
+                </button>
+              ))}
+              <button
+                onClick={() => setSelectingSize(null)}
+                className="w-full py-3 rounded-xl bg-slate-100 text-slate-600 font-bold text-sm"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
         <div className="px-4 py-2.5 border-b border-slate-50">
-          <p className="text-xs font-bold text-slate-700">Quick Add</p>
+          <p className="text-xs font-bold text-slate-700">Quick Add (Select item then size)</p>
         </div>
         <div className="px-3 py-2.5 flex flex-wrap gap-1.5">
-          {QUICK_ITEMS.filter(i => !items.includes(i)).map(item => (
+          {QUICK_ITEMS.map(item => (
             <button
               key={item}
-              onClick={() => addItem(item)}
+              onClick={() => setSelectingSize(item)}
               className="text-[10px] px-2.5 py-1 rounded-full font-semibold border bg-slate-50 text-slate-600 border-slate-200 active:bg-slate-200 transition-all"
             >
               + {item}
@@ -333,12 +421,12 @@ export default function MyStuffTab({ user }) {
         <input
           value={customInput}
           onChange={e => setCustomInput(e.target.value)}
-          onKeyDown={e => e.key === "Enter" && addItem(customInput)}
+          onKeyDown={e => e.key === "Enter" && setSelectingSize(customInput)}
           placeholder="Type any item..."
           className="flex-1 px-4 py-3 rounded-2xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10 bg-white"
         />
         <button
-          onClick={() => addItem(customInput)}
+          onClick={() => setSelectingSize(customInput)}
           disabled={!customInput.trim()}
           className="w-12 h-12 rounded-2xl bg-orange-500 text-white flex items-center justify-center disabled:opacity-30 active:scale-95 transition-transform"
         >
@@ -353,9 +441,12 @@ export default function MyStuffTab({ user }) {
           </div>
           <div className="divide-y divide-slate-50 max-h-72 overflow-y-auto">
             {items.map(item => (
-              <div key={item} className="flex items-center gap-3 px-4 py-2.5">
-                <p className="flex-1 text-sm font-semibold text-slate-700">{item}</p>
-                <button onClick={() => removeItem(item)} className="text-slate-300 hover:text-red-400 transition-colors">
+              <div key={item.id} className="flex items-center gap-3 px-4 py-2.5">
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-slate-700">{item.name}</p>
+                  <p className="text-[10px] text-slate-400 font-semibold">{item.size}</p>
+                </div>
+                <button onClick={() => removeItem(item.id)} className="text-slate-300 hover:text-red-400 transition-colors">
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
