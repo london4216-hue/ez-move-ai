@@ -154,8 +154,6 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
     }
   }, [user?.id, currentWeek]);
 
-  const [userSelections, setUserSelections] = useState({});
-
   const handleWalkthroughDone = (answers) => {
     // Store user selections: yes, maybe, skip
     const newSelections = { ...userSelections, ...answers };
