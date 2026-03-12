@@ -399,10 +399,16 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
       {/* Close date banner */}
       {user?.estimated_close_date && (
         <div className="bg-[#0F172A] rounded-2xl px-4 py-2.5 flex items-center justify-between">
-          <div>
+          <div className="flex-1">
             <p className="text-white text-[10px] font-bold">Close Date</p>
             <p className="text-orange-400 text-xs font-black">{format(parseISO(user.estimated_close_date), "MMM d, yyyy")}</p>
           </div>
+          {estimatedCost > 0 && (
+            <div className="text-center px-3">
+              <p className="text-slate-400 text-[9px]">Est. Cost</p>
+              <p className="text-emerald-400 text-xs font-black">${estimatedCost.toFixed(0)}</p>
+            </div>
+          )}
           <div className="text-right">
             <p className="text-slate-400 text-[9px]">Total Weeks</p>
             <p className="text-white text-base font-black">{totalWeeks}</p>
