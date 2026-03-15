@@ -49,6 +49,17 @@ export default function AgentOnboarding() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
+  // On mount: check if already onboarded
+  useState(() => {
+    base44.auth.me().then(user => {
+      if (user?.agent_onboarded) {
+        navigate("/AgentDashboard");
+      } else {
+        setStep("register");
+      }
+    }).catch(() => setStep("register"));
+  });
+
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
