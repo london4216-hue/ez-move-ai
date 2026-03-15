@@ -41,8 +41,8 @@ export default function WeekWalkthrough({ weekData, weekNum, onDone }) {
 
         <div className="px-5 pt-4 pb-2 flex items-center justify-between">
           <button
-            onClick={handleBack}
-            className={`text-slate-400 hover:text-slate-600 transition-colors flex items-center gap-1 ${stepIdx === 0 ? "opacity-0 cursor-default pointer-events-none" : ""}`}
+            onClick={stepIdx === 0 ? () => onDone(answers) : handleBack}
+            className="text-slate-400 hover:text-slate-600 transition-colors flex items-center gap-1"
           >
             <ChevronLeft className="w-4 h-4" />
             <span className="text-[11px] font-bold">Back</span>
