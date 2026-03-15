@@ -69,8 +69,8 @@ export default function Register() {
   };
 
   const handleSaveDetails = () => {
-    if (!moveDate || !estimatedMoveCost || !phoneNumber) {
-      setError("Please fill in all fields");
+    if (!moveDate || !estimatedMoveCost || !phoneNumber || !homeAddress.trim()) {
+      setError("Please fill in all fields including your home address");
       return;
     }
     if (phoneNumber.length !== 10) {
