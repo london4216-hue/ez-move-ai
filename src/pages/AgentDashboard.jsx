@@ -89,8 +89,7 @@ export default function AgentDashboard() {
   const handleSaveClient = async () => {
     const code = Math.floor(1000 + Math.random() * 9000).toString();
     const fullName = `${form.firstName} ${form.lastName}`;
-    const isDemoEmail = form.email === "london4216@gmail.com";
-    const emailToUse = isDemoEmail ? `demo+${code}@london4216.gmail.com` : form.email;
+    const emailToUse = form.email;
     const newClient = await base44.entities.Client.create({
       agent_id: agent.id,
       user_email: emailToUse,
