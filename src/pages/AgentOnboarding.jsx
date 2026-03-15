@@ -44,7 +44,7 @@ const FEATURES = [
 
 export default function AgentOnboarding() {
   const navigate = useNavigate();
-  const [step, setStep] = useState("register"); // register | tutorial | done
+  const [step, setStep] = useState("loading"); // loading | register | tutorial
   const [tutorialIdx, setTutorialIdx] = useState(0);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
