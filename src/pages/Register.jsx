@@ -128,6 +128,7 @@ export default function Register() {
         }
       } else {
         await base44.auth.updateMe({
+          home_address: homeAddress || "",
           registration_date: new Date().toISOString().split("T")[0],
           estimated_move_cost: estimatedMoveCost || "",
           move_date: moveDate || "",
