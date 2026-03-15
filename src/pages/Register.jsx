@@ -21,6 +21,7 @@ export default function Register() {
   const [estimatedMoveCost, setEstimatedMoveCost] = useState("");
   const [moveDate, setMoveDate] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [homeAddress, setHomeAddress] = useState("");
   const [detailsSaved, setDetailsSaved] = useState(false);
   const refs = [null, null, null, null].map(() => ({ current: null }));
   const navigate = useNavigate();
