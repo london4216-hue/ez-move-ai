@@ -40,6 +40,7 @@ export default function Register() {
         setEstimatedMoveCost(state.estimatedMoveCost || "");
         setMoveDate(state.moveDate || "");
         setPhoneNumber(state.phoneNumber || "");
+        setHomeAddress(state.homeAddress || "");
         setDetailsSaved(state.detailsSaved || false);
       } catch (e) {
         console.error('Failed to restore progress:', e);
