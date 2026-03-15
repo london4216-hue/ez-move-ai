@@ -124,6 +124,11 @@ export default function AgentOnboarding() {
         </span>
       </div>
 
+      {/* LOADING */}
+      {step === "loading" && (
+        <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+      )}
+
       {/* REGISTRATION STEP */}
       {step === "register" && (
         <div className="w-full max-w-sm bg-[#1E293B] rounded-3xl p-7 shadow-2xl border border-slate-700/50">
