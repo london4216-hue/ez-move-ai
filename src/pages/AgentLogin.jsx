@@ -21,7 +21,7 @@ export default function AgentLogin() {
 
   const handleLogin = () => {
     setLoading(true);
-    base44.auth.redirectToLogin(createPageUrl("AgentDashboard"));
+    base44.auth.redirectToLogin("/AgentOnboarding");
   };
 
   if (loading) return (
