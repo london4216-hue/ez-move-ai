@@ -344,6 +344,20 @@ export default function Register() {
           )}
           
           <div>
+            <label className="text-xs font-semibold text-slate-600 mb-1.5 block">
+              Home Address <span className="text-orange-500">*</span>
+            </label>
+            <input
+              type="text"
+              placeholder="123 Main St, City, State, ZIP"
+              value={homeAddress}
+              onChange={(e) => { setHomeAddress(e.target.value); setDetailsSaved(false); }}
+              disabled={detailsSaved}
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10 bg-white disabled:bg-slate-50 disabled:text-slate-500"
+            />
+            <p className="text-xs text-slate-400 mt-1">Used to find local services near your home</p>
+          </div>
+          <div>
             <label className="text-xs font-semibold text-slate-600 mb-1.5 block">Move Date</label>
             <input
               type="date"
