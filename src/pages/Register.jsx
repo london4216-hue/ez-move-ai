@@ -107,7 +107,7 @@ export default function Register() {
           user_email: currentUser.email,
         });
         await base44.auth.updateMe({
-          home_address: client.home_address || "",
+          home_address: homeAddress || client.home_address || "",
           estimated_close_date: client.close_date || "",
           registration_date: new Date().toISOString().split("T")[0],
           estimated_move_cost: estimatedMoveCost || "",
