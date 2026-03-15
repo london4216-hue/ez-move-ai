@@ -58,6 +58,7 @@ const AuthenticatedApp = () => {
           }
         />
       ))}
+      <Route path="/AgentOnboarding" element={<LayoutWrapper currentPageName="AgentOnboarding"><AgentOnboarding /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
