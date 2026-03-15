@@ -50,7 +50,8 @@ export default function AgentOnboarding() {
   const [error, setError] = useState("");
 
   // On mount: check if already onboarded
-  useState(() => {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const [checked] = useState(() => {
     base44.auth.me().then(user => {
       if (user?.agent_onboarded) {
         navigate("/AgentDashboard");
@@ -58,6 +59,7 @@ export default function AgentOnboarding() {
         setStep("register");
       }
     }).catch(() => setStep("register"));
+    return true;
   });
 
   const [form, setForm] = useState({
