@@ -239,6 +239,15 @@ export default function Register() {
               >
                 No, don't add to my plan
               </button>
+              {onboardingStep > 0 && (
+                <button
+                  onClick={() => setOnboardingStep(prev => prev - 1)}
+                  className="w-full py-3 rounded-2xl border border-slate-200 text-slate-500 text-sm font-semibold active:scale-[0.98] transition-transform flex items-center justify-center gap-1"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  Back
+                </button>
+              )}
             </div>
           </div>
         </div>
