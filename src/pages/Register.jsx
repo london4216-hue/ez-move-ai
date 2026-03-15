@@ -400,6 +400,7 @@ export default function Register() {
                 estimatedMoveCost,
                 moveDate,
                 phoneNumber,
+                homeAddress,
                 detailsSaved,
                 timestamp: Date.now()
               };
