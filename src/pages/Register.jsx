@@ -179,17 +179,19 @@ export default function Register() {
           </div>
 
           <div className="px-5 pt-4 pb-2 flex items-center justify-between">
-            {onboardingStep > 0 ? (
-              <button
-                onClick={() => setOnboardingStep(prev => prev - 1)}
-                className="text-slate-400 hover:text-slate-600 transition-colors flex items-center gap-1"
-              >
-                <ChevronLeft className="w-4 h-4" />
-                <span className="text-[11px] font-bold">Back</span>
-              </button>
-            ) : (
-              <div className="w-16" />
-            )}
+            <button
+              onClick={() => {
+                if (onboardingStep > 0) {
+                  setOnboardingStep(prev => prev - 1);
+                } else {
+                  setShowOnboarding(false);
+                }
+              }}
+              className="text-slate-400 hover:text-slate-600 transition-colors flex items-center gap-1"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span className="text-[11px] font-bold">Back</span>
+            </button>
             <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">
               {onboardingStep + 1}/{week1Questions.length}
             </p>
