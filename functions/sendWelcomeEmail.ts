@@ -11,10 +11,11 @@ Deno.serve(async (req) => {
       ? 'london4216@gmail.com'
       : user_email;
 
-    // Use Base44's built-in email integration with HTML
+    // Use service role to send email to any address (not restricted to registered users)
     await base44.asServiceRole.integrations.Core.SendEmail({
       to: actualEmail,
-      subject: "Welcome to EZ Move AI - Your Moving Assistant Awaits",
+      from_name: "EZ Move AI",
+      subject: "Your EZ Move AI Invitation - Get Started Today!",
       body: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); padding: 40px 20px; text-align: center; border-radius: 12px 12px 0 0;">
@@ -33,7 +34,7 @@ Deno.serve(async (req) => {
               Click below to complete your registration and start planning your move:
             </p>
             <div style="text-align: center; margin: 30px 0;">
-              <a href="${app_url}" style="display: inline-block; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 14px rgba(249, 115, 22, 0.3);">
+              <a href="${app_url}/Register" style="display: inline-block; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 14px rgba(249, 115, 22, 0.3);">
                 Get Started →
               </a>
             </div>
