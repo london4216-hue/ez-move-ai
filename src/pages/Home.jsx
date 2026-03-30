@@ -20,24 +20,24 @@ export default function Home() {
   }, []);
 
   if (checking) return (
-    <div className="min-h-screen bg-[#EFF6FF] flex items-center justify-center">
+    <div className="min-h-screen bg-[#0F172A] flex items-center justify-center">
       <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-[#EFF6FF] text-slate-900">
+    <div className="min-h-screen bg-[#0F172A] text-white">
       {/* Nav */}
       <nav className="px-6 py-5 flex items-center justify-between max-w-5xl mx-auto">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-200">
+          <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-900/50">
             <span className="text-white font-black text-sm">EZ</span>
           </div>
-          <span className="font-bold text-lg text-slate-800">EZ Move <span className="text-orange-500">AI</span></span>
+          <span className="font-bold text-lg">EZ Move <span className="text-orange-500">AI</span></span>
         </div>
         <button
           onClick={() => base44.auth.redirectToLogin("/")}
-          className="text-slate-500 hover:text-slate-800 text-sm font-semibold transition-colors px-4 py-2 rounded-xl border border-slate-200 hover:border-slate-300 bg-white"
+          className="text-slate-400 hover:text-white text-sm font-semibold transition-colors px-4 py-2 rounded-xl border border-slate-700 hover:border-slate-500"
         >
           Sign In
         </button>
@@ -45,18 +45,18 @@ export default function Home() {
 
       {/* Hero */}
       <div className="max-w-5xl mx-auto px-6 pt-16 pb-24 text-center">
-        <div className="inline-flex items-center gap-2 bg-orange-100 border border-orange-200 rounded-full px-4 py-2 mb-8">
+        <div className="inline-flex items-center gap-2 bg-orange-500/10 border border-orange-500/20 rounded-full px-4 py-2 mb-8">
           <Zap className="w-3.5 h-3.5 text-orange-400" />
           <span className="text-orange-400 text-xs font-bold uppercase tracking-wider">AI-Powered Moving Assistant</span>
         </div>
 
-        <h1 className="text-5xl md:text-6xl font-black leading-tight mb-6 text-slate-900">
+        <h1 className="text-5xl md:text-6xl font-black leading-tight mb-6">
           The smartest way to<br />
           <span className="text-orange-500">guide your clients</span><br />
           through every move
         </h1>
 
-        <p className="text-slate-500 text-lg max-w-2xl mx-auto mb-12 leading-relaxed">
+        <p className="text-slate-400 text-lg max-w-2xl mx-auto mb-12 leading-relaxed">
           EZ Move AI gives real estate agents and brokerages a powerful,
           AI-driven platform to manage every step of their clients' moving journey —
           from listing to keys in hand.
@@ -81,15 +81,15 @@ export default function Home() {
 
           <button
             onClick={() => base44.auth.redirectToLogin("/AgentOnboarding?type=broker")}
-            className="flex-1 bg-white border border-slate-200 rounded-3xl p-6 text-left hover:bg-slate-50 hover:border-slate-300 transition-all group shadow-sm"
+            className="flex-1 bg-slate-800 border border-slate-600 rounded-3xl p-6 text-left hover:bg-slate-700 hover:border-slate-500 transition-all group"
           >
-            <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center mb-4">
-              <Building2 className="w-6 h-6 text-slate-500" />
+            <div className="w-12 h-12 bg-slate-700 rounded-2xl flex items-center justify-center mb-4">
+              <Building2 className="w-6 h-6 text-slate-300" />
             </div>
-            <p className="text-xl font-black text-slate-800 mb-1">Broker Firm</p>
-            <p className="text-slate-500 text-sm mb-4">White-labeled platform for your entire brokerage</p>
+            <p className="text-xl font-black text-white mb-1">Broker Firm</p>
+            <p className="text-slate-400 text-sm mb-4">White-labeled platform for your entire brokerage</p>
             <div className="flex items-center justify-between">
-              <span className="text-slate-500 text-xs font-bold">White-label included</span>
+              <span className="text-slate-400 text-xs font-bold">White-label included</span>
               <ArrowRight className="w-5 h-5 text-slate-400 group-hover:translate-x-1 transition-transform" />
             </div>
           </button>
@@ -109,10 +109,12 @@ export default function Home() {
           ))}
         </div>
       </div>
-      <div className="bg-white border-t border-b border-slate-100">
+
+      {/* Features */}
+      <div className="bg-slate-900/50 border-t border-b border-slate-800">
         <div className="max-w-5xl mx-auto px-6 py-20">
-          <h2 className="text-3xl font-black text-center mb-3 text-slate-900">Everything your clients need</h2>
-          <p className="text-slate-500 text-center text-sm mb-12">From close date to keys — AI handles the complexity</p>
+          <h2 className="text-3xl font-black text-center mb-3">Everything your clients need</h2>
+          <p className="text-slate-400 text-center text-sm mb-12">From close date to keys — AI handles the complexity</p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
@@ -138,12 +140,12 @@ export default function Home() {
                 bg: "bg-emerald-400/10"
               },
             ].map(f => (
-              <div key={f.title} className="bg-[#EFF6FF] rounded-3xl p-6 border border-blue-100">
+              <div key={f.title} className="bg-slate-800/60 rounded-3xl p-6 border border-slate-700/50">
                 <div className={`w-12 h-12 ${f.bg} rounded-2xl flex items-center justify-center mb-4`}>
                   <f.Icon className={`w-6 h-6 ${f.color}`} />
                 </div>
-                <h3 className="font-bold text-slate-800 text-lg mb-2">{f.title}</h3>
-                <p className="text-slate-500 text-sm leading-relaxed">{f.desc}</p>
+                <h3 className="font-bold text-white text-lg mb-2">{f.title}</h3>
+                <p className="text-slate-400 text-sm leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>
@@ -152,8 +154,8 @@ export default function Home() {
 
       {/* Bottom CTA */}
       <div className="max-w-5xl mx-auto px-6 py-20 text-center">
-        <h2 className="text-4xl font-black mb-4 text-slate-900">Ready to get started?</h2>
-        <p className="text-slate-500 mb-8">Join agents and brokerages already using EZ Move AI</p>
+        <h2 className="text-4xl font-black mb-4">Ready to get started?</h2>
+        <p className="text-slate-400 mb-8">Join agents and brokerages already using EZ Move AI</p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <button
             onClick={() => base44.auth.redirectToLogin("/AgentOnboarding")}
@@ -163,14 +165,14 @@ export default function Home() {
           </button>
           <button
             onClick={() => base44.auth.redirectToLogin("/AgentOnboarding?type=broker")}
-            className="w-full sm:w-auto px-8 py-4 rounded-2xl border border-slate-200 text-slate-700 font-bold hover:bg-white transition-colors bg-white shadow-sm"
+            className="w-full sm:w-auto px-8 py-4 rounded-2xl border border-slate-700 text-slate-300 font-bold hover:bg-slate-800 transition-colors"
           >
             Broker Firm — White Label
           </button>
         </div>
       </div>
 
-      <div className="border-t border-slate-100 py-6 text-center">
+      <div className="border-t border-slate-800 py-6 text-center">
         <p className="text-slate-600 text-xs">© 2026 EZ Move AI. All rights reserved.</p>
       </div>
     </div>
