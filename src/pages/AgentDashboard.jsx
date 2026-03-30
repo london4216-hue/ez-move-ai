@@ -135,7 +135,7 @@ export default function AgentDashboard() {
           {[
             { label: "Active Clients", value: clients.filter(c => c.status === "active").length, Icon: Users, color: "text-blue-500", bg: "bg-blue-50", border: "border-blue-100" },
             { label: "Pending Invites", value: clients.filter(c => c.status === "invited").length, Icon: Clock, color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-100" },
-            { label: "Revenue", value: `$${revenue}`, Icon: DollarSign, color: "text-orange-500", bg: "bg-orange-50", border: "border-orange-100" },
+            { label: "Total Clients", value: clients.length, Icon: Users, color: "text-slate-600", bg: "bg-slate-50", border: "border-slate-100" },
           ].map(s => (
             <div key={s.label} className={`bg-white rounded-2xl p-4 border ${s.border} shadow-sm`}>
               <div className={`w-8 h-8 ${s.bg} rounded-xl flex items-center justify-center mb-2`}>
