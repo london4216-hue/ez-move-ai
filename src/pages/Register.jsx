@@ -196,7 +196,7 @@ export default function Register() {
               <span className="text-[11px] font-bold">Back</span>
             </button>
             <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">
-              {onboardingStep + 1}/{week1Questions.length}
+              Week 1 Setup · {onboardingStep + 1}/{week1Questions.length}
             </p>
             <div className="flex gap-1">
               {week1Questions.map((_, i) => (
@@ -240,7 +240,7 @@ export default function Register() {
                 onClick={() => handleAnswer("skip")}
                 className="w-full py-3 rounded-2xl border border-slate-200 text-slate-400 text-sm font-semibold active:scale-[0.98] transition-transform"
               >
-                No, don't add to my plan
+                ⏰ Not at this time
               </button>
               {onboardingStep > 0 && (
                 <button

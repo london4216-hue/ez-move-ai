@@ -1,24 +1,18 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
-import { Plus, LogOut, Edit2, X, ArrowLeft, Loader2, Users, Trash2, CreditCard, CheckCircle2, DollarSign, Clock, TrendingUp } from "lucide-react";
+import { createPageUrl } from "@/utils";
+import { Plus, LogOut, Edit2, X, Trash2, Users, DollarSign, Building2, ArrowLeft, Loader2, CheckCircle2, CreditCard, Palette } from "lucide-react";
 import { format, differenceInDays, parseISO } from "date-fns";
 
 const STATUS_COLORS = {
-  invited: "bg-amber-400/10 text-amber-400 border-amber-400/20",
-  registered: "bg-blue-400/10 text-blue-400 border-blue-400/20",
-  active: "bg-emerald-400/10 text-emerald-400 border-emerald-400/20",
-  completed: "bg-slate-600/40 text-slate-400 border-slate-600/20",
+  invited: "bg-amber-400/10 text-amber-400",
+  registered: "bg-blue-400/10 text-blue-400",
+  active: "bg-emerald-400/10 text-emerald-400",
+  completed: "bg-slate-600/50 text-slate-400",
 };
 
-const DEMO_CLIENTS = [
-  { user_name: "Sarah Johnson", user_email: "sarah.johnson@demo.com", close_date: "2026-04-15", invitation_code: "2201", status: "active", billing_status: "charged" },
-  { user_name: "Mike Torres", user_email: "mike.torres@demo.com", close_date: "2026-05-01", invitation_code: "3305", status: "active", billing_status: "charged" },
-  { user_name: "Carol Webb", user_email: "carol.webb@demo.com", close_date: "2026-03-28", invitation_code: "4412", status: "invited", billing_status: "pending" },
-];
-
-export default function AgentDashboard() {
+export default function BrokerDashboard() {
   const [agent, setAgent] = useState(null);
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -29,24 +23,22 @@ export default function AgentDashboard() {
   const [doneData, setDoneData] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({});
-  const [resendingId, setResendingId] = useState(null);
-  const [resentId, setResentId] = useState(null);
+  const [showBranding, setShowBranding] = useState(false);
+  const [brandColor, setBrandColor] = useState("#f97316");
+  const [brandName, setBrandName] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
     const load = async () => {
       const user = await base44.auth.me();
-      if (user?.role !== "admin") { navigate(createPageUrl("AgentLogin")); return; }
+      if (user?.role !== "admin") { navigate("/"); return; }
       let agents = await base44.entities.Agent.filter({ created_by: user.email });
       let agentRecord = agents.length === 0
-        ? await base44.entities.Agent.create({ company_name: user.full_name || "My Agency" })
+        ? await base44.entities.Agent.create({ company_name: user.full_name || "My Brokerage" })
         : agents[0];
       setAgent(agentRecord);
-      let clientList = await base44.entities.Client.filter({ agent_id: agentRecord.id });
-      if (clientList.length === 0) {
-        const seeded = await Promise.all(DEMO_CLIENTS.map(c => base44.entities.Client.create({ ...c, agent_id: agentRecord.id, invited_date: new Date().toISOString() })));
-        clientList = seeded;
-      }
+      setBrandName(agentRecord.company_name || "");
+      const clientList = await base44.entities.Client.filter({ agent_id: agentRecord.id });
       setClients(clientList.sort((a, b) => new Date(b.invited_date || 0) - new Date(a.invited_date || 0)));
       setLoading(false);
     };
@@ -62,11 +54,15 @@ export default function AgentDashboard() {
 
   const handleSaveClient = async () => {
     const code = Math.floor(1000 + Math.random() * 9000).toString();
-    const fullName = `${form.firstName} ${form.lastName}`;
     const newClient = await base44.entities.Client.create({
-      agent_id: agent.id, user_email: form.email, user_name: fullName,
-      close_date: form.close_date, invitation_code: code, status: "invited",
-      invited_date: new Date().toISOString(), billing_status: "pending",
+      agent_id: agent.id,
+      user_email: form.email,
+      user_name: `${form.firstName} ${form.lastName}`,
+      close_date: form.close_date,
+      invitation_code: code,
+      status: "invited",
+      invited_date: new Date().toISOString(),
+      billing_status: "pending",
     });
     setPendingClient({ ...newClient, invitation_code: code });
     setClients(prev => [{ ...newClient, invitation_code: code }, ...prev]);
@@ -84,21 +80,19 @@ export default function AgentDashboard() {
     setPaying(false);
   };
 
-  const resendCode = async (client) => {
-    setResendingId(client.id);
-    // Email sending handled by backend when available
-    setTimeout(() => { setResendingId(null); setResentId(client.id); setTimeout(() => setResentId(null), 3000); }, 800);
-  };
-
   const deleteClient = async (id) => {
     if (!confirm("Delete this client?")) return;
     await base44.entities.Client.delete(id);
     setClients(prev => prev.filter(c => c.id !== id));
   };
 
+  const saveBranding = async () => {
+    await base44.entities.Agent.update(agent.id, { company_name: brandName });
+    setAgent(prev => ({ ...prev, company_name: brandName }));
+    setShowBranding(false);
+  };
+
   const revenue = clients.filter(c => c.billing_status === "charged").length * 40;
-  const activeCount = clients.filter(c => c.status === "active").length;
-  const pendingCount = clients.filter(c => c.status === "invited").length;
   const canSave = form.firstName.trim() && form.lastName.trim() && form.email.trim() && form.close_date;
 
   if (loading) return (
@@ -113,17 +107,26 @@ export default function AgentDashboard() {
       <div className="border-b border-slate-800 px-6 py-4">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-900/40">
-              <span className="text-white font-black text-sm">EZ</span>
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg">
+              <Building2 className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="font-black text-white text-sm leading-tight">EZ Move <span className="text-orange-500">AI</span></p>
-              <p className="text-slate-500 text-[10px] font-semibold">Agent Portal · {agent?.company_name}</p>
+              <p className="font-black text-white text-sm leading-tight">{agent?.company_name}</p>
+              <p className="text-orange-500 text-[10px] font-bold uppercase tracking-widest">Broker Portal · EZ Move AI</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={() => setAddStep("form")}
-              className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs px-4 py-2 rounded-xl transition-colors shadow-lg shadow-orange-900/30">
+            <button
+              onClick={() => setShowBranding(true)}
+              className="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 flex items-center justify-center transition-colors border border-slate-700"
+              title="Branding Settings"
+            >
+              <Palette className="w-4 h-4 text-slate-400" />
+            </button>
+            <button
+              onClick={() => setAddStep("form")}
+              className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs px-4 py-2 rounded-xl transition-colors"
+            >
               <Plus className="w-3.5 h-3.5" /> Add Client
             </button>
             <button onClick={() => base44.auth.logout("/")} className="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 flex items-center justify-center transition-colors">
@@ -134,11 +137,11 @@ export default function AgentDashboard() {
       </div>
 
       <div className="max-w-3xl mx-auto px-6 py-6 space-y-5">
-        {/* Stats Row */}
+        {/* Stats */}
         <div className="grid grid-cols-3 gap-4">
           {[
-            { label: "Active Clients", value: activeCount, Icon: Users, color: "text-blue-400", bg: "bg-blue-400/10" },
-            { label: "Pending", value: pendingCount, Icon: Clock, color: "text-amber-400", bg: "bg-amber-400/10" },
+            { label: "Total Clients", value: clients.length, Icon: Users, color: "text-blue-400", bg: "bg-blue-400/10" },
+            { label: "Active", value: clients.filter(c => c.status === "active").length, Icon: CheckCircle2, color: "text-emerald-400", bg: "bg-emerald-400/10" },
             { label: "Revenue", value: `$${revenue}`, Icon: DollarSign, color: "text-orange-400", bg: "bg-orange-400/10" },
           ].map(s => (
             <div key={s.label} className="bg-slate-800/60 rounded-2xl p-4 border border-slate-700/50">
@@ -158,7 +161,9 @@ export default function AgentDashboard() {
               <Users className="w-4 h-4 text-orange-400" />
               <p className="font-bold text-white text-sm">Clients</p>
             </div>
-            <span className="text-slate-500 text-xs font-semibold">{clients.length} total</span>
+            <button onClick={() => setAddStep("form")} className="text-orange-400 text-xs font-bold flex items-center gap-1 hover:text-orange-300">
+              <Plus className="w-3.5 h-3.5" /> Add
+            </button>
           </div>
 
           {clients.length === 0 ? (
@@ -172,47 +177,34 @@ export default function AgentDashboard() {
               {clients.map(client => {
                 const daysLeft = client.close_date ? differenceInDays(parseISO(client.close_date), new Date()) : null;
                 return (
-                  <div key={client.id} className="px-5 py-4 flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500/20 to-orange-600/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="text-sm font-black text-orange-400">{(client.user_name || "?")[0]}</span>
+                  <div key={client.id} className="px-5 py-3.5 flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-orange-500/10 flex items-center justify-center flex-shrink-0">
+                      <span className="text-sm font-bold text-orange-400">{(client.user_name || "?")[0]}</span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                      <div className="flex items-center gap-2">
                         <p className="font-bold text-white text-sm">{client.user_name || "—"}</p>
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${STATUS_COLORS[client.status] || "bg-slate-700 text-slate-400 border-slate-600"}`}>
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${STATUS_COLORS[client.status] || "bg-slate-700 text-slate-400"}`}>
                           {client.status}
                         </span>
                       </div>
-                      <p className="text-[11px] text-slate-500 truncate mb-1.5">{client.user_email}</p>
+                      <p className="text-[11px] text-slate-500 truncate">{client.user_email}</p>
                       {client.invitation_code && (
-                        <div className="inline-flex items-center gap-1.5 bg-slate-900/60 rounded-lg px-2 py-1 border border-slate-700/50">
-                          <span className="text-[9px] text-slate-500 font-semibold uppercase">Code</span>
-                          <span className="text-xs font-black text-orange-400 tracking-widest">{client.invitation_code}</span>
-                        </div>
+                        <span className="text-[10px] text-orange-400 font-black tracking-widest">Code: {client.invitation_code}</span>
                       )}
                     </div>
-                    <div className="flex-shrink-0 text-right flex flex-col items-end gap-2">
+                    <div className="flex-shrink-0 text-right flex flex-col items-end gap-1.5">
                       {daysLeft !== null && (
-                        <div>
-                          <p className={`text-xs font-bold ${daysLeft < 0 ? "text-emerald-400" : daysLeft < 14 ? "text-red-400" : "text-slate-300"}`}>
-                            {daysLeft < 0 ? "Closed ✓" : `${daysLeft}d left`}
-                          </p>
-                          {client.close_date && (
-                            <p className="text-[10px] text-slate-500">{format(parseISO(client.close_date), "MMM d, yyyy")}</p>
-                          )}
-                        </div>
+                        <p className={`text-xs font-bold ${daysLeft < 0 ? "text-emerald-400" : daysLeft < 14 ? "text-red-400" : "text-slate-400"}`}>
+                          {daysLeft < 0 ? "Closed ✓" : `${daysLeft}d left`}
+                        </p>
                       )}
                       <div className="flex items-center gap-1.5">
-                        <button onClick={() => { setEditForm({ user_name: client.user_name, user_email: client.user_email, home_address: client.home_address, close_date: client.close_date }); setEditingId(client.id); }}
-                          className="text-[10px] text-orange-400 font-bold flex items-center gap-0.5 bg-orange-400/10 px-2 py-0.5 rounded-lg hover:bg-orange-400/20 transition-colors">
+                        <button onClick={() => { setEditForm({ user_name: client.user_name, user_email: client.user_email, home_address: client.home_address, close_date: client.close_date }); setEditingId(client.id); }} className="text-[10px] text-orange-400 font-bold bg-orange-400/10 px-2 py-0.5 rounded-lg flex items-center gap-0.5">
                           <Edit2 className="w-2.5 h-2.5" /> Edit
                         </button>
-                        <button onClick={() => resendCode(client)} disabled={resendingId === client.id}
-                          className={`text-[10px] font-bold flex items-center gap-0.5 px-2 py-0.5 rounded-lg transition-all ${resentId === client.id ? "text-emerald-400 bg-emerald-400/10" : "text-blue-400 bg-blue-400/10 hover:bg-blue-400/20"}`}>
-                          {resendingId === client.id ? "..." : resentId === client.id ? "✓ Sent" : "📨 Code"}
-                        </button>
-                        <button onClick={() => deleteClient(client.id)} className="text-[10px] text-red-400 font-bold flex items-center gap-0.5 bg-red-400/10 px-2 py-0.5 rounded-lg hover:bg-red-400/20 transition-colors">
-                          <Trash2 className="w-2.5 h-2.5" />
+                        <button onClick={() => deleteClient(client.id)} className="text-[10px] text-red-400 font-bold bg-red-400/10 px-2 py-0.5 rounded-lg flex items-center gap-0.5">
+                          <Trash2 className="w-2.5 h-2.5" /> Del
                         </button>
                       </div>
                     </div>
@@ -224,7 +216,41 @@ export default function AgentDashboard() {
         </div>
       </div>
 
-      {/* Edit Modal */}
+      {/* Branding Modal */}
+      {showBranding && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden">
+            <div className="px-6 pt-5 pb-4 border-b border-slate-800 flex items-center justify-between">
+              <p className="font-bold text-white">White-Label Branding</p>
+              <button onClick={() => setShowBranding(false)} className="w-8 h-8 rounded-xl bg-slate-800 flex items-center justify-center">
+                <X className="w-4 h-4 text-slate-400" />
+              </button>
+            </div>
+            <div className="px-6 py-5 space-y-4">
+              <div>
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-2">Firm Name</label>
+                <input type="text" value={brandName} onChange={e => setBrandName(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-orange-400" />
+              </div>
+              <div className="bg-slate-800 rounded-2xl p-4 border border-slate-700">
+                <p className="text-xs text-slate-400 mb-2 font-semibold">Preview</p>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
+                    <Building2 className="w-4 h-4 text-white" />
+                  </div>
+                  <p className="font-bold text-white text-sm">{brandName || "Your Firm Name"}</p>
+                </div>
+                <p className="text-[10px] text-slate-500 mt-1 ml-10">Powered by EZ Move AI</p>
+              </div>
+              <button onClick={saveBranding} className="w-full py-3 rounded-xl bg-orange-500 text-white font-bold text-sm hover:bg-orange-600 transition-colors">
+                Save Branding
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Client Modal */}
       {editingId && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-end md:items-center justify-center p-4 z-50">
           <div className="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden">
@@ -234,7 +260,11 @@ export default function AgentDashboard() {
               <div className="w-8" />
             </div>
             <div className="px-6 py-5 space-y-3">
-              {[{ label: "Full Name", key: "user_name", type: "text" }, { label: "Email", key: "user_email", type: "email" }, { label: "Address", key: "home_address", type: "text" }, { label: "Close Date", key: "close_date", type: "date" }].map(f => (
+              {[
+                { label: "Full Name", key: "user_name", type: "text" },
+                { label: "Email", key: "user_email", type: "email" },
+                { label: "Close Date", key: "close_date", type: "date" },
+              ].map(f => (
                 <div key={f.key}>
                   <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wide block mb-1">{f.label}</label>
                   <input type={f.type} value={editForm[f.key] || ""} onChange={e => setEditForm(p => ({ ...p, [f.key]: e.target.value }))}
@@ -255,49 +285,45 @@ export default function AgentDashboard() {
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-end md:items-center justify-center p-4 z-50">
           <div className="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden">
             <div className="px-6 pt-5 pb-4 border-b border-slate-800 flex items-center justify-between">
-              <button onClick={addStep === "payment" ? () => setAddStep("form") : resetAdd} className="w-8 h-8 rounded-xl bg-slate-800 flex items-center justify-center">
+              <button onClick={addStep === "payment" ? () => setAddStep("form") : addStep === "done" ? resetAdd : resetAdd}
+                className="w-8 h-8 rounded-xl bg-slate-800 flex items-center justify-center">
                 {addStep === "payment" ? <ArrowLeft className="w-4 h-4 text-slate-400" /> : <X className="w-4 h-4 text-slate-400" />}
               </button>
               <p className="font-bold text-white text-sm">
-                {addStep === "form" ? "New Client" : addStep === "payment" ? "Payment" : "Client Added! 🎉"}
+                {addStep === "form" ? "New Client" : addStep === "payment" ? "Complete Payment" : "Client Added! 🎉"}
               </p>
               <div className="w-8" />
             </div>
             <div className="px-6 py-5">
               {addStep === "form" && (
                 <div className="space-y-4">
-                  <p className="text-xs text-slate-500">Client info — you'll confirm payment on the next step.</p>
                   <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wide block mb-1">First Name</label>
-                      <input type="text" value={form.firstName} onChange={e => setForm(p => ({ ...p, firstName: e.target.value }))} placeholder="Jane"
-                        className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-orange-400" />
-                    </div>
-                    <div>
-                      <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wide block mb-1">Last Name</label>
-                      <input type="text" value={form.lastName} onChange={e => setForm(p => ({ ...p, lastName: e.target.value }))} placeholder="Smith"
-                        className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-orange-400" />
-                    </div>
+                    {["firstName", "lastName"].map(k => (
+                      <div key={k}>
+                        <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wide block mb-1">{k === "firstName" ? "First" : "Last"}</label>
+                        <input type="text" value={form[k]} onChange={e => setForm(p => ({ ...p, [k]: e.target.value }))} placeholder={k === "firstName" ? "Jane" : "Smith"}
+                          className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-orange-400" />
+                      </div>
+                    ))}
                   </div>
-                  {[{ label: "Email Address", key: "email", type: "email", ph: "jane@email.com" }, { label: "Estimated Close Date", key: "close_date", type: "date", ph: "" }].map(f => (
+                  {[{ label: "Email", key: "email", type: "email" }, { label: "Close Date", key: "close_date", type: "date" }].map(f => (
                     <div key={f.key}>
                       <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wide block mb-1">{f.label}</label>
-                      <input type={f.type} value={form[f.key]} onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))} placeholder={f.ph}
+                      <input type={f.type} value={form[f.key]} onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))}
                         className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-orange-400" />
                     </div>
                   ))}
-                  <button onClick={handleSaveClient} disabled={!canSave} className="w-full py-3.5 rounded-2xl bg-orange-500 text-white font-bold text-sm disabled:opacity-40 hover:bg-orange-600 transition-colors mt-2">
+                  <button onClick={handleSaveClient} disabled={!canSave} className="w-full py-3.5 rounded-2xl bg-orange-500 text-white font-bold text-sm disabled:opacity-40 hover:bg-orange-600 transition-colors">
                     Save & Continue →
                   </button>
                 </div>
               )}
               {addStep === "payment" && pendingClient && (
                 <div className="space-y-4">
-                  <div className="bg-slate-800 rounded-2xl p-4 border border-slate-700/50 space-y-2">
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Client Summary</p>
+                  <div className="bg-slate-800 rounded-2xl p-4 border border-slate-700 space-y-2">
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Summary</p>
                     <div className="flex justify-between"><span className="text-xs text-slate-400">Name</span><span className="text-xs font-bold text-white">{pendingClient.user_name}</span></div>
                     <div className="flex justify-between"><span className="text-xs text-slate-400">Email</span><span className="text-xs font-bold text-white">{pendingClient.user_email}</span></div>
-                    <div className="flex justify-between"><span className="text-xs text-slate-400">Close Date</span><span className="text-xs font-bold text-white">{pendingClient.close_date}</span></div>
                     <div className="flex justify-between"><span className="text-xs text-slate-400">Invite Code</span><span className="text-xs font-black text-orange-400 tracking-widest">{pendingClient.invitation_code}</span></div>
                   </div>
                   <div className="bg-orange-500/10 border border-orange-500/20 rounded-2xl p-4 flex items-center justify-between">
@@ -308,10 +334,10 @@ export default function AgentDashboard() {
                     <p className="text-2xl font-black text-orange-400">$40</p>
                   </div>
                   <button onClick={handlePayment} disabled={paying} className="w-full py-3.5 rounded-2xl bg-orange-500 text-white font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50 hover:bg-orange-600 transition-colors">
-                    {paying ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : <><CreditCard className="w-4 h-4" /> Pay $40 & Send Invite</>}
+                    {paying ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : <><CreditCard className="w-4 h-4" /> Pay $40 & Activate</>}
                   </button>
                   <button onClick={() => { setClients(prev => prev.map(c => c.id === pendingClient.id ? { ...c, status: "active", billing_status: "charged" } : c)); setDoneData({ name: pendingClient.user_name, code: pendingClient.invitation_code }); setAddStep("done"); }}
-                    className="w-full py-2.5 rounded-2xl border border-slate-700 text-slate-500 text-xs font-semibold hover:bg-slate-800 transition-colors">
+                    className="w-full py-2.5 rounded-2xl border border-slate-700 text-slate-400 text-xs font-semibold hover:bg-slate-800 transition-colors">
                     Skip Payment (Demo)
                   </button>
                 </div>
@@ -322,7 +348,7 @@ export default function AgentDashboard() {
                   <p className="text-xl font-bold text-white mb-1">All Set!</p>
                   <p className="text-sm text-slate-400 mb-5">{doneData.name} is now active.</p>
                   <div className="bg-orange-500/10 border border-orange-500/20 rounded-2xl p-4 mb-5">
-                    <p className="text-xs text-slate-400 mb-1">Share this invite code</p>
+                    <p className="text-xs text-slate-400 mb-1">4-Digit Invite Code</p>
                     <p className="text-4xl font-black text-orange-400 tracking-widest">{doneData.code}</p>
                   </div>
                   <button onClick={resetAdd} className="w-full py-3 rounded-2xl bg-orange-500 text-white font-bold text-sm hover:bg-orange-600 transition-colors">Done</button>

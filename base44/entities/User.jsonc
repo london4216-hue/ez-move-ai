@@ -1,0 +1,49 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "role": {
+      "type": "string",
+      "enum": [
+        "super_admin",
+        "admin",
+        "user"
+      ],
+      "default": "user",
+      "description": "super_admin = EZ Move AI platform staff, admin = Agent or Broker, user = Buyer/Seller client"
+    },
+    "account_type": {
+      "type": "string",
+      "enum": [
+        "agent",
+        "broker"
+      ],
+      "description": "For admin users: individual agent or broker firm"
+    },
+    "home_address": {
+      "type": "string"
+    },
+    "estimated_close_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "registration_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "estimated_move_cost": {
+      "type": "string"
+    },
+    "move_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "onboarded": {
+      "type": "boolean",
+      "default": false
+    }
+  }
+}
