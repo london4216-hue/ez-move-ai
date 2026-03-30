@@ -487,6 +487,112 @@ function ToolShell({ emoji, title, tagline, color, onGenerate, loading, fetched,
   );
 }
 
+// ── 8. Perfect Final Walkthrough ─────────────────────────────────────────────
+function WalkthroughCard({ user }) {
+  const [loading, setLoading] = useState(false);
+  const [sections, setSections] = useState([]);
+  const [checked, setChecked] = useState(new Set());
+  const [fetched, setFetched] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  const generate = async () => {
+    setLoading(true);
+    const res = await base44.integrations.Core.InvokeLLM({
+      prompt: `Generate a comprehensive "Perfect Final Walkthrough" checklist for a home buyer doing their last walkthrough before closing. Organize into 5 sections: Exterior, Kitchen, Bathrooms, Bedrooms & Living Areas, and Systems & Utilities. Each section should have 4-5 specific inspection items the buyer must verify. Items should be actionable (e.g. "Test all light switches", "Run garbage disposal", "Check for cracks in walls"). This checklist should help them catch any issues before signing.`,
+      response_json_schema: {
+        type: "object",
+        properties: {
+          sections: { type: "array", items: { type: "object", properties: {
+            title: { type: "string" },
+            emoji: { type: "string" },
+            items: { type: "array", items: { type: "string" } }
+          }}}
+        }
+      }
+    });
+    setSections(res.sections || []);
+    setFetched(true);
+    setOpen(true);
+    setLoading(false);
+  };
+
+  const toggle = (key) => setChecked(s => { const n = new Set(s); n.has(key) ? n.delete(key) : n.add(key); return n; });
+  const totalItems = sections.reduce((sum, s) => sum + s.items.length, 0);
+  const progress = totalItems ? Math.round((checked.size / totalItems) * 100) : 0;
+
+  return (
+    <div className="bg-violet-50 border border-violet-200 rounded-2xl overflow-hidden">
+      <button onClick={() => fetched && setOpen(v => !v)} className="w-full px-4 py-3.5 flex items-center gap-3 text-left">
+        <div className="w-9 h-9 rounded-xl bg-violet-100 flex items-center justify-center shrink-0">
+          <span className="text-lg">🏠</span>
+        </div>
+        <div className="flex-1">
+          <p className="text-xs font-black text-slate-800">🏠 Perfect Final Walkthrough</p>
+          <p className="text-[10px] text-slate-500">
+            {fetched ? `${checked.size}/${totalItems} items verified (${progress}%)` : "Nail your last walkthrough before closing"}
+          </p>
+        </div>
+        {fetched && (open ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />)}
+      </button>
+
+      <div className="px-4 pb-4">
+        {!fetched && (
+          <>
+            <div className="bg-white border border-violet-100 rounded-2xl p-3 mb-3">
+              <p className="text-[11px] text-slate-600 leading-relaxed">
+                <span className="font-bold text-violet-600">Why this matters:</span> Your final walkthrough is your last chance to verify repairs were completed, appliances work, and nothing was damaged during the seller's move-out — before you sign.
+              </p>
+            </div>
+            <button onClick={generate} disabled={loading}
+              className="w-full py-3 rounded-xl bg-violet-500 text-white text-xs font-bold flex items-center justify-center gap-2 disabled:opacity-60">
+              {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Building checklist…</> : <><Sparkles className="w-4 h-4" /> Build My Walkthrough Checklist</>}
+            </button>
+          </>
+        )}
+
+        {fetched && open && (
+          <div className="space-y-3 mt-1">
+            <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-full bg-violet-500 rounded-full transition-all duration-500" style={{ width: `${progress}%` }} />
+            </div>
+            {progress === 100 && (
+              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3 flex items-center gap-2">
+                <Check className="w-4 h-4 text-emerald-500 shrink-0" />
+                <p className="text-xs font-bold text-emerald-700">All items verified — you're ready to close! 🎉</p>
+              </div>
+            )}
+            {sections.map((section, si) => (
+              <div key={si} className="bg-white rounded-2xl border border-violet-100 overflow-hidden">
+                <div className="bg-violet-500 px-4 py-2 flex items-center gap-2">
+                  <span className="text-white text-sm">{section.emoji}</span>
+                  <span className="text-white text-xs font-black">{section.title}</span>
+                  <span className="text-violet-200 text-[10px] ml-auto">{section.items.filter(item => checked.has(`${si}-${item}`)).length}/{section.items.length}</span>
+                </div>
+                <div className="divide-y divide-slate-50">
+                  {(section.items || []).map((item, ii) => {
+                    const key = `${si}-${item}`;
+                    return (
+                      <button key={ii} onClick={() => toggle(key)}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-left active:bg-slate-50 transition-colors">
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                          checked.has(key) ? "bg-violet-500 border-violet-500" : "border-slate-300"
+                        }`}>
+                          {checked.has(key) && <Check className="w-3 h-3 text-white" />}
+                        </div>
+                        <p className={`text-xs font-semibold transition-all ${checked.has(key) ? "line-through text-slate-400" : "text-slate-700"}`}>{item}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 export default function AIMoveAssist({ user }) {
   return (
@@ -506,6 +612,7 @@ export default function AIMoveAssist({ user }) {
       <BudgetCalc />
       <TimelineCard user={user} />
       <DocumentsCard user={user} />
+      <WalkthroughCard user={user} />
     </div>
   );
 }
