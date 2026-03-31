@@ -419,12 +419,14 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
       {/* Consolidated All Weeks */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
         <div className="px-4 py-3 border-b border-slate-100">
-          <h3 className="text-sm font-bold text-slate-800">📋 All Tasks (Week 1-{totalWeeks})</h3>
+          <h3 className="text-sm font-bold text-slate-800">📋 My Move Plan</h3>
         </div>
 
-        {/* All Weeks Consolidated - Collapsable */}
         <div className="px-3 pb-3 space-y-2 max-h-[520px] overflow-y-auto">
           {Array.from({ length: totalWeeks }, (_, i) => i + 1).map(weekNum => {
+            // Week 1 always shown (set during registration). Other weeks only shown after walkthrough done.
+            const isUnlocked = weekNum === 1 || !!localStorage.getItem(`walkthrough_done_w${weekNum}_${user?.id}`);
+            if (!isUnlocked) return null;  // hide weeks not yet set up
             const wData = weeksData[weekNum];
             const wItems = [
               ...(wData?.items || []).filter(i => userSelections[i.id] === "yes"),
@@ -432,13 +434,18 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
             ];
             const wCompleted = wItems.filter(i => completedIds.has(i.id)).length;
             const wProgress = wItems.length ? Math.round((wCompleted / wItems.length) * 100) : 0;
-            const isSetup = weekNum === 1 ? true : localStorage.getItem(`walkthrough_done_w${weekNum}_${user?.id}`);
             const isExpanded = expandedWeeks.has(weekNum);
 
             return (
               <div key={weekNum} className="rounded-2xl border border-slate-200 overflow-hidden">
                 <button
-                  onClick={() => launchWeekSetup(weekNum)}
+                  onClick={() => {
+                    setExpandedWeeks(prev => {
+                      const next = new Set(prev);
+                      next.has(weekNum) ? next.delete(weekNum) : next.add(weekNum);
+                      return next;
+                    });
+                  }}
                   className="w-full px-3 py-2.5 bg-slate-50 border-b border-slate-100 flex items-center justify-between hover:bg-slate-100 transition-colors"
                 >
                   <div className="flex items-center gap-2 flex-1 min-w-0">
