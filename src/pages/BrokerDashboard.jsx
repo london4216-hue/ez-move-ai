@@ -53,13 +53,35 @@ export default function BrokerDashboard() {
 
   const handleSaveClient = async () => {
     const code = Math.floor(1000 + Math.random() * 9000).toString();
+    const clientName = `${form.firstName} ${form.lastName}`;
     const newClient = await base44.entities.Client.create({
-      agent_id: agent.id, user_email: form.email, user_name: `${form.firstName} ${form.lastName}`,
+      agent_id: agent.id, user_email: form.email, user_name: clientName,
       close_date: form.close_date, invitation_code: code, status: "invited",
       invited_date: new Date().toISOString(), billing_status: "pending",
     });
     setPendingClient({ ...newClient, invitation_code: code });
     setClients(prev => [{ ...newClient, invitation_code: code }, ...prev]);
+    // Send invite email
+    const appUrl = window.location.origin;
+    base44.integrations.Core.SendEmail({
+      to: form.email,
+      from_name: agent?.company_name || "EZ Move AI",
+      subject: `Your EZ Move AI Invitation from ${agent?.company_name || "your agent"}`,
+      body: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
+        <div style="background:linear-gradient(135deg,#f97316,#ea580c);border-radius:16px;padding:24px;text-align:center;margin-bottom:24px">
+          <h1 style="color:white;margin:0;font-size:28px;font-weight:900">EZ Move <span style="opacity:0.85">AI</span></h1>
+          <p style="color:rgba(255,255,255,0.85);margin:8px 0 0;font-size:13px">Your personal moving assistant</p>
+        </div>
+        <h2 style="color:#1e293b;font-size:20px">Hi ${clientName},</h2>
+        <p style="color:#475569;line-height:1.6">${agent?.company_name || "Your real estate agent"} has invited you to use <strong>EZ Move AI</strong> — your step-by-step moving assistant to make your move stress-free.</p>
+        <div style="background:#fff7ed;border:2px solid #fed7aa;border-radius:12px;padding:20px;text-align:center;margin:24px 0">
+          <p style="color:#9a3412;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 8px">Your Invite Code</p>
+          <p style="color:#f97316;font-size:42px;font-weight:900;letter-spacing:8px;margin:0">${code}</p>
+        </div>
+        <a href="${appUrl}" style="display:block;background:#f97316;color:white;text-decoration:none;text-align:center;padding:14px;border-radius:12px;font-weight:700;font-size:15px;margin-bottom:16px">Get Started →</a>
+        <p style="color:#94a3b8;font-size:12px;text-align:center">Enter your invite code on the registration page to get started.</p>
+      </div>`,
+    }).catch(() => {});
     setAddStep("payment");
   };
 
