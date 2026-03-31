@@ -214,6 +214,7 @@ function ItemPicker({ listType, onAdd }) {
 
 // List display + email + drag & drop
 function ItemList({ items, listColor, listBg, onRemove, onEmail, sending, sent, user, emptyLabel, listType, onMove, otherItems }) {
+  const [draggedIdx, setDraggedIdx] = useState(null);
   if (items.length === 0) return null;
   
   return (
@@ -224,7 +225,7 @@ function ItemList({ items, listColor, listBg, onRemove, onEmail, sending, sent, 
             <div 
               key={idx} 
               draggable
-              onDragStart={() => {}}
+              onDragStart={() => setDraggedIdx(idx)}
               className="flex items-center gap-2 px-3 py-2.5 cursor-move transition-all"
             >
               <GripHorizontal className="w-4 h-4 text-[#D1D5DB] flex-shrink-0" />

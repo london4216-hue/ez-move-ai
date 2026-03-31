@@ -129,9 +129,9 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
       </div>
 
       {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end justify-center">
+          <div className="w-full max-w-md bg-white rounded-t-3xl shadow-2xl max-h-[90vh] flex flex-col">
+            <div className="sticky top-0 bg-white border-b border-slate-100 px-5 py-4 flex items-center justify-between flex-shrink-0">
               <h3 className="text-lg font-bold text-slate-800">Add Contact</h3>
               <button
                 onClick={() => setShowAddModal(false)}
@@ -141,7 +141,7 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
               </button>
             </div>
 
-            <div className="p-5 space-y-4">
+            <div className="p-5 space-y-4 overflow-y-auto">
               <div>
                 <label className="text-xs font-semibold text-slate-600 mb-1.5 block">Name *</label>
                 <input
@@ -193,7 +193,7 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
                 />
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex gap-3 pb-2">
                 <button
                   onClick={() => setShowAddModal(false)}
                   className="flex-1 py-3 rounded-xl border-2 border-slate-200 text-slate-700 font-bold"
@@ -201,9 +201,7 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
                   Close
                 </button>
                 <button
-                  onClick={async () => {
-                    await handleAddContact();
-                  }}
+                  onClick={async () => { await handleAddContact(); }}
                   disabled={!newContact.name || !newContact.role}
                   className="flex-1 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold
                     disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
