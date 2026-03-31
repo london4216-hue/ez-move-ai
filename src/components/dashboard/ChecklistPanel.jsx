@@ -283,6 +283,7 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
           weekData={weeksData[walkthroughWeek]}
           weekNum={walkthroughWeek}
           onDone={handleWalkthroughDone}
+          user={user}
         />
       )}
       
