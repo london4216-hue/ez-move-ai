@@ -25,6 +25,7 @@ export default function Register() {
   const [city, setCity] = useState("");
   const [zipCode, setZipCode] = useState("");
   const [detailsSaved, setDetailsSaved] = useState(false);
+  const [locationLoading, setLocationLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -50,6 +51,24 @@ export default function Register() {
         setZipCode(state.zipCode || "");
         setDetailsSaved(state.detailsSaved || false);
       } catch (e) {}
+    }
+
+    // Auto-detect location
+    if (navigator.geolocation) {
+      setLocationLoading(true);
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        try {
+          const { latitude, longitude } = pos.coords;
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
+          const data = await res.json();
+          const addr = data.address || {};
+          const street = [addr.house_number, addr.road].filter(Boolean).join(" ");
+          setStreetAddress(prev => prev || street || "");
+          setCity(prev => prev || addr.city || addr.town || addr.village || addr.county || "");
+          setZipCode(prev => prev || addr.postcode || "");
+        } catch (e) {}
+        setLocationLoading(false);
+      }, () => setLocationLoading(false));
     }
   }, []);
 
@@ -262,9 +281,10 @@ export default function Register() {
         <div className="text-center mb-6">
           <h1 className="text-lg font-black text-slate-800 mb-1">Set Up Your Move</h1>
           <p className="text-sm text-slate-500">Fill in your details to get started</p>
-          {inviteCode && (
-            <div className="mt-2 inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-1">
-              <span className="text-xs text-emerald-600 font-semibold">✓ Invite code: {inviteCode}</span>
+          {locationLoading && (
+            <div className="mt-2 inline-flex items-center gap-1.5 bg-blue-50 border border-blue-200 rounded-xl px-3 py-1">
+              <Loader2 className="w-3 h-3 text-blue-500 animate-spin" />
+              <span className="text-xs text-blue-600 font-semibold">Detecting your location...</span>
             </div>
           )}
         </div>
@@ -382,11 +402,7 @@ export default function Register() {
           </button>
         </div>
 
-        {!inviteCode && (
-          <p className="text-center text-xs text-slate-400 mt-4">
-            Need an invite? <span className="text-orange-500 font-semibold">Contact your agent</span>
-          </p>
-        )}
+
       </div>
     </div>
   );
