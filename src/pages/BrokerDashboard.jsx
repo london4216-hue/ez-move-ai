@@ -86,7 +86,7 @@ export default function BrokerDashboard() {
     setShowBranding(false);
   };
 
-  const revenue = clients.filter(c => c.billing_status === "charged").length * 40;
+
   const canSave = form.firstName.trim() && form.lastName.trim() && form.email.trim() && form.close_date;
 
   if (loading) return (
@@ -123,11 +123,10 @@ export default function BrokerDashboard() {
       </div>
 
       <div className="max-w-3xl mx-auto px-6 py-6 space-y-5">
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           {[
             { label: "Total Clients", value: clients.length, Icon: Users, color: "text-blue-500", bg: "bg-blue-50", border: "border-blue-100" },
             { label: "Active", value: clients.filter(c => c.status === "active").length, Icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-100" },
-            { label: "Revenue", value: `$${revenue}`, Icon: DollarSign, color: "text-orange-500", bg: "bg-orange-50", border: "border-orange-100" },
           ].map(s => (
             <div key={s.label} className={`bg-white rounded-2xl p-4 border ${s.border} shadow-sm`}>
               <div className={`w-8 h-8 ${s.bg} rounded-xl flex items-center justify-center mb-2`}>
