@@ -72,11 +72,12 @@ export default function AgentDashboard() {
     setClients(prev => [{ ...newClient, invitation_code: code }, ...prev]);
     // Send invite email
     const appUrl = window.location.origin;
-    base44.integrations.Core.SendEmail({
-      to: form.email,
-      from_name: agent?.company_name || "EZ Move AI",
-      subject: `Your EZ Move AI Invitation from ${agent?.company_name || "your agent"}`,
-      body: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
+    try {
+      await base44.integrations.Core.SendEmail({
+        to: form.email,
+        from_name: agent?.company_name || "EZ Move AI",
+        subject: `Your EZ Move AI Invitation from ${agent?.company_name || "your agent"}`,
+        body: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
         <div style="background:linear-gradient(135deg,#f97316,#ea580c);border-radius:16px;padding:24px;text-align:center;margin-bottom:24px">
           <h1 style="color:white;margin:0;font-size:28px;font-weight:900">EZ Move <span style="opacity:0.85">AI</span></h1>
           <p style="color:rgba(255,255,255,0.85);margin:8px 0 0;font-size:13px">Your personal moving assistant</p>
@@ -90,7 +91,12 @@ export default function AgentDashboard() {
         <a href="${appUrl}" style="display:block;background:#f97316;color:white;text-decoration:none;text-align:center;padding:14px;border-radius:12px;font-weight:700;font-size:15px;margin-bottom:16px">Get Started →</a>
         <p style="color:#94a3b8;font-size:12px;text-align:center">Enter your invite code on the registration page to get started.</p>
       </div>`,
-    }).catch(() => {});
+      });
+      console.log("Invite email sent to", form.email);
+    } catch (emailErr) {
+      console.error("Failed to send invite email:", emailErr);
+      alert(`Client saved but email failed to send: ${emailErr?.message || emailErr}`);
+    }
     setAddStep("payment");
   };
 
