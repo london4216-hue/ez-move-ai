@@ -58,7 +58,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col max-w-md mx-auto">
+    <div className="min-h-screen bg-slate-100 flex flex-col max-w-md mx-auto border-x border-slate-200 shadow-[0_0_40px_rgba(0,0,0,0.08)]">
       {showOnboarding && <Week1OnboardingModal user={user} onDone={handleOnboardingDone} />}
       {/* Header */}
       <div className="bg-white border-b border-slate-200 px-4 pt-14 pb-4 safe-area-top">
