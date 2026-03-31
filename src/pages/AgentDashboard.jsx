@@ -246,7 +246,7 @@ export default function AgentDashboard() {
               <div className="w-8" />
             </div>
             <div className="px-6 py-5 space-y-3">
-              {[{ label: "Full Name", key: "user_name", type: "text" }, { label: "Email", key: "user_email", type: "email" }, { label: "Address", key: "home_address", type: "text" }, { label: "Close Date", key: "close_date", type: "date" }].map(f => (
+              {[{ label: "Full Name", key: "user_name", type: "text" }, { label: "Email", key: "user_email", type: "email" }, { label: "Address", key: "home_address", type: "text" }, { label: "Est. Close / First Day of Home", key: "close_date", type: "date" }].map(f => (
                 <div key={f.key}>
                   <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wide block mb-1">{f.label}</label>
                   <input type={f.type} value={editForm[f.key] || ""} onChange={e => setEditForm(p => ({ ...p, [f.key]: e.target.value }))}
@@ -285,7 +285,7 @@ export default function AgentDashboard() {
                       </div>
                     ))}
                   </div>
-                  {[{ label: "Close Date", key: "close_date", type: "date" }].map(f => (
+                  {[{ label: "Est. Close / First Day of Home", key: "close_date", type: "date" }].map(f => (
                     <div key={f.key}>
                       <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wide block mb-1">{f.label}</label>
                       <input type={f.type} value={form[f.key]} onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))} placeholder={f.ph || ""}

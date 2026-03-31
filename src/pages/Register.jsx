@@ -18,7 +18,6 @@ export default function Register() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingStep, setOnboardingStep] = useState(0);
   const [answers, setAnswers] = useState({});
-  const [estimatedMoveCost, setEstimatedMoveCost] = useState("");
   const [moveDate, setMoveDate] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [streetAddress, setStreetAddress] = useState("");
@@ -26,6 +25,8 @@ export default function Register() {
   const [zipCode, setZipCode] = useState("");
   const [detailsSaved, setDetailsSaved] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
+  const [addressSuggestions, setAddressSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -43,7 +44,6 @@ export default function Register() {
     if (savedProgress) {
       try {
         const state = JSON.parse(savedProgress);
-        setEstimatedMoveCost(state.estimatedMoveCost || "");
         setMoveDate(state.moveDate || "");
         setPhoneNumber(state.phoneNumber || "");
         setStreetAddress(state.streetAddress || "");
@@ -70,7 +70,28 @@ export default function Register() {
         setLocationLoading(false);
       }, () => setLocationLoading(false));
     }
+
+    // Load client close date from URL code
+    const urlParams2 = new URLSearchParams(window.location.search);
+    const codeParam = urlParams2.get('code');
+    if (codeParam) {
+      base44.entities.Client.filter({ invitation_code: codeParam }).then(clients => {
+        if (clients.length > 0 && clients[0].close_date) {
+          setMoveDate(prev => prev || clients[0].close_date);
+        }
+      }).catch(() => {});
+    }
   }, []);
+
+  const fetchAddressSuggestions = async (query) => {
+    if (query.length < 4) { setAddressSuggestions([]); return; }
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5&countrycodes=us`);
+      const data = await res.json();
+      setAddressSuggestions(data);
+      setShowSuggestions(true);
+    } catch (e) {}
+  };
 
   const handlePhoneChange = (val) => {
     const d = val.replace(/\D/g, "");
@@ -78,8 +99,8 @@ export default function Register() {
   };
 
   const handleSaveDetails = () => {
-    if (!moveDate || !estimatedMoveCost || !phoneNumber || !streetAddress.trim() || !city.trim() || !zipCode.trim()) {
-      setError("Please fill in all fields including your address");
+    if (!phoneNumber || !streetAddress.trim() || !city.trim() || !zipCode.trim()) {
+      setError("Please fill in your address and phone number");
       return;
     }
     if (phoneNumber.length !== 10) {
@@ -112,9 +133,8 @@ export default function Register() {
         await base44.entities.Client.update(client.id, { status: "registered", user_email: currentUser.email });
         await base44.auth.updateMe({
           home_address: fullAddress || client.home_address || "",
-          estimated_close_date: client.close_date || "",
+          estimated_close_date: client.close_date || moveDate || "",
           registration_date: new Date().toISOString().split("T")[0],
-          estimated_move_cost: estimatedMoveCost || "",
           move_date: moveDate || "",
           phone: phoneNumber || "",
         });
@@ -122,7 +142,6 @@ export default function Register() {
         await base44.auth.updateMe({
           home_address: fullAddress || "",
           registration_date: new Date().toISOString().split("T")[0],
-          estimated_move_cost: estimatedMoveCost || "",
           move_date: moveDate || "",
           phone: phoneNumber || "",
         });
@@ -256,7 +275,7 @@ export default function Register() {
       
       <button
         onClick={() => {
-          const currentState = { estimatedMoveCost, moveDate, phoneNumber, streetAddress, city, zipCode, detailsSaved, timestamp: Date.now() };
+          const currentState = { moveDate, phoneNumber, streetAddress, city, zipCode, detailsSaved, timestamp: Date.now() };
           localStorage.setItem('register_progress', JSON.stringify(currentState));
           base44.auth.logout();
         }}
@@ -304,7 +323,7 @@ export default function Register() {
             </div>
           )}
           
-          <div>
+          <div className="relative">
             <label className="text-xs font-semibold text-slate-600 mb-1.5 block">
               Street Address <span className="text-orange-500">*</span>
             </label>
@@ -312,11 +331,32 @@ export default function Register() {
               type="text"
               placeholder="123 Main St"
               value={streetAddress}
-              autoComplete="street-address"
-              onChange={(e) => { setStreetAddress(e.target.value); setDetailsSaved(false); }}
+              autoComplete="off"
+              onChange={(e) => { setStreetAddress(e.target.value); setDetailsSaved(false); fetchAddressSuggestions(e.target.value); }}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+              onFocus={() => addressSuggestions.length > 0 && setShowSuggestions(true)}
               disabled={detailsSaved}
               className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10 bg-white disabled:bg-slate-50 disabled:text-slate-500"
             />
+            {showSuggestions && addressSuggestions.length > 0 && (
+              <div className="absolute z-50 left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden">
+                {addressSuggestions.map((s, i) => (
+                  <button key={i} type="button"
+                    onMouseDown={() => {
+                      const addr = s.address || {};
+                      const street = [addr.house_number, addr.road].filter(Boolean).join(" ");
+                      setStreetAddress(street || s.display_name.split(",")[0]);
+                      setCity(addr.city || addr.town || addr.village || addr.county || "");
+                      setZipCode(addr.postcode || "");
+                      setShowSuggestions(false);
+                      setDetailsSaved(false);
+                    }}
+                    className="w-full text-left px-4 py-2.5 text-xs text-slate-700 hover:bg-orange-50 border-b border-slate-50 last:border-0 truncate">
+                    {s.display_name}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -347,22 +387,11 @@ export default function Register() {
             </div>
           </div>
           <div>
-            <label className="text-xs font-semibold text-slate-600 mb-1.5 block">Move Date</label>
+            <label className="text-xs font-semibold text-slate-600 mb-1.5 block">Est. Close / First Day of Home</label>
             <input
               type="date"
               value={moveDate}
               onChange={(e) => { setMoveDate(e.target.value); setDetailsSaved(false); }}
-              disabled={detailsSaved}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10 bg-white disabled:bg-slate-50 disabled:text-slate-500"
-            />
-          </div>
-          <div>
-            <label className="text-xs font-semibold text-slate-600 mb-1.5 block">Estimated Move Cost</label>
-            <input
-              type="text"
-              placeholder="e.g., $2,500"
-              value={estimatedMoveCost}
-              onChange={(e) => { setEstimatedMoveCost(e.target.value); setDetailsSaved(false); }}
               disabled={detailsSaved}
               className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10 bg-white disabled:bg-slate-50 disabled:text-slate-500"
             />
@@ -384,7 +413,7 @@ export default function Register() {
         <div className="flex gap-3">
           <button
             onClick={() => {
-              const currentState = { estimatedMoveCost, moveDate, phoneNumber, streetAddress, city, zipCode, detailsSaved, timestamp: Date.now() };
+              const currentState = { moveDate, phoneNumber, streetAddress, city, zipCode, detailsSaved, timestamp: Date.now() };
               localStorage.setItem('register_progress', JSON.stringify(currentState));
               navigate(-1);
             }}
