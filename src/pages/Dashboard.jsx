@@ -93,24 +93,22 @@ export default function Dashboard() {
         </div>
 
         {/* Progress bar toward close */}
-        {user?.estimated_close_date && user?.registration_date && (
+        {user?.estimated_close_date && (
           <div className="mt-3">
             <div className="flex items-center justify-between mb-1">
               <span className="text-slate-500 text-[9px] font-semibold uppercase tracking-wider">Move Timeline</span>
               <span className="text-orange-400 text-[9px] font-bold">
-                {Math.max(0, Math.min(100, Math.round(
-                  (differenceInDays(new Date(), parseISO(user.registration_date)) /
-                    differenceInDays(parseISO(user.estimated_close_date), parseISO(user.registration_date))) * 100
-                )))}% complete
+                {daysToClose !== null && daysToClose > 0 ? `${daysToClose} days to close` : daysToClose === 0 ? "Closing today!" : "Closed!"}
               </span>
             </div>
             <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-orange-500 to-orange-400 rounded-full transition-all duration-700"
                 style={{
-                  width: `${Math.max(2, Math.min(100, Math.round(
-                    (differenceInDays(new Date(), parseISO(user.registration_date)) /
-                      Math.max(1, differenceInDays(parseISO(user.estimated_close_date), parseISO(user.registration_date)))) * 100
+                  width: daysToClose === null ? '2%' : `${Math.max(2, Math.min(100, Math.round(
+                    (Math.max(0, daysToClose) / Math.max(1,
+                      differenceInDays(parseISO(user.estimated_close_date), user.registration_date ? parseISO(user.registration_date) : new Date())
+                    )) * 100
                   )))}%`
                 }}
               />
