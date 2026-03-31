@@ -354,9 +354,21 @@ export default function AgentDashboard() {
                   <CheckCircle2 className="w-14 h-14 text-emerald-500 mx-auto mb-4" />
                   <p className="text-xl font-bold text-slate-800 mb-1">All Set!</p>
                   <p className="text-sm text-slate-500 mb-5">{doneData.name} is now active.</p>
-                  <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4 mb-5">
-                    <p className="text-xs text-slate-500 mb-1">Share this invite code</p>
+                  <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4 mb-3">
+                    <p className="text-xs text-slate-500 mb-1">Invite Code</p>
                     <p className="text-4xl font-black text-orange-500 tracking-widest">{doneData.code}</p>
+                  </div>
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 mb-3 text-left">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">Shareable Invite Link</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-xs text-slate-600 truncate flex-1 font-mono">{`${window.location.origin}/Register?code=${doneData.code}`}</p>
+                      <button
+                        onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/Register?code=${doneData.code}`); alert('Link copied!'); }}
+                        className="flex-shrink-0 bg-orange-500 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg hover:bg-orange-600 transition-colors">
+                        Copy
+                      </button>
+                    </div>
+                    <p className="text-[10px] text-slate-400 mt-1.5">Send this link via text, WhatsApp, or any messaging app.</p>
                   </div>
                   <button onClick={resetAdd} className="w-full py-3 rounded-2xl bg-orange-500 text-white font-bold text-sm hover:bg-orange-600 transition-colors">Done</button>
                 </div>
