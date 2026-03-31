@@ -12,7 +12,7 @@ const week1Questions = [
 ];
 
 export default function Register() {
-  const [digits, setDigits] = useState(["", "", "", ""]);
+  const [inviteCode, setInviteCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -21,9 +21,10 @@ export default function Register() {
   const [estimatedMoveCost, setEstimatedMoveCost] = useState("");
   const [moveDate, setMoveDate] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [homeAddress, setHomeAddress] = useState("");
+  const [streetAddress, setStreetAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [zipCode, setZipCode] = useState("");
   const [detailsSaved, setDetailsSaved] = useState(false);
-  const refs = [null, null, null, null].map(() => ({ current: null }));
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,46 +32,35 @@ export default function Register() {
       if (user?.registration_date) navigate(createPageUrl("Dashboard"));
     }).catch(() => {});
     
+    // Extract invite code from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const codeFromUrl = urlParams.get('code');
+    if (codeFromUrl) setInviteCode(codeFromUrl);
+    
     // Restore saved progress
     const savedProgress = localStorage.getItem('register_progress');
     if (savedProgress) {
       try {
         const state = JSON.parse(savedProgress);
-        setDigits(state.digits || ["", "", "", ""]);
         setEstimatedMoveCost(state.estimatedMoveCost || "");
         setMoveDate(state.moveDate || "");
         setPhoneNumber(state.phoneNumber || "");
-        setHomeAddress(state.homeAddress || "");
+        setStreetAddress(state.streetAddress || "");
+        setCity(state.city || "");
+        setZipCode(state.zipCode || "");
         setDetailsSaved(state.detailsSaved || false);
-      } catch (e) {
-        console.error('Failed to restore progress:', e);
-      }
+      } catch (e) {}
     }
   }, []);
 
-  const handleChange = (i, val) => {
-    if (!/^\d?$/.test(val)) return;
-    const next = [...digits];
-    next[i] = val;
-    setDigits(next);
-    setError("");
-    if (val && i < 3) refs[i + 1].current?.focus();
-  };
-
-  const handleKey = (i, e) => {
-    if (e.key === "Backspace" && !digits[i] && i > 0) refs[i - 1].current?.focus();
-  };
-
   const handlePhoneChange = (val) => {
-    const digits = val.replace(/\D/g, "");
-    if (digits.length <= 10) {
-      setPhoneNumber(digits);
-    }
+    const d = val.replace(/\D/g, "");
+    if (d.length <= 10) setPhoneNumber(d);
   };
 
   const handleSaveDetails = () => {
-    if (!moveDate || !estimatedMoveCost || !phoneNumber || !homeAddress.trim()) {
-      setError("Please fill in all fields including your home address");
+    if (!moveDate || !estimatedMoveCost || !phoneNumber || !streetAddress.trim() || !city.trim() || !zipCode.trim()) {
+      setError("Please fill in all fields including your address");
       return;
     }
     if (phoneNumber.length !== 10) {
@@ -82,8 +72,7 @@ export default function Register() {
   };
 
   const handleVerify = async () => {
-    const code = digits.join("");
-    if (code.length !== 4) return;
+    const code = inviteCode;
     if (!detailsSaved) {
       setError("Please save your move details first");
       return;
@@ -92,50 +81,33 @@ export default function Register() {
     setError("");
     try {
       const currentUser = await base44.auth.me();
+      const fullAddress = `${streetAddress}, ${city}, ${zipCode}`;
       const clients = await base44.entities.Client.filter({ invitation_code: code });
       if (clients.length === 0 && code !== "1016") {
-        setError("Invalid code. Check your invite email or contact your agent.");
-        setDigits(["", "", "", ""]);
-        refs[0].current?.focus();
+        setError("Invalid invite link. Contact your agent.");
         setLoading(false);
         return;
       }
       if (clients.length > 0) {
         const client = clients[0];
-        await base44.entities.Client.update(client.id, {
-          status: "registered",
-          user_email: currentUser.email,
-        });
+        await base44.entities.Client.update(client.id, { status: "registered", user_email: currentUser.email });
         await base44.auth.updateMe({
-          home_address: homeAddress || client.home_address || "",
+          home_address: fullAddress || client.home_address || "",
           estimated_close_date: client.close_date || "",
           registration_date: new Date().toISOString().split("T")[0],
           estimated_move_cost: estimatedMoveCost || "",
           move_date: moveDate || "",
           phone: phoneNumber || "",
         });
-        
-        // Send welcome email to registered user
-        try {
-          await base44.functions.invoke('sendWelcomeEmail', {
-            user_name: currentUser.full_name,
-            user_email: currentUser.email,
-            invite_code: code,
-            app_url: window.location.origin
-          });
-        } catch (emailError) {
-          console.error('Failed to send welcome email:', emailError);
-        }
       } else {
         await base44.auth.updateMe({
-          home_address: homeAddress || "",
+          home_address: fullAddress || "",
           registration_date: new Date().toISOString().split("T")[0],
           estimated_move_cost: estimatedMoveCost || "",
           move_date: moveDate || "",
           phone: phoneNumber || "",
         });
       }
-      
       setLoading(false);
       setShowOnboarding(true);
     } catch (e) {
@@ -166,7 +138,6 @@ export default function Register() {
     }
   };
 
-  const allFilled = digits.every(d => d !== "");
   const currentQuestion = week1Questions[onboardingStep];
   const progress = ((onboardingStep) / week1Questions.length) * 100;
 
@@ -266,16 +237,7 @@ export default function Register() {
       
       <button
         onClick={() => {
-          // Save current state before exiting
-          const currentState = {
-            digits,
-            estimatedMoveCost,
-            moveDate,
-            phoneNumber,
-            homeAddress,
-            detailsSaved,
-            timestamp: Date.now()
-          };
+          const currentState = { estimatedMoveCost, moveDate, phoneNumber, streetAddress, city, zipCode, detailsSaved, timestamp: Date.now() };
           localStorage.setItem('register_progress', JSON.stringify(currentState));
           base44.auth.logout();
         }}
@@ -297,36 +259,15 @@ export default function Register() {
       </div>
 
       <div className="w-full max-w-sm bg-white rounded-3xl p-7 shadow-2xl mt-16">
-        <div className="text-center mb-8">
-          <h1 className="text-xs font-semibold text-slate-800 mb-2 uppercase tracking-wider">Enter your code</h1>
-          <p className="text-sm text-slate-500 leading-relaxed">
-            Your agent sent you a 4-digit invitation code via email
-          </p>
+        <div className="text-center mb-6">
+          <h1 className="text-lg font-black text-slate-800 mb-1">Set Up Your Move</h1>
+          <p className="text-sm text-slate-500">Fill in your details to get started</p>
+          {inviteCode && (
+            <div className="mt-2 inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-1">
+              <span className="text-xs text-emerald-600 font-semibold">✓ Invite code: {inviteCode}</span>
+            </div>
+          )}
         </div>
-
-        <div className="flex gap-3 justify-center mb-4">
-          {digits.map((d, i) => (
-            <input
-              key={i}
-              ref={el => refs[i].current = el}
-              type="text"
-              inputMode="numeric"
-              maxLength={1}
-              value={d}
-              onChange={e => handleChange(i, e.target.value)}
-              onKeyDown={e => handleKey(i, e)}
-              className={`w-14 h-16 text-center text-2xl font-black rounded-2xl border-2 outline-none transition-all
-                ${d ? "border-orange-500 bg-orange-50 text-slate-800" : "border-slate-200 bg-slate-50 text-slate-300"}
-                focus:border-orange-500 focus:bg-orange-50`}
-            />
-          ))}
-        </div>
-
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-2xl p-3 mb-4">
-            <p className="text-sm text-red-600 text-center font-medium">{error}</p>
-          </div>
-        )}
 
         <div className="space-y-3 mb-4">
           {!detailsSaved ? (
@@ -345,17 +286,45 @@ export default function Register() {
           
           <div>
             <label className="text-xs font-semibold text-slate-600 mb-1.5 block">
-              Home Address <span className="text-orange-500">*</span>
+              Street Address <span className="text-orange-500">*</span>
             </label>
             <input
               type="text"
-              placeholder="123 Main St, City, State, ZIP"
-              value={homeAddress}
-              onChange={(e) => { setHomeAddress(e.target.value); setDetailsSaved(false); }}
+              placeholder="123 Main St"
+              value={streetAddress}
+              autoComplete="street-address"
+              onChange={(e) => { setStreetAddress(e.target.value); setDetailsSaved(false); }}
               disabled={detailsSaved}
               className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10 bg-white disabled:bg-slate-50 disabled:text-slate-500"
             />
-            <p className="text-xs text-slate-400 mt-1">Used to find local services near your home</p>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-semibold text-slate-600 mb-1.5 block">City <span className="text-orange-500">*</span></label>
+              <input
+                type="text"
+                placeholder="New York"
+                value={city}
+                autoComplete="address-level2"
+                onChange={(e) => { setCity(e.target.value); setDetailsSaved(false); }}
+                disabled={detailsSaved}
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10 bg-white disabled:bg-slate-50 disabled:text-slate-500"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-slate-600 mb-1.5 block">ZIP Code <span className="text-orange-500">*</span></label>
+              <input
+                type="text"
+                placeholder="10001"
+                value={zipCode}
+                autoComplete="postal-code"
+                inputMode="numeric"
+                maxLength={10}
+                onChange={(e) => { setZipCode(e.target.value.replace(/[^0-9-]/g,'')); setDetailsSaved(false); }}
+                disabled={detailsSaved}
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10 bg-white disabled:bg-slate-50 disabled:text-slate-500"
+              />
+            </div>
           </div>
           <div>
             <label className="text-xs font-semibold text-slate-600 mb-1.5 block">Move Date</label>
@@ -395,15 +364,7 @@ export default function Register() {
         <div className="flex gap-3">
           <button
             onClick={() => {
-              const currentState = {
-                digits,
-                estimatedMoveCost,
-                moveDate,
-                phoneNumber,
-                homeAddress,
-                detailsSaved,
-                timestamp: Date.now()
-              };
+              const currentState = { estimatedMoveCost, moveDate, phoneNumber, streetAddress, city, zipCode, detailsSaved, timestamp: Date.now() };
               localStorage.setItem('register_progress', JSON.stringify(currentState));
               navigate(-1);
             }}
@@ -414,17 +375,18 @@ export default function Register() {
           </button>
           <button
             onClick={handleVerify}
-            disabled={!allFilled || loading || !detailsSaved}
-            className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm
-              disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all shadow-lg shadow-orange-200 flex items-center justify-center gap-2"
+            disabled={loading || !detailsSaved}
+            className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all shadow-lg shadow-orange-200 flex items-center justify-center gap-2"
           >
             {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Verifying...</> : "Continue →"}
           </button>
         </div>
 
-        <p className="text-center text-xs text-slate-400 mt-4">
-          No code? <span className="text-orange-500 font-semibold">Contact your agent</span>
-        </p>
+        {!inviteCode && (
+          <p className="text-center text-xs text-slate-400 mt-4">
+            Need an invite? <span className="text-orange-500 font-semibold">Contact your agent</span>
+          </p>
+        )}
       </div>
     </div>
   );
