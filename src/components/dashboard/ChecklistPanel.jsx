@@ -418,7 +418,7 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
       {/* Consolidated All Weeks */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
         <div className="px-4 py-3 border-b border-slate-100">
-          <h3 className="text-sm font-bold text-slate-800">📋 All Tasks (Week 1-4)</h3>
+          <h3 className="text-sm font-bold text-slate-800">📋 All Tasks (Week 1-{totalWeeks})</h3>
         </div>
 
         {/* All Weeks Consolidated - Collapsable */}
