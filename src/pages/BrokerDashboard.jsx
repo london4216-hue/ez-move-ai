@@ -297,7 +297,7 @@ export default function BrokerDashboard() {
                       </div>
                     ))}
                   </div>
-                  {[{ label: "Email", key: "email", type: "email" }, { label: "Est. Close / First Day of Home", key: "close_date", type: "date" }].map(f => (
+                  {[{ label: "Email", key: "email", type: "email" }, { label: "Est. Close / Purchase Date", key: "close_date", type: "date" }].map(f => (
                     <div key={f.key}>
                       <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wide block mb-1">{f.label}</label>
                       <input type={f.type} value={form[f.key]} onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))}
