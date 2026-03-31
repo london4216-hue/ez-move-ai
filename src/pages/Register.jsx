@@ -23,7 +23,6 @@ export default function Register() {
   const [streetAddress, setStreetAddress] = useState("");
   const [city, setCity] = useState("");
   const [zipCode, setZipCode] = useState("");
-  const [detailsSaved, setDetailsSaved] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
   const [addressSuggestions, setAddressSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -49,7 +48,6 @@ export default function Register() {
         setStreetAddress(state.streetAddress || "");
         setCity(state.city || "");
         setZipCode(state.zipCode || "");
-        setDetailsSaved(state.detailsSaved || false);
       } catch (e) {}
     }
 
@@ -98,23 +96,16 @@ export default function Register() {
     if (d.length <= 10) setPhoneNumber(d);
   };
 
-  const handleSaveDetails = () => {
+
+
+  const handleVerify = async () => {
+    const code = inviteCode;
     if (!phoneNumber || !streetAddress.trim() || !city.trim() || !zipCode.trim()) {
       setError("Please fill in your address and phone number");
       return;
     }
     if (phoneNumber.length !== 10) {
       setError("Phone number must be 10 digits");
-      return;
-    }
-    setDetailsSaved(true);
-    setError("");
-  };
-
-  const handleVerify = async () => {
-    const code = inviteCode;
-    if (!detailsSaved) {
-      setError("Please save your move details first");
       return;
     }
     setLoading(true);
@@ -275,7 +266,7 @@ export default function Register() {
       
       <button
         onClick={() => {
-          const currentState = { moveDate, phoneNumber, streetAddress, city, zipCode, detailsSaved, timestamp: Date.now() };
+          const currentState = { moveDate, phoneNumber, streetAddress, city, zipCode, timestamp: Date.now() };
           localStorage.setItem('register_progress', JSON.stringify(currentState));
           base44.auth.logout();
         }}
@@ -309,20 +300,6 @@ export default function Register() {
         </div>
 
         <div className="space-y-3 mb-4">
-          {!detailsSaved ? (
-            <button
-              onClick={handleSaveDetails}
-              className="w-full py-3 rounded-xl bg-orange-500 text-white font-bold text-sm active:scale-[0.98] transition-all"
-            >
-              Save Details
-            </button>
-          ) : (
-            <div className="flex items-center justify-center gap-2 py-3 bg-emerald-50 rounded-xl">
-              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-              <span className="text-sm font-bold text-emerald-600">Details saved</span>
-            </div>
-          )}
-          
           <div className="relative">
             <label className="text-xs font-semibold text-slate-600 mb-1.5 block">
               Street Address <span className="text-orange-500">*</span>
@@ -332,7 +309,7 @@ export default function Register() {
               placeholder="123 Main St"
               value={streetAddress}
               autoComplete="off"
-              onChange={(e) => { setStreetAddress(e.target.value); setDetailsSaved(false); fetchAddressSuggestions(e.target.value); }}
+              onChange={(e) => { setStreetAddress(e.target.value); fetchAddressSuggestions(e.target.value); }}
               onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
               onFocus={() => addressSuggestions.length > 0 && setShowSuggestions(true)}
               disabled={detailsSaved}
@@ -349,7 +326,6 @@ export default function Register() {
                       setCity(addr.city || addr.town || addr.village || addr.county || "");
                       setZipCode(addr.postcode || "");
                       setShowSuggestions(false);
-                      setDetailsSaved(false);
                     }}
                     className="w-full text-left px-4 py-2.5 text-xs text-slate-700 hover:bg-orange-50 border-b border-slate-50 last:border-0 truncate">
                     {s.display_name}
@@ -366,7 +342,7 @@ export default function Register() {
                 placeholder="New York"
                 value={city}
                 autoComplete="address-level2"
-                onChange={(e) => { setCity(e.target.value); setDetailsSaved(false); }}
+                onChange={(e) => { setCity(e.target.value); }}
                 disabled={detailsSaved}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10 bg-white disabled:bg-slate-50 disabled:text-slate-500"
               />
@@ -380,7 +356,7 @@ export default function Register() {
                 autoComplete="postal-code"
                 inputMode="numeric"
                 maxLength={10}
-                onChange={(e) => { setZipCode(e.target.value.replace(/[^0-9-]/g,'')); setDetailsSaved(false); }}
+                onChange={(e) => { setZipCode(e.target.value.replace(/[^0-9-]/g,'')); }}
                 disabled={detailsSaved}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10 bg-white disabled:bg-slate-50 disabled:text-slate-500"
               />
@@ -391,7 +367,7 @@ export default function Register() {
             <input
               type="date"
               value={moveDate}
-              onChange={(e) => { setMoveDate(e.target.value); setDetailsSaved(false); }}
+              onChange={(e) => { setMoveDate(e.target.value); }}
               disabled={detailsSaved}
               className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10 bg-white disabled:bg-slate-50 disabled:text-slate-500"
             />
@@ -402,7 +378,7 @@ export default function Register() {
               type="tel"
               placeholder="1234567890"
               value={phoneNumber}
-              onChange={(e) => { handlePhoneChange(e.target.value); setDetailsSaved(false); }}
+              onChange={(e) => { handlePhoneChange(e.target.value); }}
               disabled={detailsSaved}
               className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10 bg-white disabled:bg-slate-50 disabled:text-slate-500"
             />
@@ -413,7 +389,7 @@ export default function Register() {
         <div className="flex gap-3">
           <button
             onClick={() => {
-              const currentState = { moveDate, phoneNumber, streetAddress, city, zipCode, detailsSaved, timestamp: Date.now() };
+              const currentState = { moveDate, phoneNumber, streetAddress, city, zipCode, timestamp: Date.now() };
               localStorage.setItem('register_progress', JSON.stringify(currentState));
               navigate(-1);
             }}
@@ -424,7 +400,7 @@ export default function Register() {
           </button>
           <button
             onClick={handleVerify}
-            disabled={loading || !detailsSaved}
+            disabled={loading}
             className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all shadow-lg shadow-orange-200 flex items-center justify-center gap-2"
           >
             {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Verifying...</> : "Continue →"}
