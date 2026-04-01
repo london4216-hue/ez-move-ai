@@ -25,10 +25,9 @@ const BASE_WEEKS = {
     items: [
       { id: "w2-1", title: "Finalize mover", description: "Confirm date aligned with closing timeline", ai_search_query: null, prerequisites: ["w1-1", "w1-4"] },
       { id: "w2-2", title: "Schedule estate sale", description: "Suggested date based on close date", ai_search_query: null },
-      { id: "w2-3", title: "Schedule a cleaner", description: "Find top-rated cleaners for move prep", ai_search_query: "top rated professional house cleaners near me" },
-      { id: "w2-4", title: "Order packing supplies", description: "Boxes, labels, tape, wardrobe boxes", ai_search_query: null },
-      { id: "w2-5", title: "Begin packing non-essentials", description: "Seasonal items, storage rooms, decor", ai_search_query: null },
-      { id: "w2-6", title: "Utility planning", description: "Start list of utilities to transfer/cancel", ai_search_query: null },
+      { id: "w2-3", title: "Order packing supplies", description: "Boxes, labels, tape, wardrobe boxes", ai_search_query: null },
+      { id: "w2-4", title: "Begin packing non-essentials", description: "Seasonal items, storage rooms, decor", ai_search_query: null },
+      { id: "w2-5", title: "Utility planning", description: "Start list of utilities to transfer/cancel", ai_search_query: null },
     ]
   },
   3: {
@@ -299,10 +298,12 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
   const isWeekLocked = (_w) => false;
 
   const weekData = weeksData[activeWeek];
-  // For week 2+, show all items by default (no selection gate)
-  const allItems = activeWeek === 1
-    ? [...(weekData?.items || []).filter(i => userSelections[i.id] === "yes"), ...(customItems[activeWeek] || [])]
-    : [...(weekData?.items || []), ...(customItems[activeWeek] || [])];
+  // Only show items user selected "yes" for, plus custom items
+  const allItems = [
+    ...(weekData?.items || []).filter(i => userSelections[i.id] === "yes"),
+    ...(customItems[activeWeek] || [])
+  ];
+  // Include "maybe" items as grayed out
   const maybeItems = (weekData?.items || []).filter(i => userSelections[i.id] === "maybe");
   const completed = allItems.filter(i => completedIds.has(i.id)).length;
   const progress = allItems.length ? Math.round((completed / allItems.length) * 100) : 0;
@@ -313,21 +314,6 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
     const start = addDays(parseISO(user.registration_date), (activeWeek - 1) * 7);
     const end = addDays(start, 6);
     return `${format(start, "MMM d")} – ${format(end, "MMM d")}`;
-  })();
-
-  // Calculate total move cost from all collected data
-  const totalMoveCost = (() => {
-    let total = 0;
-    contacts.forEach(c => {
-      if (c.cost_of_service) total += parseFloat(c.cost_of_service);
-    });
-    appointments.forEach(a => {
-      if (a.notes?.includes("$")) {
-        const match = a.notes.match(/\$(\d+(?:,\d+)*(?:\.\d{2})?)/);
-        if (match) total += parseFloat(match[1].replace(/,/g, ''));
-      }
-    });
-    return total;
   })();
 
   return (
@@ -474,14 +460,8 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
 
       {/* Consolidated All Weeks */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-        <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+        <div className="px-4 py-3 border-b border-slate-100">
           <h3 className="text-sm font-bold text-slate-800">📋 My Move Plan</h3>
-          {totalMoveCost > 0 && (
-            <div className="text-right">
-              <p className="text-[10px] text-slate-500 font-semibold">Total Move Cost</p>
-              <p className="text-lg font-black text-emerald-600">${totalMoveCost.toLocaleString()}</p>
-            </div>
-          )}
         </div>
 
         <div className="px-3 pb-3 space-y-2 max-h-[520px] overflow-y-auto">
