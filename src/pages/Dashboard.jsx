@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
@@ -153,5 +152,6 @@ export default function Dashboard() {
           </div>
         </>
       )}
-    </div>
-  );
+      </div>
+      );
+      }
