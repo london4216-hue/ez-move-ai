@@ -51,13 +51,14 @@ export default function Dashboard() {
   );
 
   const handleOnboardingDone = () => {
-    localStorage.setItem(`onboarding_done_${user?.id}`, "1");
     setShowOnboarding(false);
   };
 
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col max-w-md mx-auto border-x border-slate-200 shadow-[0_0_40px_rgba(0,0,0,0.08)]" style={{paddingTop: 0}}>
       {showOnboarding && <Week1OnboardingModal user={user} onDone={handleOnboardingDone} />}
+      {showOnboarding && null /* hide dashboard until onboarding is done */}
+      {!showOnboarding && (<>
       {/* Header */}
       <div className="bg-white border-b border-slate-200 px-4 pt-2 pb-4">
         <div className="flex items-center justify-between">
@@ -152,6 +153,7 @@ export default function Dashboard() {
           })}
         </div>
       </div>
+    </>)}
     </div>
   );
 }
