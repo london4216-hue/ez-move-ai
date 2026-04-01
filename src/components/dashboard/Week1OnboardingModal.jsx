@@ -146,6 +146,7 @@ Job details (as a mover would ask):
 - Walking distance from home to truck: ${q.walk_distance}
 - Parking situation: ${q.parking}
 - Distance from old home to new home: ${q.move_distance || "local (under 50 miles)"}
+- Hanging clothes/wardrobes: ${q.hanging_clothes || "some"} (indicates wardrobe box needs)
 - Special/heavy items: ${q.special_items || "none"}
 
 Provide a detailed mover-style estimate including:
@@ -416,19 +417,33 @@ Be specific and realistic, like a professional moving company estimate.`,
                           </div>
                           {/* Inline size + qty picker */}
                           {isPrompting && (
-                            <div className="mt-1 mb-1 bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2.5 space-y-2">
-                              <div className="flex items-center gap-2">
-                                <span className="text-[10px] font-bold text-slate-500 whitespace-nowrap">Size?</span>
-                                <div className="flex gap-1.5 flex-wrap">
-                                  {SIZES.map((s) => (
-                                    <button key={s} onClick={() => selectSize(item, s)}
-                                      className={`px-2.5 py-1 rounded-xl text-[10px] font-bold border transition-all hover:scale-105 ${SIZE_COLORS[s]}`}>
-                                      {s}
-                                    </button>
-                                  ))}
-                                </div>
-                              </div>
-                            </div>
+                           <div className="mt-1 mb-1 bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2.5 space-y-2">
+                             <div className="flex items-center gap-2">
+                               <span className="text-[10px] font-bold text-slate-500 whitespace-nowrap">Size?</span>
+                               <div className="flex gap-1.5 flex-wrap">
+                                 {SIZES.map((s) => {
+                                   const tooltips = {
+                                     Small: "Small items: lamps, picture frames, kitchen items, books, small decor",
+                                     Medium: "Medium items: plates, pots, pillows, small furniture like nightstands",
+                                     Large: "Large items: dressers, desks, beds, sofas, bulky items",
+                                     XL: "XL items: entertainment centers, armoires, heavy appliances, pianos"
+                                   };
+                                   return (
+                                     <div key={s} className="group relative">
+                                       <button onClick={() => selectSize(item, s)}
+                                         className={`px-2.5 py-1 rounded-xl text-[10px] font-bold border transition-all hover:scale-105 ${SIZE_COLORS[s]}`}>
+                                         {s}
+                                       </button>
+                                       <div className="absolute bottom-full mb-2 hidden group-hover:block bg-slate-800 text-white text-[9px] px-2 py-1 rounded-lg whitespace-nowrap z-10">
+                                         {tooltips[s]}
+                                         <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
+                                       </div>
+                                     </div>
+                                   );
+                                 })}
+                               </div>
+                             </div>
+                           </div>
                           )}
                           {/* Qty picker — shown after size chosen */}
                           {d?.size && !isPrompting && (
@@ -532,6 +547,17 @@ Be specific and realistic, like a professional moving company estimate.`,
                             className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all ${moverQForm.move_distance === v ? "bg-orange-500 text-white border-orange-500" : "bg-white text-slate-600 border-slate-200"}`}>{v}</button>
                         ))}
                       </div>
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-500 mb-1 block">Hanging clothes & wardrobes? <span className="text-slate-400 font-normal">(helps calculate wardrobe boxes)</span></label>
+                      <div className="flex gap-2 flex-wrap">
+                        {["None/minimal", "Some closets", "Full closets", "Very full"].map(v => (
+                          <button key={v} onClick={() => setMoverQForm(f => ({...f, hanging_clothes: v}))}
+                            className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all ${moverQForm.hanging_clothes === v ? "bg-orange-500 text-white border-orange-500" : "bg-white text-slate-600 border-slate-200"}`}>{v}</button>
+                        ))}
+                      </div>
+                      <p className="text-[9px] text-slate-400 mt-1">📦 Wardrobe boxes keep your clothes on hangers — saves time & wrinkles during the move</p>
                     </div>
 
                     <div>
