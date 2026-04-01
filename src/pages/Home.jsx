@@ -216,20 +216,6 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="flex flex-col gap-2">
-              <button
-                onClick={() => base44.auth.redirectToLogin("/AgentOnboarding")}
-                className="w-full py-3.5 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-orange-200"
-              >
-                Agent Login <ArrowRight className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => base44.auth.redirectToLogin("/AgentOnboarding")}
-                className="w-full py-2.5 rounded-2xl border border-orange-200 text-orange-500 font-semibold text-sm flex items-center justify-center gap-2 hover:bg-orange-50 transition-all"
-              >
-                New Agent? Register Here →
-              </button>
-            </div>
           </div>
         )}
 
