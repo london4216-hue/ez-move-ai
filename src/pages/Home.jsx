@@ -180,12 +180,20 @@ export default function Home() {
                 </div>
               )}
 
-              <button
-                onClick={() => base44.auth.redirectToLogin("/AgentOnboarding")}
-                className="w-full py-3.5 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg shadow-orange-900/30"
-              >
-                Agent Login / Sign Up <ArrowRight className="w-4 h-4" />
-              </button>
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={() => base44.auth.redirectToLogin("/AgentOnboarding")}
+                  className="w-full py-3.5 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg shadow-orange-900/30"
+                >
+                  Agent Login <ArrowRight className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => base44.auth.redirectToLogin("/AgentOnboarding")}
+                  className="w-full py-2.5 rounded-2xl border border-orange-400/40 text-orange-300 font-semibold text-sm flex items-center justify-center gap-2 hover:bg-white/5 transition-all"
+                >
+                  New Agent? Register Here →
+                </button>
+              </div>
             </div>
 
             {/* Broker Firm Card */}
@@ -214,12 +222,20 @@ export default function Home() {
                 <p className="text-slate-400 text-xs mt-1">Custom pricing available for large brokerages. Contact us to open your firm account.</p>
               </div>
 
-              <button
-                onClick={() => base44.auth.redirectToLogin("/AgentOnboarding")}
-                className="w-full py-3.5 rounded-2xl bg-purple-500 hover:bg-purple-600 text-white font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg shadow-purple-900/30"
-              >
-                Open Broker Account <ArrowRight className="w-4 h-4" />
-              </button>
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={() => base44.auth.redirectToLogin("/AgentOnboarding")}
+                  className="w-full py-3.5 rounded-2xl bg-purple-500 hover:bg-purple-600 text-white font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg shadow-purple-900/30"
+                >
+                  Broker Login <ArrowRight className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => base44.auth.redirectToLogin("/AgentOnboarding")}
+                  className="w-full py-2.5 rounded-2xl border border-purple-400/40 text-purple-300 font-semibold text-sm flex items-center justify-center gap-2 hover:bg-white/5 transition-all"
+                >
+                  New Broker Firm? Register Here →
+                </button>
+              </div>
             </div>
           </div>
         </div>
