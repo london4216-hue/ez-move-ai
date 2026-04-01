@@ -593,6 +593,108 @@ function WalkthroughCard({ user }) {
   );
 }
 
+// ── 9. Amazon Supplies List ────────────────────────────────────────────────────
+function AmazonSuppliesCard() {
+  const [open, setOpen] = useState(false);
+  const [rooms, setRooms] = useState({ bedrooms: 2, bathrooms: 1, living: 1, garage: 0 });
+  const [copied, setCopied] = useState(false);
+
+  const total_rooms = rooms.bedrooms + rooms.bathrooms + rooms.living + (rooms.garage ? 1 : 0);
+  const small = Math.ceil(total_rooms * 8 + rooms.bathrooms * 4);
+  const medium = Math.ceil(rooms.bedrooms * 6 + rooms.living * 4);
+  const large = Math.ceil(rooms.bedrooms * 2 + (rooms.garage ? 8 : 0));
+  const tape = Math.ceil((small + medium + large) / 15);
+  const bubble = Math.ceil(rooms.bedrooms * 10 + rooms.living * 5);
+
+  const supplies = [
+    { label: "Moving Boxes Variety Pack", qty: small, size: "small", amazon: "moving boxes small" },
+    { label: "Medium Moving Boxes", qty: medium, size: "medium", amazon: "medium cardboard boxes" },
+    { label: "Large Moving Boxes", qty: large, size: "large", amazon: "large moving boxes" },
+    { label: "Packing Tape", qty: tape, size: "rolls", amazon: "heavy duty packing tape rolls" },
+    { label: "Bubble Wrap", qty: bubble, size: "feet", amazon: "bubble wrap roll" },
+  ];
+
+  const generateAmazonList = () => {
+    const params = supplies.map(s => `${s.qty}x ${s.label}`).join(" | ");
+    const amazonUrl = `https://www.amazon.com/s?k=${encodeURIComponent(supplies[0].amazon)}`;
+    window.open(amazonUrl, "_blank");
+  };
+
+  const copyToClipboard = () => {
+    const listText = supplies.map(s => `${s.qty}x ${s.label}`).join("\n");
+    navigator.clipboard.writeText(listText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="bg-blue-50 border border-blue-200 rounded-2xl overflow-hidden">
+      <button onClick={() => setOpen(v => !v)} className="w-full px-4 py-3.5 flex items-center gap-3 text-left">
+        <div className="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center shrink-0">
+          <Package className="w-4 h-4 text-blue-600" />
+        </div>
+        <div className="flex-1">
+          <p className="text-xs font-black text-slate-800">🛒 Amazon Supplies List</p>
+          <p className="text-[10px] text-slate-500">Build your shopping list from calculations</p>
+        </div>
+        {open ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+      </button>
+
+      {open && (
+        <div className="px-4 pb-4 space-y-3">
+          {/* Room stepper */}
+          <div className="bg-white rounded-2xl border border-slate-100 px-4 py-2">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 mt-1">Your Home</p>
+            {[
+              { label: "Bedrooms", key: "bedrooms", val: rooms.bedrooms },
+              { label: "Bathrooms", key: "bathrooms", val: rooms.bathrooms },
+              { label: "Living / Dining", key: "living", val: rooms.living },
+              { label: "Garage / Storage", key: "garage", val: rooms.garage }
+            ].map(r => (
+              <div key={r.key} className="flex items-center justify-between py-2 border-b border-slate-50 last:border-0">
+                <p className="text-xs font-semibold text-slate-600">{r.label}</p>
+                <div className="flex items-center gap-3">
+                  <button onClick={() => setRooms(prev => ({ ...prev, [r.key]: Math.max(0, prev[r.key] - 1) }))}
+                    className="w-7 h-7 rounded-full bg-slate-100 text-slate-600 font-bold text-sm flex items-center justify-center">−</button>
+                  <span className="text-sm font-black text-slate-800 w-4 text-center">{r.val}</span>
+                  <button onClick={() => setRooms(prev => ({ ...prev, [r.key]: prev[r.key] + 1 }))}
+                    className="w-7 h-7 rounded-full bg-blue-500 text-white font-bold text-sm flex items-center justify-center">+</button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Supplies List */}
+          <div className="bg-white rounded-2xl border border-blue-100 overflow-hidden">
+            <div className="bg-blue-500 px-4 py-2">
+              <p className="text-white text-xs font-bold">📋 Your Supply Quantities</p>
+            </div>
+            <div className="divide-y divide-slate-50">
+              {supplies.map(s => (
+                <div key={s.label} className="flex items-center justify-between px-4 py-2.5">
+                  <p className="text-xs font-semibold text-slate-700">{s.label}</p>
+                  <span className="text-sm font-black text-blue-600">{s.qty} {s.size}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-2">
+            <button onClick={copyToClipboard} className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center gap-2">
+              {copied ? "✓ Copied" : "📋 Copy List"}
+            </button>
+            <button onClick={generateAmazonList} className="flex-1 py-3 rounded-xl bg-blue-500 text-white font-bold text-xs flex items-center justify-center gap-2">
+              🛍️ Shop Amazon
+            </button>
+          </div>
+          <p className="text-[10px] text-slate-400 text-center">Add items individually from Amazon search</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 export default function AIMoveAssist({ user }) {
   return (
@@ -609,6 +711,7 @@ export default function AIMoveAssist({ user }) {
       <JunkCard user={user} />
       <DonationCard user={user} />
       <PackingCalc user={user} />
+      <AmazonSuppliesCard />
       <BudgetCalc />
       <TimelineCard user={user} />
       <DocumentsCard user={user} />
