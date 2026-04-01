@@ -81,6 +81,11 @@ export default function Register() {
     const code = inviteCode;
     try {
       const currentUser = await base44.auth.me();
+      if (!currentUser) {
+        setError("Not authenticated. Please reload.");
+        setLoading(false);
+        return;
+      }
       const fullAddress = `${streetAddress}, ${city}, ${zipCode}`;
       const clients = await base44.entities.Client.filter({ invitation_code: code });
       if (clients.length === 0 && code !== "1016") {
@@ -91,23 +96,12 @@ export default function Register() {
       if (clients.length > 0) {
         const client = clients[0];
         await base44.entities.Client.update(client.id, { status: "registered", user_email: currentUser.email });
-        await base44.auth.updateMe({
-          home_address: fullAddress || client.home_address || "",
-          estimated_close_date: client.close_date || moveDate || "",
-          registration_date: new Date().toISOString().split("T")[0],
-          move_date: moveDate || "",
-          agent_name: "Gina Slusher",
-          agent_phone: "555-123-4757",
-        });
-      } else {
-        await base44.auth.updateMe({
-          home_address: fullAddress || "",
-          registration_date: new Date().toISOString().split("T")[0],
-          move_date: moveDate || "",
-          agent_name: "Gina Slusher",
-          agent_phone: "555-123-4757",
-        });
       }
+      await base44.auth.updateMe({
+        home_address: fullAddress,
+        estimated_close_date: clients.length > 0 ? clients[0].close_date : moveDate,
+        registration_date: new Date().toISOString().split("T")[0],
+      });
       setLoading(false);
       localStorage.removeItem('register_progress');
       setShowOnboarding(true);
@@ -178,14 +172,14 @@ export default function Register() {
       <div className="w-full max-w-sm bg-white rounded-3xl p-7 shadow-2xl mt-16">
         <div className="text-center mb-6">
           <h1 className="text-lg font-black text-slate-800 mb-1">Welcome to Move <span className="text-orange-500">EZ AI</span></h1>
-          <p className="text-sm text-slate-500">Enter your home address to begin</p>
+          <p className="text-sm text-slate-500">Enter your new home address or the address of the home you're selling</p>
 
         </div>
 
         <div className="space-y-3 mb-4">
           <div className="relative">
             <label className="text-xs font-semibold text-slate-600 mb-1.5 block">
-              Street Address <span className="text-orange-500">*</span>
+              Home Address <span className="text-orange-500">*</span>
             </label>
             <input
               type="text"
