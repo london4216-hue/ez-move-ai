@@ -3,39 +3,21 @@ import { base44 } from "@/api/base44Client";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import {
-  Shield, Building2, Home as HomeIcon, ArrowRight, Zap, CheckCircle2,
-  Star, Users, CalendarDays, Package, Sparkles, Briefcase, UserCheck, ChevronRight, ChevronDown
+  Shield, ArrowRight, Zap, CheckCircle2,
+  Users, CalendarDays, Package, Sparkles,
+  Briefcase, UserCheck, LogIn
 } from "lucide-react";
 
-const FEATURES = [
-  { icon: CalendarDays, label: "Week-by-week move plan", color: "text-orange-500", bg: "bg-orange-50" },
-  { icon: Sparkles, label: "AI local service finder", color: "text-purple-500", bg: "bg-purple-50" },
-  { icon: Package, label: "Inventory & packing tools", color: "text-blue-500", bg: "bg-blue-50" },
-  { icon: Users, label: "Agent & broker portal", color: "text-emerald-600", bg: "bg-emerald-50" },
-];
-
-// $40/client, 10% discount per every 3 clients
 function getPricing(count) {
   const tiers = Math.floor(count / 3);
-  const discount = Math.min(tiers * 0.1, 0.5); // cap at 50%
+  const discount = Math.min(tiers * 0.1, 0.5);
   const pricePerClient = 40 * (1 - discount);
   return { pricePerClient: Math.round(pricePerClient * 100) / 100, discount, total: Math.round(pricePerClient * count * 100) / 100 };
 }
 
-const PRICING_EXAMPLES = [
-  { count: 1 },
-  { count: 3 },
-  { count: 6 },
-  { count: 9 },
-  { count: 12 },
-];
-
-
-
 export default function Home() {
   const navigate = useNavigate();
   const [checking, setChecking] = useState(true);
-  const [openPortal, setOpenPortal] = useState(null);
   const [clientCount, setClientCount] = useState(3);
 
   useEffect(() => {
@@ -50,7 +32,7 @@ export default function Home() {
   }, []);
 
   if (checking) return (
-    <div className="min-h-screen bg-blue-50 flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center bg-slate-900">
       <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
     </div>
   );
@@ -58,203 +40,197 @@ export default function Home() {
   const pricing = getPricing(clientCount);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-orange-50/30 flex flex-col">
+    <div className="min-h-screen bg-slate-900 flex flex-col text-white">
 
-      {/* Nav */}
-      <nav className="px-6 py-4 flex items-center justify-between max-w-6xl mx-auto w-full">
+      {/* Top Nav */}
+      <nav className="px-6 py-4 flex items-center justify-between max-w-6xl mx-auto w-full border-b border-white/10">
+        {/* Brand */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-200">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-900/40">
             <span className="text-white font-black text-sm">EZ</span>
           </div>
           <div>
-            <p className="font-black text-slate-800 text-lg leading-tight">EZ Move <span className="text-orange-500">AI</span></p>
-            <p className="text-slate-400 text-[10px] font-semibold hidden sm:block">Your Complete Moving Platform</p>
+            <p className="font-black text-white text-lg leading-tight">EZ Move <span className="text-orange-400">AI</span></p>
+            <p className="text-slate-400 text-[10px] font-semibold hidden sm:block">The Smart Moving Platform</p>
           </div>
+        </div>
+
+        {/* 3 Login Buttons */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => base44.auth.redirectToLogin("/SuperAdmin")}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-xs font-bold text-slate-300 hover:text-white transition-all"
+          >
+            <Shield className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Admin</span>
+          </button>
+          <button
+            onClick={() => base44.auth.redirectToLogin("/AgentDashboard")}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-xs font-bold text-slate-300 hover:text-white transition-all"
+          >
+            <UserCheck className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Agent Login</span>
+          </button>
+          <button
+            onClick={() => base44.auth.redirectToLogin("/BrokerDashboard")}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 border border-purple-500 text-xs font-bold text-white transition-all"
+          >
+            <Briefcase className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Broker Login</span>
+          </button>
         </div>
       </nav>
 
       {/* Hero */}
-      <section className="flex flex-col items-center text-center px-5 pt-8 pb-6 max-w-4xl mx-auto w-full">
-        <div className="inline-flex items-center gap-2 bg-orange-100 border border-orange-200 rounded-full px-4 py-1.5 mb-5">
-          <Zap className="w-3.5 h-3.5 text-orange-500" />
-          <span className="text-orange-600 text-xs font-bold uppercase tracking-wider">AI-Powered Moving Assistant</span>
+      <section className="flex flex-col items-center text-center px-5 pt-14 pb-10 max-w-3xl mx-auto w-full">
+        <div className="inline-flex items-center gap-2 bg-orange-500/20 border border-orange-500/30 rounded-full px-4 py-1.5 mb-6">
+          <Zap className="w-3.5 h-3.5 text-orange-400" />
+          <span className="text-orange-300 text-xs font-bold uppercase tracking-wider">AI-Powered Moving Assistant</span>
         </div>
-        <h1 className="text-4xl md:text-5xl font-black text-slate-800 leading-tight mb-4">
-          Moving Made <span className="text-orange-500">Simple.</span><br />
+        <h1 className="text-4xl md:text-6xl font-black leading-tight mb-5">
+          Moving Made <span className="text-orange-400">Simple.</span><br />
           <span className="text-slate-400 text-3xl md:text-4xl font-bold">Powered by AI.</span>
         </h1>
-        <p className="text-slate-500 text-base max-w-xl leading-relaxed mb-6">
-          EZ Move AI gives buyers and sellers a personalized, week-by-week moving plan —
-          with AI tools to find local services, manage inventory, and stay on track for closing day.
+        <p className="text-slate-400 text-base md:text-lg max-w-2xl leading-relaxed mb-8">
+          EZ Move AI is the all-in-one moving platform for real estate professionals and their clients.
+          Give every buyer and seller a personalized, week-by-week moving plan with AI tools to find
+          local services, manage inventory, and stay on track from contract to closing day.
         </p>
-        <div className="flex flex-wrap justify-center gap-3 mb-8">
-          {FEATURES.map(f => (
-            <div key={f.label} className={`flex items-center gap-2 ${f.bg} px-3 py-2 rounded-xl`}>
+        <div className="flex flex-wrap justify-center gap-3">
+          {[
+            { icon: CalendarDays, label: "Week-by-week move plan", color: "text-orange-400" },
+            { icon: Sparkles, label: "AI local service finder", color: "text-purple-400" },
+            { icon: Package, label: "Inventory & packing tools", color: "text-blue-400" },
+            { icon: Users, label: "Agent & broker portals", color: "text-emerald-400" },
+          ].map(f => (
+            <div key={f.label} className="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-2 rounded-xl">
               <f.icon className={`w-4 h-4 ${f.color}`} />
-              <span className="text-slate-700 text-xs font-semibold">{f.label}</span>
+              <span className="text-slate-300 text-xs font-semibold">{f.label}</span>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Customer Section - always visible */}
-      <div className="max-w-3xl mx-auto w-full px-5 pb-6">
-        <div className="bg-white rounded-3xl border border-blue-100 shadow-xl shadow-blue-50 p-7">
-          <div className="flex items-center gap-3 mb-5">
-            <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center flex-shrink-0">
-              <HomeIcon className="w-6 h-6 text-blue-500" />
+      {/* Two Offer Cards */}
+      <section className="max-w-5xl mx-auto w-full px-5 pb-16">
+        <p className="text-center text-slate-500 text-xs font-bold uppercase tracking-widest mb-6">Choose Your Plan</p>
+        <div className="grid md:grid-cols-2 gap-6">
+
+          {/* For Agents */}
+          <div className="bg-gradient-to-br from-orange-600 to-orange-700 rounded-3xl p-7 flex flex-col shadow-2xl shadow-orange-900/40 border border-orange-500/30">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center flex-shrink-0">
+                <UserCheck className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <p className="font-black text-white text-xl leading-tight">For Agents</p>
+                <p className="text-orange-200 text-sm">Individual real estate agents</p>
+              </div>
             </div>
-            <div>
-              <p className="font-black text-slate-800 text-lg">Buyer or Seller?</p>
-              <p className="text-slate-400 text-sm">Log in to access your personalized moving plan</p>
+
+            <p className="text-orange-100 text-sm leading-relaxed mb-5">
+              Elevate your client experience with a branded, AI-powered moving assistant. Invite clients with a unique link — they get a personalized moving plan from day one.
+            </p>
+
+            <ul className="space-y-2.5 mb-6 flex-1">
+              {[
+                "Invite clients with one unique link",
+                "Track close dates & move progress",
+                "White-labeled client experience",
+                "AI tools: movers, services & more",
+                "Volume discounts — 10% off every 3 clients",
+              ].map(item => (
+                <li key={item} className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-orange-200 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-orange-50">{item}</span>
+                </li>
+              ))}
+            </ul>
+
+            {/* Pricing Calculator */}
+            <div className="bg-black/20 rounded-2xl p-4 mb-5">
+              <p className="text-xs font-bold text-orange-200 uppercase tracking-wide mb-3">Pricing Calculator</p>
+              <div className="flex items-center gap-3 mb-3">
+                <label className="text-sm text-orange-100 font-semibold whitespace-nowrap">Clients:</label>
+                <input type="range" min={1} max={20} value={clientCount}
+                  onChange={e => setClientCount(Number(e.target.value))}
+                  className="flex-1 accent-white" />
+                <span className="text-white font-black text-lg w-8 text-right">{clientCount}</span>
+              </div>
+              <div className="flex items-center justify-between bg-white/10 rounded-xl px-4 py-3">
+                <div>
+                  <p className="text-sm font-bold text-white">${pricing.pricePerClient.toFixed(2)} / client</p>
+                  {pricing.discount > 0 && (
+                    <p className="text-xs text-orange-200 font-semibold">🎉 {Math.round(pricing.discount * 100)}% discount applied</p>
+                  )}
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-black text-white">${pricing.total.toFixed(2)}</p>
+                  <p className="text-[10px] text-orange-200">for {clientCount} {clientCount === 1 ? "client" : "clients"}</p>
+                </div>
+              </div>
             </div>
-            <span className="ml-auto px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-50 text-blue-600 border border-blue-100 whitespace-nowrap">Invite Required</span>
+
+            <button
+              onClick={() => base44.auth.redirectToLogin("/AgentOnboarding")}
+              className="w-full py-4 rounded-2xl bg-white text-orange-600 font-black text-sm flex items-center justify-center gap-2 hover:bg-orange-50 transition-all shadow-lg active:scale-[0.98]"
+            >
+              Sign Up as Agent <ArrowRight className="w-4 h-4" />
+            </button>
+            <p className="text-center text-orange-200 text-xs mt-3">Already registered? <button onClick={() => base44.auth.redirectToLogin("/AgentDashboard")} className="underline font-bold">Log in here</button></p>
           </div>
-          <ul className="space-y-2.5 mb-6">
-            {["Personalized week-by-week checklist", "AI local service finder", "Appointment & inventory tools", "Track your move from contract to keys"].map(item => (
-              <li key={item} className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                <span className="text-sm text-slate-600">{item}</span>
-              </li>
-            ))}
-          </ul>
-          <button
-            onClick={() => base44.auth.redirectToLogin("/Register")}
-            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold text-sm flex items-center justify-center gap-2 hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-[0.98]"
-          >
-            Log In / Get Started <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
 
-      {/* Portal Dropdowns */}
-      <div className="max-w-3xl mx-auto w-full px-5 pb-12 space-y-3">
-        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest text-center mb-4">Portal Access</p>
+          {/* For Brokers */}
+          <div className="bg-gradient-to-br from-purple-700 to-purple-900 rounded-3xl p-7 flex flex-col shadow-2xl shadow-purple-900/40 border border-purple-500/30">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center flex-shrink-0">
+                <Briefcase className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <p className="font-black text-white text-xl leading-tight">For Brokers</p>
+                <p className="text-purple-200 text-sm">Broker firms & teams</p>
+              </div>
+            </div>
 
-        {/* Agent Portal */}
-        <div className="bg-white border border-orange-100 rounded-2xl overflow-hidden shadow-sm">
-          <button onClick={() => setOpenPortal(openPortal === 'agent' ? null : 'agent')}
-            className="w-full px-5 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-orange-50 rounded-xl flex items-center justify-center">
-                <UserCheck className="w-5 h-5 text-orange-500" />
-              </div>
-              <div className="text-left">
-                <p className="font-bold text-slate-800 text-sm">Agent Portal</p>
-                <p className="text-slate-400 text-xs">Individual agent sign-in & sign-up</p>
-              </div>
-            </div>
-            <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${openPortal === 'agent' ? 'rotate-180' : ''}`} />
-          </button>
-          {openPortal === 'agent' && (
-            <div className="px-5 pb-5 border-t border-orange-50">
-              <ul className="space-y-2 my-4">
-                {["Invite clients with a unique link", "Track close dates & move progress", "White-labeled client experience", "Volume discounts — 10% off every 3 clients"].map(item => (
-                  <li key={item} className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-orange-400 flex-shrink-0" />
-                    <span className="text-sm text-slate-600">{item}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4 mb-4">
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-3">Pricing Calculator</p>
-                <div className="flex items-center gap-3 mb-3">
-                  <label className="text-sm text-slate-600 font-semibold whitespace-nowrap">Clients:</label>
-                  <input type="range" min={1} max={20} value={clientCount}
-                    onChange={e => setClientCount(Number(e.target.value))}
-                    className="flex-1 accent-orange-500" />
-                  <span className="text-orange-600 font-black text-lg w-8 text-right">{clientCount}</span>
-                </div>
-                <div className="flex items-center justify-between bg-white rounded-xl px-4 py-3 border border-orange-100">
-                  <div>
-                    <p className="text-sm font-bold text-slate-700">${pricing.pricePerClient.toFixed(2)} / client</p>
-                    {pricing.discount > 0 && (
-                      <p className="text-xs text-emerald-600 font-semibold">🎉 {Math.round(pricing.discount * 100)}% volume discount applied</p>
-                    )}
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xl font-black text-orange-500">${pricing.total.toFixed(2)}</p>
-                    <p className="text-[10px] text-slate-400">total for {clientCount} {clientCount === 1 ? "client" : "clients"}</p>
-                  </div>
-                </div>
-              </div>
-              <button onClick={() => base44.auth.redirectToLogin("/AgentOnboarding")}
-                className="w-full py-3.5 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-orange-200">
-                Agent Sign In / Sign Up <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-          )}
-        </div>
+            <p className="text-purple-100 text-sm leading-relaxed mb-5">
+              Manage your entire firm from one dashboard. Add clients, track payments, and give every agent under your firm the power of EZ Move AI — all under one roof.
+            </p>
 
-        {/* Broker Portal */}
-        <div className="bg-white border border-purple-100 rounded-2xl overflow-hidden shadow-sm">
-          <button onClick={() => setOpenPortal(openPortal === 'broker' ? null : 'broker')}
-            className="w-full px-5 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-purple-50 rounded-xl flex items-center justify-center">
-                <Briefcase className="w-5 h-5 text-purple-500" />
-              </div>
-              <div className="text-left">
-                <p className="font-bold text-slate-800 text-sm">Broker Portal</p>
-                <p className="text-slate-400 text-xs">Broker firm sign-in & sign-up</p>
-              </div>
-            </div>
-            <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${openPortal === 'broker' ? 'rotate-180' : ''}`} />
-          </button>
-          {openPortal === 'broker' && (
-            <div className="px-5 pb-5 border-t border-purple-50">
-              <ul className="space-y-2 my-4">
-                {["All agents under one account", "Centralized client management", "$40/client — 10% off every 3 clients", "Volume pricing for high-volume firms"].map(item => (
-                  <li key={item} className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-purple-400 flex-shrink-0" />
-                    <span className="text-sm text-slate-600">{item}</span>
-                  </li>
-                ))}
-              </ul>
-              <button onClick={() => base44.auth.redirectToLogin("/BrokerDashboard")}
-                className="w-full py-3.5 rounded-2xl bg-purple-500 hover:bg-purple-600 text-white font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-purple-200">
-                Broker Sign In / Sign Up <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-          )}
-        </div>
+            <ul className="space-y-2.5 mb-6 flex-1">
+              {[
+                "One account for your whole firm",
+                "Add & manage clients for all agents",
+                "Centralized billing & payments",
+                "Track all client move progress",
+                "Volume pricing — same $40/client discounts",
+                "White-labeled for your brokerage brand",
+              ].map(item => (
+                <li key={item} className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-purple-300 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-purple-50">{item}</span>
+                </li>
+              ))}
+            </ul>
 
-        {/* EZ Move Admin */}
-        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-          <button onClick={() => setOpenPortal(openPortal === 'admin' ? null : 'admin')}
-            className="w-full px-5 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-slate-100 rounded-xl flex items-center justify-center">
-                <Shield className="w-5 h-5 text-slate-600" />
-              </div>
-              <div className="text-left">
-                <p className="font-bold text-slate-800 text-sm">EZ Move Admin</p>
-                <p className="text-slate-400 text-xs">Complete control — all clients & revenue</p>
-              </div>
+            <div className="bg-black/20 rounded-2xl px-4 py-3 mb-5">
+              <p className="text-purple-200 text-xs font-semibold">🏢 Ideal for broker firms with multiple agents</p>
+              <p className="text-purple-300 text-xs mt-1">Same per-client pricing with 10% off every 3 clients purchased.</p>
             </div>
-            <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${openPortal === 'admin' ? 'rotate-180' : ''}`} />
-          </button>
-          {openPortal === 'admin' && (
-            <div className="px-5 pb-5 border-t border-slate-100">
-              <ul className="space-y-2 my-4">
-                {["View all agents & broker firms", "Monitor client activity & billing", "Manage licenses and accounts", "Platform-wide analytics"].map(item => (
-                  <li key={item} className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-slate-400 flex-shrink-0" />
-                    <span className="text-sm text-slate-600">{item}</span>
-                  </li>
-                ))}
-              </ul>
-              <button onClick={() => base44.auth.redirectToLogin("/SuperAdmin")}
-                className="w-full py-3.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm flex items-center justify-center gap-2 transition-all">
-                <Shield className="w-4 h-4" /> Admin Sign In
-              </button>
-            </div>
-          )}
+
+            <button
+              onClick={() => base44.auth.redirectToLogin("/BrokerDashboard")}
+              className="w-full py-4 rounded-2xl bg-white text-purple-700 font-black text-sm flex items-center justify-center gap-2 hover:bg-purple-50 transition-all shadow-lg active:scale-[0.98]"
+            >
+              Sign Up as Broker <ArrowRight className="w-4 h-4" />
+            </button>
+            <p className="text-center text-purple-200 text-xs mt-3">Already registered? <button onClick={() => base44.auth.redirectToLogin("/BrokerDashboard")} className="underline font-bold">Log in here</button></p>
+          </div>
+
         </div>
-      </div>
+      </section>
 
       {/* Footer */}
-      <footer className="py-6 text-center bg-slate-900 mt-auto">
+      <footer className="py-6 text-center border-t border-white/10 mt-auto">
         <p className="text-slate-500 text-xs">© 2026 EZ Move AI · All Rights Reserved</p>
       </footer>
     </div>
