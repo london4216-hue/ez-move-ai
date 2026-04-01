@@ -446,7 +446,7 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
             const isExpanded = expandedWeeks.has(weekNum);
 
             return (
-              <div key={weekNum} className={`rounded-2xl border overflow-hidden ${isPreview ? "border-slate-100 opacity-60" : "border-slate-200"}`}>
+              <div key={weekNum} className={`rounded-2xl border overflow-hidden ${isPreview ? "border-slate-100" : "border-slate-200"}`}>
                 <button
                   onClick={() => {
                     setExpandedWeeks(prev => {
@@ -460,7 +460,7 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
                   <div className="flex items-center gap-2 flex-1 min-w-0">
                     <h4 className="text-xs font-bold text-slate-700">Week {weekNum}</h4>
                     {isPreview ? (
-                      <span className="text-[9px] font-bold text-slate-300 uppercase tracking-wide bg-slate-100 px-2 py-0.5 rounded-full">Preview</span>
+                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wide bg-slate-100 px-2 py-0.5 rounded-full">Upcoming</span>
                     ) : (
                       <div className="flex-1 max-w-[120px]">
                         <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
@@ -482,17 +482,19 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
                   <div className="p-2 space-y-1.5 border-t border-slate-100">
                     {isPreview ? (
                       <>
-                        <p className="text-[10px] text-slate-400 text-center pt-1 pb-0.5 italic">
-                          🔔 Your guide will walk you through this week starting the Friday before it begins
+                        <p className="text-[10px] text-slate-500 text-center pt-1 pb-0.5 font-semibold">
+                          📅 Coming up — you can start any of these tasks early!
                         </p>
-                        {wItems.slice(0, 3).map(item => (
-                          <div key={item.id} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 border border-dashed border-slate-100">
-                            <div className="w-3.5 h-3.5 rounded-full border-2 border-slate-200 flex-shrink-0" />
-                            <p className="text-xs text-slate-400 truncate">{item.title}</p>
+                        {wItems.map(item => (
+                          <div key={item.id} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200">
+                            <div className="w-3.5 h-3.5 rounded-full border-2 border-slate-300 flex-shrink-0" />
+                            <p className="text-xs text-slate-600 truncate">{item.title}</p>
                           </div>
                         ))}
                         {wItems.length > 3 && (
-                          <p className="text-[10px] text-slate-300 text-center">+ {wItems.length - 3} more tasks</p>
+                          <button
+                            onClick={() => setExpandedWeeks(prev => { const n = new Set(prev); n.add(weekNum); return n; })}
+                            className="text-[10px] text-orange-500 font-bold text-center w-full py-1">+ {wItems.length - 3} more tasks — tap to see all</button>
                         )}
                       </>
                     ) : (

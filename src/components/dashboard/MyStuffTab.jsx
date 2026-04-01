@@ -18,22 +18,15 @@ const QUICK_ITEMS = [
 
 const ITEM_SIZES = ["Small", "Medium", "Large", "X-Large"];
 
-// Size multipliers for weight and cost
-const SIZE_MULTIPLIERS = {
-  "Small": 0.5,
-  "Medium": 1.0,
-  "Large": 1.8,
-  "X-Large": 3.0
-};
+const SIZE_MULTIPLIERS = { "Small": 0.5, "Medium": 1.0, "Large": 1.8, "X-Large": 3.0 };
 
 const SIZE_BOX_NEEDS = {
-  "Small": { small: 1, medium: 0, large: 0 },
+  "Small":  { small: 1, medium: 0, large: 0 },
   "Medium": { small: 0, medium: 1, large: 0 },
-  "Large": { small: 0, medium: 1, large: 1 },
-  "X-Large": { small: 0, medium: 2, large: 2 }
+  "Large":  { small: 0, medium: 1, large: 1 },
+  "X-Large":{ small: 0, medium: 2, large: 2 }
 };
 
-// Base item weights
 const ITEM_BASE_WEIGHT = {
   "Sofa": 150, "Couch": 150, "Bed Frame": 80, "Mattress": 100, "Dresser": 120,
   "Dining Table": 100, "Chairs": 20, "TV": 30, "TV Stand": 40, "Bookcase": 80,
@@ -45,61 +38,38 @@ const ITEM_BASE_WEIGHT = {
 
 function calcSupplies(moveItems) {
   let small = 0, medium = 0, large = 0;
-  
   moveItems.forEach(item => {
     const needs = SIZE_BOX_NEEDS[item.size] || { small: 0, medium: 1, large: 0 };
-    small += needs.small;
-    medium += needs.medium;
-    large += needs.large;
+    small += needs.small; medium += needs.medium; large += needs.large;
   });
-
   const tape = Math.max(2, Math.ceil((small + medium + large) / 10));
   const paper = Math.ceil((small + medium) * 2.5);
   const bubble = Math.ceil(moveItems.length * 3);
-  
-  // Calculate cost
-  const boxCost = (small * 2) + (medium * 3) + (large * 5);
-  const tapeCost = tape * 6;
-  const paperCost = Math.ceil(paper / 25) * 12;
-  const bubbleCost = Math.ceil(bubble / 50) * 18;
-  const suppliesCost = boxCost + tapeCost + paperCost + bubbleCost;
-  
+  const suppliesCost = (small * 2) + (medium * 3) + (large * 5) + (tape * 6) + (Math.ceil(paper / 25) * 12) + (Math.ceil(bubble / 50) * 18);
   return { small, medium, large, tape, paper, bubble, cost: suppliesCost };
 }
 
 function calcMoverCost(moveItems) {
   const totalWeight = moveItems.reduce((sum, item) => {
     const baseName = item.name.replace(/\s*\(.*?\)\s*/g, '');
-    const baseWeight = ITEM_BASE_WEIGHT[baseName] || 40;
-    const multiplier = SIZE_MULTIPLIERS[item.size] || 1.0;
-    return sum + (baseWeight * multiplier);
+    return sum + ((ITEM_BASE_WEIGHT[baseName] || 40) * (SIZE_MULTIPLIERS[item.size] || 1.0));
   }, 0);
-  
   const base = totalWeight < 500 ? 800 : totalWeight < 1500 ? 1500 : totalWeight < 3000 ? 2800 : 4500;
-  const top = Math.round(base * 1.6 / 100) * 100;
-  return { low: base, high: top };
+  return { low: base, high: Math.round(base * 1.6 / 100) * 100 };
 }
 
-// ── Move Summary screen ────────────────────────────────────────────────────────
 function SummaryScreen({ lists, setLists, onBack, user, saveEstimates }) {
-  const [movingItem, setMovingItem] = useState(null); // { item, fromKey }
+  const [movingItem, setMovingItem] = useState(null);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
 
   const moveItem = (item, fromKey, toKey) => {
-    setLists(prev => ({
-      ...prev,
-      [fromKey]: prev[fromKey].filter(i => i.id !== item.id),
-      [toKey]: [...prev[toKey], item],
-    }));
-    setMovingItem(null);
-    setTimeout(() => saveEstimates(lists), 100);
+    const updated = { ...lists, [fromKey]: lists[fromKey].filter(i => i.id !== item.id), [toKey]: [...lists[toKey], item] };
+    setLists(updated); setMovingItem(null); saveEstimates(updated);
   };
-
   const removeItem = (item, fromKey) => {
-    setLists(prev => ({ ...prev, [fromKey]: prev[fromKey].filter(i => i.id !== item.id) }));
-    setMovingItem(null);
-    setTimeout(() => saveEstimates({ ...lists, [fromKey]: lists[fromKey].filter(i => i.id !== item.id) }), 100);
+    const updated = { ...lists, [fromKey]: lists[fromKey].filter(i => i.id !== item.id) };
+    setLists(updated); setMovingItem(null); saveEstimates(updated);
   };
 
   const supplies = calcSupplies(lists.move);
@@ -111,21 +81,16 @@ function SummaryScreen({ lists, setLists, onBack, user, saveEstimates }) {
       `${l.emoji} ${l.label.toUpperCase()}\n${"─".repeat(30)}\n${lists[l.key].length === 0 ? "(empty)" : lists[l.key].map((it, i) => `${i + 1}. ${it.name} (${it.size})`).join("\n")}`
     ).join("\n\n") + `\n\nESTIMATES\n${"─".repeat(30)}\nPacking Supplies: $${supplies.cost}\nMovers: $${cost.low.toLocaleString()}–$${cost.high.toLocaleString()}`;
     await base44.integrations.Core.SendEmail({ to: user?.email, subject: "My Full Move Inventory — EZ Move AI", body });
-    setSending(false);
-    setSent(true);
-    setTimeout(() => setSent(false), 4000);
+    setSending(false); setSent(true); setTimeout(() => setSent(false), 4000);
   };
 
   return (
     <div className="space-y-3">
-      {/* Header */}
       <div className="bg-[#0F172A] rounded-2xl px-4 py-3 flex items-center justify-between">
         <button onClick={onBack} className="text-slate-400 text-xs font-bold">← Back</button>
         <p className="text-white font-black text-sm">📋 Full Inventory</p>
         <div className="w-10" />
       </div>
-
-      {/* All 3 lists */}
       {LISTS.map(list => (
         <div key={list.key} className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
           <div className={`px-4 py-2.5 ${list.light} border-b border-opacity-50 flex items-center justify-between`}>
@@ -143,26 +108,18 @@ function SummaryScreen({ lists, setLists, onBack, user, saveEstimates }) {
                       <p className="text-sm font-semibold text-slate-700">{item.name}</p>
                       <p className="text-[10px] text-slate-400 font-semibold">{item.size}</p>
                     </div>
-                    <button
-                      onClick={() => setMovingItem(movingItem?.item?.id === item.id && movingItem?.fromKey === list.key ? null : { item, fromKey: list.key })}
-                      className="text-[10px] font-bold text-blue-500 bg-blue-50 px-2 py-1 rounded-lg"
-                    >
-                      Move →
-                    </button>
+                    <button onClick={() => setMovingItem(movingItem?.item?.id === item.id && movingItem?.fromKey === list.key ? null : { item, fromKey: list.key })}
+                      className="text-[10px] font-bold text-blue-500 bg-blue-50 px-2 py-1 rounded-lg">Move →</button>
                     <button onClick={() => removeItem(item, list.key)} className="text-slate-300 hover:text-red-400 transition-colors">
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
-                    </div>
-                    {/* Move-to picker */}
-                    {movingItem?.item?.id === item.id && movingItem?.fromKey === list.key && (
+                  </div>
+                  {movingItem?.item?.id === item.id && movingItem?.fromKey === list.key && (
                     <div className="px-4 pb-2.5 flex gap-2 flex-wrap">
                       <p className="text-[10px] text-slate-400 w-full font-semibold">Move to:</p>
                       {LISTS.filter(l => l.key !== list.key).map(target => (
-                        <button
-                          key={target.key}
-                          onClick={() => moveItem(item, list.key, target.key)}
-                          className={`text-[10px] font-bold px-3 py-1.5 rounded-xl border ${target.light} ${target.text} flex items-center gap-1`}
-                        >
+                        <button key={target.key} onClick={() => moveItem(item, list.key, target.key)}
+                          className={`text-[10px] font-bold px-3 py-1.5 rounded-xl border ${target.light} ${target.text} flex items-center gap-1`}>
                           {target.emoji} {target.label}
                         </button>
                       ))}
@@ -174,8 +131,6 @@ function SummaryScreen({ lists, setLists, onBack, user, saveEstimates }) {
           )}
         </div>
       ))}
-
-      {/* Packing supplies auto-estimate */}
       {lists.move.length > 0 && (
         <div className="bg-amber-50 border border-amber-200 rounded-2xl overflow-hidden">
           <div className="bg-amber-500 px-4 py-2.5 flex items-center gap-2">
@@ -185,12 +140,12 @@ function SummaryScreen({ lists, setLists, onBack, user, saveEstimates }) {
           </div>
           <div className="grid grid-cols-3 gap-px bg-amber-100">
             {[
-              { label: "Small Boxes",  qty: supplies.small,  unit: "boxes" },
-              { label: "Medium Boxes", qty: supplies.medium, unit: "boxes" },
-              { label: "Large Boxes",  qty: supplies.large,  unit: "boxes" },
-              { label: "Packing Tape", qty: supplies.tape,   unit: "rolls" },
-              { label: "Packing Paper",qty: supplies.paper,  unit: "sheets" },
-              { label: "Bubble Wrap",  qty: supplies.bubble, unit: "ft" },
+              { label: "Small Boxes",   qty: supplies.small,  unit: "boxes" },
+              { label: "Medium Boxes",  qty: supplies.medium, unit: "boxes" },
+              { label: "Large Boxes",   qty: supplies.large,  unit: "boxes" },
+              { label: "Packing Tape",  qty: supplies.tape,   unit: "rolls" },
+              { label: "Packing Paper", qty: supplies.paper,  unit: "sheets" },
+              { label: "Bubble Wrap",   qty: supplies.bubble, unit: "ft" },
             ].map(s => (
               <div key={s.label} className="bg-white px-3 py-3 text-center">
                 <p className="text-lg font-black text-amber-600">{s.qty}</p>
@@ -205,8 +160,6 @@ function SummaryScreen({ lists, setLists, onBack, user, saveEstimates }) {
           </div>
         </div>
       )}
-
-      {/* Mover cost estimate */}
       {lists.move.length > 0 && (
         <div className="bg-blue-50 border border-blue-200 rounded-2xl overflow-hidden">
           <div className="bg-blue-500 px-4 py-2.5 flex items-center gap-2">
@@ -225,8 +178,6 @@ function SummaryScreen({ lists, setLists, onBack, user, saveEstimates }) {
           </div>
         </div>
       )}
-
-      {/* Email all */}
       <div className="pb-2">
         {sent ? (
           <div className="flex items-center justify-center gap-2 py-3 bg-emerald-50 rounded-2xl">
@@ -245,63 +196,77 @@ function SummaryScreen({ lists, setLists, onBack, user, saveEstimates }) {
   );
 }
 
-// ── Main component ─────────────────────────────────────────────────────────────
-export default function MyStuffTab({ user }) {
-  const [activeList, setActiveList] = useState(null); // null = home, "summary" = summary, or list key
-  const [lists, setLists] = useState({ move: [], junk: [], donate: [] });
+export default function MyStuffTab({ user, onStartOnboarding }) {
+  const [activeList, setActiveList] = useState(null);
+  const [lists, setLists] = useState(() => {
+    if (user?.stuff_lists) {
+      try { return JSON.parse(user.stuff_lists); } catch {}
+    }
+    return { move: [], junk: [], donate: [] };
+  });
   const [customInput, setCustomInput] = useState("");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
-  const [selectingSize, setSelectingSize] = useState(null); // item name waiting for size
+  const [selectingSize, setSelectingSize] = useState(null);
 
+  const onboardingDone = !!localStorage.getItem(`onboarding_done_${user?.id}`);
   const currentList = LISTS.find(l => l.key === activeList);
   const items = activeList && activeList !== "summary" ? lists[activeList] : [];
+  const totalItems = Object.values(lists).reduce((sum, arr) => sum + arr.length, 0);
+
+  const saveEstimates = async (currentLists) => {
+    if (currentLists.move.length === 0) return;
+    const supplies = calcSupplies(currentLists.move);
+    const movers = calcMoverCost(currentLists.move);
+    await base44.auth.updateMe({ packing_supplies_cost: supplies.cost, moving_supplies_cost: movers.low, stuff_lists: JSON.stringify(currentLists) });
+  };
 
   const addItem = (name, size) => {
     const trimmed = name.trim();
     if (!trimmed || !activeList || !size) return;
     if (lists[activeList]?.some(i => i.name === trimmed && i.size === size)) return;
     const newItem = { id: `${trimmed}-${size}-${Date.now()}`, name: trimmed, size };
-    setLists(prev => ({ ...prev, [activeList]: [...prev[activeList], newItem] }));
+    const updated = { ...lists, [activeList]: [...lists[activeList], newItem] };
+    setLists(updated);
     setCustomInput("");
     setSelectingSize(null);
-    saveEstimates({ ...lists, [activeList]: [...lists[activeList], newItem] });
+    saveEstimates(updated);
   };
 
   const removeItem = (id) => {
-    setLists(prev => ({ ...prev, [activeList]: prev[activeList].filter(i => i.id !== id) }));
-    saveEstimates({ ...lists, [activeList]: lists[activeList].filter(i => i.id !== id) });
-  };
-
-  const saveEstimates = async (currentLists) => {
-    if (currentLists.move.length === 0) return;
-    const supplies = calcSupplies(currentLists.move);
-    const movers = calcMoverCost(currentLists.move);
-    await base44.auth.updateMe({
-      packing_supplies_cost: supplies.cost,
-      moving_supplies_cost: movers.low,
-      stuff_lists: JSON.stringify(currentLists)
-    });
+    const updated = { ...lists, [activeList]: lists[activeList].filter(i => i.id !== id) };
+    setLists(updated);
+    saveEstimates(updated);
   };
 
   const handleEmail = async () => {
     setSending(true);
-    const listLabel = currentList?.label;
-    const body = `${listLabel.toUpperCase()}\n${"=".repeat(40)}\n\n${items.map((item, i) => `${i + 1}. ${item.name} (${item.size})`).join("\n")}\n\n${"=".repeat(40)}\nTotal: ${items.length} items\n\nGenerated by EZ Move AI`;
-    await base44.integrations.Core.SendEmail({ to: user?.email, subject: `My ${listLabel} — EZ Move AI`, body });
-    setSending(false);
-    setSent(true);
-    setTimeout(() => setSent(false), 4000);
+    const body = `${currentList?.label?.toUpperCase()}\n${"=".repeat(40)}\n\n${items.map((item, i) => `${i + 1}. ${item.name} (${item.size})`).join("\n")}\n\nTotal: ${items.length} items\n\nGenerated by EZ Move AI`;
+    await base44.integrations.Core.SendEmail({ to: user?.email, subject: `My ${currentList?.label} — EZ Move AI`, body });
+    setSending(false); setSent(true); setTimeout(() => setSent(false), 4000);
   };
 
-  const totalItems = Object.values(lists).reduce((sum, arr) => sum + arr.length, 0);
+  // Onboarding gate — after all hooks/functions defined
+  if (!onboardingDone) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
+        <div className="text-5xl mb-4">📦</div>
+        <p className="text-lg font-black text-slate-800 mb-2">My Stuff isn't set up yet</p>
+        <p className="text-sm text-slate-500 mb-6 leading-relaxed">
+          Complete the quick setup wizard to build your Move, Donate, and Junk lists automatically.
+        </p>
+        <button onClick={onStartOnboarding}
+          className="px-6 py-3.5 rounded-2xl bg-orange-500 text-white font-bold text-sm shadow-lg shadow-orange-200 active:scale-95 transition-transform">
+          Start Setup →
+        </button>
+      </div>
+    );
+  }
 
-  // ── Summary screen ──────────────────────────────────────────────────────────
   if (activeList === "summary") {
     return <SummaryScreen lists={lists} setLists={setLists} onBack={() => setActiveList(null)} user={user} saveEstimates={saveEstimates} />;
   }
 
-  // ── Dashboard ───────────────────────────────────────────────────────────────
   if (!activeList) {
     return (
       <div className="space-y-3">
@@ -317,14 +282,10 @@ export default function MyStuffTab({ user }) {
             </div>
           </div>
         </div>
-
         <div className="space-y-2.5">
           {LISTS.map(list => (
-            <button
-              key={list.key}
-              onClick={() => setActiveList(list.key)}
-              className="w-full bg-white rounded-2xl border border-slate-100 shadow-sm px-4 py-4 flex items-center gap-4 active:scale-[0.98] transition-transform text-left"
-            >
+            <button key={list.key} onClick={() => setActiveList(list.key)}
+              className="w-full bg-white rounded-2xl border border-slate-100 shadow-sm px-4 py-4 flex items-center gap-4 active:scale-[0.98] transition-transform text-left">
               <div className={`w-12 h-12 rounded-2xl ${list.color} flex items-center justify-center flex-shrink-0 shadow-sm`}>
                 <span className="text-2xl">{list.emoji}</span>
               </div>
@@ -334,22 +295,16 @@ export default function MyStuffTab({ user }) {
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
                 {lists[list.key].length > 0 && (
-                  <span className={`text-xs font-black px-2.5 py-1 rounded-full border ${list.light} ${list.text}`}>
-                    {lists[list.key].length}
-                  </span>
+                  <span className={`text-xs font-black px-2.5 py-1 rounded-full border ${list.light} ${list.text}`}>{lists[list.key].length}</span>
                 )}
                 <ChevronRight className="w-4 h-4 text-slate-300" />
               </div>
             </button>
           ))}
         </div>
-
-        {/* View full summary */}
         {totalItems > 0 && (
-          <button
-            onClick={() => setActiveList("summary")}
-            className="w-full py-4 rounded-2xl border-2 border-orange-300 bg-orange-50 text-orange-700 text-sm font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
-          >
+          <button onClick={() => setActiveList("summary")}
+            className="w-full py-4 rounded-2xl border-2 border-orange-300 bg-orange-50 text-orange-700 text-sm font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform">
             <LayoutList className="w-4 h-4" />
             View Full Inventory + Estimates
             <ArrowRight className="w-4 h-4 ml-auto" />
@@ -359,13 +314,10 @@ export default function MyStuffTab({ user }) {
     );
   }
 
-  // ── Individual list ─────────────────────────────────────────────────────────
   return (
     <div className="space-y-3">
       <div className="bg-[#0F172A] rounded-2xl px-4 py-3 flex items-center justify-between">
-        <button onClick={() => setActiveList(null)} className="text-slate-400 text-xs font-bold flex items-center gap-1">
-          ← Back
-        </button>
+        <button onClick={() => setActiveList(null)} className="text-slate-400 text-xs font-bold">← Back</button>
         <div className="text-center">
           <p className="text-white font-black text-sm">{currentList.emoji} {currentList.label}</p>
           <p className="text-slate-400 text-[10px]">{items.length} items</p>
@@ -382,20 +334,13 @@ export default function MyStuffTab({ user }) {
             </div>
             <div className="px-5 pt-4 space-y-2">
               {ITEM_SIZES.map(size => (
-                <button
-                  key={size}
-                  onClick={() => addItem(selectingSize, size)}
-                  className="w-full py-3 rounded-xl border-2 border-slate-200 bg-white text-slate-700 font-bold text-sm hover:border-orange-400 hover:bg-orange-50 transition-all"
-                >
+                <button key={size} onClick={() => addItem(selectingSize, size)}
+                  className="w-full py-3 rounded-xl border-2 border-slate-200 bg-white text-slate-700 font-bold text-sm hover:border-orange-400 hover:bg-orange-50 transition-all">
                   {size}
                 </button>
               ))}
-              <button
-                onClick={() => setSelectingSize(null)}
-                className="w-full py-3 rounded-xl bg-slate-100 text-slate-600 font-bold text-sm"
-              >
-                Cancel
-              </button>
+              <button onClick={() => setSelectingSize(null)}
+                className="w-full py-3 rounded-xl bg-slate-100 text-slate-600 font-bold text-sm">Cancel</button>
             </div>
           </div>
         </div>
@@ -407,11 +352,8 @@ export default function MyStuffTab({ user }) {
         </div>
         <div className="px-3 py-2.5 flex flex-wrap gap-1.5">
           {QUICK_ITEMS.map(item => (
-            <button
-              key={item}
-              onClick={() => setSelectingSize(item)}
-              className="text-[10px] px-2.5 py-1 rounded-full font-semibold border bg-slate-50 text-slate-600 border-slate-200 active:bg-slate-200 transition-all"
-            >
+            <button key={item} onClick={() => setSelectingSize(item)}
+              className="text-[10px] px-2.5 py-1 rounded-full font-semibold border bg-slate-50 text-slate-600 border-slate-200 active:bg-slate-200 transition-all">
               + {item}
             </button>
           ))}
@@ -419,18 +361,12 @@ export default function MyStuffTab({ user }) {
       </div>
 
       <div className="flex gap-2">
-        <input
-          value={customInput}
-          onChange={e => setCustomInput(e.target.value)}
+        <input value={customInput} onChange={e => setCustomInput(e.target.value)}
           onKeyDown={e => e.key === "Enter" && setSelectingSize(customInput)}
           placeholder="Type any item..."
-          className="flex-1 px-4 py-3 rounded-2xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10 bg-white"
-        />
-        <button
-          onClick={() => setSelectingSize(customInput)}
-          disabled={!customInput.trim()}
-          className="w-12 h-12 rounded-2xl bg-orange-500 text-white flex items-center justify-center disabled:opacity-30 active:scale-95 transition-transform"
-        >
+          className="flex-1 px-4 py-3 rounded-2xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10 bg-white" />
+        <button onClick={() => setSelectingSize(customInput)} disabled={!customInput.trim()}
+          className="w-12 h-12 rounded-2xl bg-orange-500 text-white flex items-center justify-center disabled:opacity-30 active:scale-95 transition-transform">
           <Plus className="w-5 h-5" />
         </button>
       </div>
@@ -478,12 +414,9 @@ export default function MyStuffTab({ user }) {
         </div>
       )}
 
-      {/* Shortcut to summary if move list has items */}
       {activeList === "move" && items.length >= 3 && (
-        <button
-          onClick={() => setActiveList("summary")}
-          className="w-full py-3.5 rounded-2xl border-2 border-orange-300 bg-orange-50 text-orange-700 text-sm font-bold flex items-center justify-center gap-2"
-        >
+        <button onClick={() => setActiveList("summary")}
+          className="w-full py-3.5 rounded-2xl border-2 border-orange-300 bg-orange-50 text-orange-700 text-sm font-bold flex items-center justify-center gap-2">
           <Package className="w-4 h-4" />
           See Supplies & Cost Estimate
         </button>

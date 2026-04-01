@@ -28,11 +28,9 @@ export default function Dashboard() {
     base44.auth.me().then(u => {
       setUser(u);
       setLoading(false);
-      // Show onboarding for brand-new users (registered in last 2 minutes)
-      const regDate = u?.registration_date ? new Date(u.registration_date) : null;
-      const isNew = regDate && (Date.now() - regDate.getTime()) < 2 * 60 * 1000;
-      const alreadySeen = localStorage.getItem(`onboarding_done_${u?.id}`);
-      if (isNew && !alreadySeen) setShowOnboarding(true);
+      // Show onboarding for any user who hasn't completed it yet
+      const alreadyDone = localStorage.getItem(`onboarding_done_${u?.id}`);
+      if (!alreadyDone) setShowOnboarding(true);
     }).catch(() => navigate(createPageUrl("Register")));
   }, []);
 
@@ -132,7 +130,7 @@ export default function Dashboard() {
       {/* Content */}
       <div className="flex-1 overflow-y-auto px-4 pt-4 pb-24">
         {activeTab === "plan" && <ChecklistPanel user={user} />}
-        {activeTab === "inventory" && <MyStuffTab user={user} onNavigate={setActiveTab} />}
+        {activeTab === "inventory" && <MyStuffTab user={user} onNavigate={setActiveTab} onStartOnboarding={() => setShowOnboarding(true)} />}
         {activeTab === "ai" && <AIMoveAssist user={user} />}
       </div>
 
