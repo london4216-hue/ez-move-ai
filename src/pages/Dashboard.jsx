@@ -117,11 +117,7 @@ export default function Dashboard() {
               <div
                 className="h-full bg-gradient-to-r from-orange-500 to-orange-400 rounded-full transition-all duration-700"
                 style={{
-                  width: daysToClose === null ? '2%' : `${Math.max(2, Math.min(100, Math.round(
-                    (Math.max(0, daysToClose) / Math.max(1,
-                      differenceInDays(parseISO(user.estimated_close_date), user.registration_date ? parseISO(user.registration_date) : new Date())
-                    )) * 100
-                  )))%`
+                  width: daysToClose === null ? '2%' : `${Math.max(2, Math.min(100, Math.round((Math.max(0, daysToClose) / Math.max(1, differenceInDays(parseISO(user.estimated_close_date), user.registration_date ? parseISO(user.registration_date) : new Date()))) * 100)))}%`
                 }}
               />
             </div>
@@ -145,7 +141,7 @@ export default function Dashboard() {
               <button
                 key={id}
                 onClick={() => setActiveTab(id)}
-                className={`flex-1 flex flex-col items-center gap-1 py-1.5 rounded-xl transition-all active:scale-95 ${active ? 'text-orange-500' : 'text-slate-400'}`}
+                className={active ? 'flex-1 flex flex-col items-center gap-1 py-1.5 rounded-xl transition-all active:scale-95 text-orange-500' : 'flex-1 flex flex-col items-center gap-1 py-1.5 rounded-xl transition-all active:scale-95 text-slate-400'}
               >
                 <Icon className={active ? 'w-5 h-5 stroke-[2.5]' : 'w-5 h-5'} />
                 <span className={active ? 'text-[10px] font-bold leading-none text-orange-500' : 'text-[10px] font-bold leading-none text-slate-400'}>{label}</span>
