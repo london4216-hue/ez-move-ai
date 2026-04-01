@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
 import { differenceInDays, parseISO } from "date-fns";
-import { LayoutList, CalendarDays, Package, Home, Sparkles } from "lucide-react";
+import { LayoutList, CalendarDays, Package, Home, Sparkles, RotateCcw } from "lucide-react";
 import ChecklistPanel from "@/components/dashboard/ChecklistPanel";
 import CalendarSheet from "@/components/dashboard/CalendarSheet";
 import MyStuffTab from "@/components/dashboard/MyStuffTab";
@@ -64,6 +64,18 @@ export default function Dashboard() {
       <div className="bg-white border-b border-slate-200 px-4 pt-14 pb-4 safe-area-top">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                if (!confirm("Reset demo? This clears all checklist progress and onboarding data.")) return;
+                const keys = Object.keys(localStorage).filter(k => k.includes(user?.id) || k === 'register_progress');
+                keys.forEach(k => localStorage.removeItem(k));
+                window.location.reload();
+              }}
+              className="flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 hover:bg-red-50 hover:text-red-500 text-slate-400 text-[9px] font-bold transition-colors border border-slate-200 hover:border-red-200"
+            >
+              <RotateCcw className="w-2.5 h-2.5" />
+              Demo Reset
+            </button>
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-900/30">
               <span className="text-white text-[10px] font-black tracking-tight">EZ</span>
             </div>
