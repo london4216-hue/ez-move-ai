@@ -140,6 +140,36 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
     ]).then(([appts, cnts]) => {
       setAppointments(appts);
       setContacts(cnts);
+
+      // Auto-complete tasks that have a scheduled appointment or contact with a service date
+      const allWeekItems = Object.values(weeksData).flatMap(w => w.items);
+      const autoCompleted = new Set();
+
+      allWeekItems.forEach(item => {
+        const titleLower = item.title.toLowerCase();
+        // Check appointments
+        const hasAppt = appts.some(a =>
+          a.status !== "cancelled" &&
+          a.date &&
+          (a.title?.toLowerCase().includes(titleLower) || titleLower.includes(a.title?.toLowerCase() || "") ||
+           a.provider_name?.toLowerCase().includes(titleLower))
+        );
+        // Check contacts with a service date
+        const hasContact = cnts.some(c =>
+          c.service_date &&
+          (c.role?.toLowerCase().includes(titleLower) || titleLower.includes(c.role?.toLowerCase() || "") ||
+           c.name?.toLowerCase().includes(titleLower))
+        );
+        if (hasAppt || hasContact) autoCompleted.add(item.id);
+      });
+
+      if (autoCompleted.size > 0) {
+        setCompletedIds(prev => {
+          const merged = new Set([...prev, ...autoCompleted]);
+          localStorage.setItem(`checklist_complete_${user.id}`, JSON.stringify([...merged]));
+          return merged;
+        });
+      }
     });
   }, [user]);
 
