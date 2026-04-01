@@ -40,18 +40,35 @@ export default function ProviderContactCard({ provider, item, user, onClose, onS
 
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-[#F3F4F6]">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#FFF7ED] flex items-center justify-center text-lg">
-              📋
-            </div>
-            <div>
-              <p className="text-sm font-bold text-[#1A1A2E]">{provider.name}</p>
-              <p className="text-[11px] text-[#F97316] font-semibold">{item.title}</p>
-            </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-[#1A1A2E]">{provider.name}</p>
+            <p className="text-[11px] text-[#F97316] font-semibold">{item.title}</p>
           </div>
-          <button onClick={onClose} className="p-1">
+          <button onClick={onClose} className="p-1 flex-shrink-0">
             <X className="w-5 h-5 text-[#9CA3AF]" />
           </button>
+        </div>
+
+        {/* Quick Info Row */}
+        <div className="px-4 py-3 border-b border-[#F3F4F6] grid grid-cols-3 gap-2 text-xs">
+          {provider.email && (
+            <div>
+              <p className="text-[9px] text-[#9CA3AF] font-semibold uppercase tracking-wide mb-0.5">Email</p>
+              <p className="font-semibold text-[#1A1A2E] truncate">{provider.email}</p>
+            </div>
+          )}
+          {provider.service_date && (
+            <div>
+              <p className="text-[9px] text-[#9CA3AF] font-semibold uppercase tracking-wide mb-0.5">Service Date</p>
+              <p className="font-semibold text-[#1A1A2E]">{new Date(provider.service_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
+            </div>
+          )}
+          {provider.cost_of_service && (
+            <div>
+              <p className="text-[9px] text-[#9CA3AF] font-semibold uppercase tracking-wide mb-0.5">Est. Cost</p>
+              <p className="font-semibold text-[#1A1A2E]">${provider.cost_of_service}</p>
+            </div>
+          )}
         </div>
 
         <div className="px-4 pt-4 space-y-4">
