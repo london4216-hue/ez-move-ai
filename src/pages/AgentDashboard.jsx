@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
-import { Plus, LogOut, Edit2, X, ArrowLeft, Loader2, Users, Trash2, CreditCard, CheckCircle2, DollarSign, Clock, Home } from "lucide-react";
+import { Plus, LogOut, Edit2, X, ArrowLeft, Loader2, Users, Trash2, CreditCard, CheckCircle2, DollarSign, Clock, Home, Copy, Check } from "lucide-react";
 import { format, differenceInDays, parseISO } from "date-fns";
 
 const STATUS_COLORS = {
@@ -31,6 +31,14 @@ export default function AgentDashboard() {
   const [editForm, setEditForm] = useState({});
   const [resendingId, setResendingId] = useState(null);
   const [resentId, setResentId] = useState(null);
+  const [copiedId, setCopiedId] = useState(null);
+
+  const copyInviteLink = (client) => {
+    const link = `${window.location.origin}/Register?code=${client.invitation_code}`;
+    navigator.clipboard.writeText(link);
+    setCopiedId(client.id);
+    setTimeout(() => setCopiedId(null), 2500);
+  };
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -199,10 +207,17 @@ export default function AgentDashboard() {
                       </div>
                       <p className="text-[11px] text-slate-400 truncate mb-1.5">{client.user_email}</p>
                       {client.invitation_code && (
-                        <div className="inline-flex items-center gap-1.5 bg-slate-50 border border-slate-100 rounded-lg px-2 py-1">
-                          <span className="text-[9px] text-slate-400 font-semibold uppercase">Code</span>
-                          <span className="text-xs font-black text-orange-500 tracking-widest">{client.invitation_code}</span>
-                        </div>
+                        <button
+                          onClick={() => copyInviteLink(client)}
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-semibold transition-all ${
+                            copiedId === client.id
+                              ? "bg-emerald-50 border-emerald-200 text-emerald-600"
+                              : "bg-slate-50 border-slate-200 text-slate-500 hover:bg-orange-50 hover:border-orange-200 hover:text-orange-600"
+                          }`}
+                        >
+                          {copiedId === client.id ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                          {copiedId === client.id ? "Copied!" : "Copy Invite Link"}
+                        </button>
                       )}
                     </div>
                     <div className="flex-shrink-0 text-right flex flex-col items-end gap-2">
