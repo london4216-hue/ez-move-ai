@@ -62,6 +62,7 @@ export default function Week1OnboardingModal({ user, onDone }) {
   const [insights, setInsights]         = useState(saved.insights ?? null);
   const [loadingInsights, setLoadingInsights] = useState(false);
   const [moversSaved, setMoversSaved]   = useState(false);
+  const [selectedEstate, setSelectedEstate] = useState(saved.selectedEstate ?? null);  // provider name
 
   const step = STEPS[stepIdx];
 
@@ -150,6 +151,22 @@ Be realistic and concise.`,
       setLoadingAI(false);
     } else {
       goTo(stepIdx + 1, { needsEstate: answer });
+    }
+  };
+
+  const selectEstateProvider = async (p) => {
+    setSelectedEstate(p.name);
+    persist({ selectedEstate: p.name });
+    if (user?.id) {
+      await base44.entities.Contact.create({
+        user_id: user.id,
+        name: p.name,
+        role: "Estate Sale",
+        phone: p.phone || "",
+        email: "",
+        avatar_initials: p.name?.[0] || "E",
+        color: "#a855f7",
+      }).catch(() => {});
     }
   };
 
@@ -446,12 +463,31 @@ Be realistic and concise.`,
                 {providers.length > 0 && (
                   <div className="space-y-2 mb-5 text-left">
                     {providers.map((p, i) => (
-                      <div key={i} className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
-                        <p className="font-bold text-slate-800 text-sm">{p.name}</p>
-                        {p.description && <p className="text-xs text-slate-500 mt-0.5">{p.description}</p>}
-                        {p.phone && <a href={`tel:${p.phone}`} className="text-xs font-bold text-orange-500 flex items-center gap-1 mt-1"><Phone className="w-3 h-3" />{p.phone}</a>}
+                      <div key={i} className={`bg-white border rounded-2xl p-4 shadow-sm transition-all ${selectedEstate === p.name ? "border-purple-400 ring-1 ring-purple-300" : "border-slate-100"}`}>
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1">
+                            <p className="font-bold text-slate-800 text-sm">{p.name}</p>
+                            {p.description && <p className="text-xs text-slate-500 mt-0.5">{p.description}</p>}
+                            {p.phone && <a href={`tel:${p.phone}`} className="text-xs font-bold text-orange-500 flex items-center gap-1 mt-1"><Phone className="w-3 h-3" />{p.phone}</a>}
+                          </div>
+                          <button
+                            onClick={() => selectEstateProvider(p)}
+                            className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl text-[11px] font-bold border transition-all ${
+                              selectedEstate === p.name
+                                ? "bg-purple-500 text-white border-purple-500"
+                                : "bg-white text-purple-600 border-purple-300 hover:bg-purple-50"
+                            }`}>
+                            {selectedEstate === p.name ? <><CheckCircle2 className="w-3 h-3" /> Selected</> : "Select"}
+                          </button>
+                        </div>
                       </div>
                     ))}
+                  </div>
+                )}
+                {selectedEstate && (
+                  <div className="bg-purple-50 border border-purple-200 rounded-2xl px-4 py-2.5 mb-4 flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-purple-500 flex-shrink-0" />
+                    <p className="text-xs font-bold text-purple-700">{selectedEstate} saved to your dashboard contacts!</p>
                   </div>
                 )}
                 {needsEstate === false && (
