@@ -92,12 +92,17 @@ export default function UpcomingEvents({ user }) {
 
   return (
     <>
-      <div className="mb-4">
-        <div className="flex items-center gap-1.5 mb-2 px-0.5">
-          <CalendarDays className="w-3.5 h-3.5 text-orange-500" />
-          <p className="text-xs font-bold text-slate-700">Upcoming Events</p>
-          <span className="text-[10px] font-bold text-orange-500 bg-orange-50 px-1.5 py-0.5 rounded-full">{events.length}</span>
+      {/* Red Alert Banner */}
+      <div className="mb-4 bg-red-50 border-2 border-red-300 rounded-2xl p-3 flex items-start gap-2.5">
+        <div className="w-2 h-2 rounded-full bg-red-500 mt-1.5 flex-shrink-0 animate-pulse" />
+        <div className="flex-1">
+          <p className="text-xs font-black text-red-700 uppercase tracking-wide">🚨 Upcoming Events</p>
+          <p className="text-[10px] text-red-600 font-semibold mt-0.5">{events.length} scheduled event{events.length !== 1 ? 's' : ''} — tap to review details</p>
         </div>
+      </div>
+
+      <div className="mb-4">
+
 
         <div className="flex gap-2.5 overflow-x-auto pb-1 no-scrollbar">
           {events.map(ev => {
@@ -149,6 +154,29 @@ export default function UpcomingEvents({ user }) {
             </div>
 
             <div className="px-5 pt-4 space-y-3">
+              {/* Contact Name & Phone */}
+              {selected.raw?.contact_name && (
+                <div className="flex items-center gap-3 bg-red-50 rounded-2xl px-4 py-3 border border-red-200">
+                  <div className="w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center font-black text-xs flex-shrink-0">
+                    {selected.raw.contact_name.split(' ').map(n => n[0]).join('')}
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-semibold text-red-500 uppercase tracking-wide">Contact</p>
+                    <p className="text-sm font-bold text-red-700">{selected.raw.contact_name}</p>
+                  </div>
+                </div>
+              )}
+              {selected.raw?.full_name && !selected.raw.contact_name && (
+                <div className="flex items-center gap-3 bg-red-50 rounded-2xl px-4 py-3 border border-red-200">
+                  <div className="w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center font-black text-xs flex-shrink-0">
+                    {selected.raw.full_name.split(' ').map(n => n[0]).join('')}
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-semibold text-red-500 uppercase tracking-wide">Contact</p>
+                    <p className="text-sm font-bold text-red-700">{selected.raw.full_name}</p>
+                  </div>
+                </div>
+              )}
               <div className="flex items-center gap-3 bg-orange-50 rounded-2xl px-4 py-3">
                 <CalendarDays className="w-4 h-4 text-orange-500 flex-shrink-0" />
                 <div>
@@ -158,11 +186,11 @@ export default function UpcomingEvents({ user }) {
               </div>
 
               {selected.phone && (
-                <a href={`tel:${selected.phone}`} className="flex items-center gap-3 bg-slate-50 rounded-2xl px-4 py-3 hover:bg-slate-100 transition-colors">
-                  <Phone className="w-4 h-4 text-slate-500 flex-shrink-0" />
+                <a href={`tel:${selected.phone}`} className="flex items-center gap-3 bg-blue-50 rounded-2xl px-4 py-3 hover:bg-blue-100 transition-colors border border-blue-200">
+                  <Phone className="w-4 h-4 text-blue-500 flex-shrink-0" />
                   <div>
-                    <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">Phone</p>
-                    <p className="text-sm font-bold text-slate-700">{selected.phone}</p>
+                    <p className="text-[10px] font-semibold text-blue-500 uppercase tracking-wide">Phone</p>
+                    <p className="text-sm font-bold text-blue-700">{selected.phone}</p>
                   </div>
                 </a>
               )}
@@ -188,12 +216,18 @@ export default function UpcomingEvents({ user }) {
               )}
 
               {selected.notes && (
-                <div className="flex items-start gap-3 bg-slate-50 rounded-2xl px-4 py-3">
-                  <FileText className="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5" />
+                <div className="flex items-start gap-3 bg-amber-50 rounded-2xl px-4 py-3 border border-amber-200">
+                  <FileText className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide mb-1">Notes</p>
-                    <p className="text-sm text-slate-600 leading-relaxed">{selected.notes}</p>
+                    <p className="text-[10px] font-semibold text-amber-600 uppercase tracking-wide mb-1">User Notes</p>
+                    <p className="text-sm text-amber-800 leading-relaxed">{selected.notes}</p>
                   </div>
+                </div>
+              )}
+              {!selected.notes && (
+                <div className="flex items-start gap-3 bg-slate-50 rounded-2xl px-4 py-3 border border-slate-200">
+                  <FileText className="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5" />
+                  <p className="text-xs text-slate-400 font-semibold italic">No notes added</p>
                 </div>
               )}
             </div>

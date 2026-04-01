@@ -6,6 +6,7 @@ import { CalendarDays, Phone, X, Save, ChevronDown, ChevronUp } from "lucide-rea
 import ChecklistItemCard from "./ChecklistItemCard";
 import WeekWalkthrough from "./WeekWalkthrough";
 import MoveDirectory from "./MoveDirectory";
+import UpcomingEvents from "./UpcomingEvents";
 
 const BASE_WEEKS = {
   1: {
@@ -317,6 +318,8 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
 
   return (
     <div className="space-y-4">
+      <UpcomingEvents user={user} />
+
       {showWalkthrough && walkthroughWeek && (
         <WeekWalkthrough
           weekData={weeksData[walkthroughWeek]}
