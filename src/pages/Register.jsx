@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
-import { Loader2, ChevronLeft, LogOut } from "lucide-react";
+import { Loader2, LogOut } from "lucide-react";
 import Week1Setup from "../components/register/Week1Setup";
 
 // Week1Setup now handled by Week1Setup component
@@ -43,23 +43,7 @@ export default function Register() {
       } catch (e) {}
     }
 
-    // Auto-detect location
-    if (navigator.geolocation) {
-      setLocationLoading(true);
-      navigator.geolocation.getCurrentPosition(async (pos) => {
-        try {
-          const { latitude, longitude } = pos.coords;
-          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
-          const data = await res.json();
-          const addr = data.address || {};
-          const street = [addr.house_number, addr.road].filter(Boolean).join(" ");
-          setStreetAddress(prev => prev || street || "");
-          setCity(prev => prev || addr.city || addr.town || addr.village || addr.county || "");
-          setZipCode(prev => prev || addr.postcode || "");
-        } catch (e) {}
-        setLocationLoading(false);
-      }, () => setLocationLoading(false));
-    }
+
 
     // Load client close date from URL code
     const urlParams2 = new URLSearchParams(window.location.search);
@@ -192,14 +176,9 @@ export default function Register() {
 
       <div className="w-full max-w-sm bg-white rounded-3xl p-7 shadow-2xl mt-16">
         <div className="text-center mb-6">
-          <h1 className="text-lg font-black text-slate-800 mb-1">Set Up Your Move</h1>
-          <p className="text-sm text-slate-500">Fill in your details to get started</p>
-          {locationLoading && (
-            <div className="mt-2 inline-flex items-center gap-1.5 bg-blue-50 border border-blue-200 rounded-xl px-3 py-1">
-              <Loader2 className="w-3 h-3 text-blue-500 animate-spin" />
-              <span className="text-xs text-blue-600 font-semibold">Detecting your location...</span>
-            </div>
-          )}
+          <h1 className="text-lg font-black text-slate-800 mb-1">Welcome to Move <span className="text-orange-500">EZ AI</span></h1>
+          <p className="text-sm text-slate-500">Enter your home address to begin</p>
+
         </div>
 
         <div className="space-y-3 mb-4">
@@ -274,26 +253,13 @@ export default function Register() {
 
         </div>
 
-        <div className="flex gap-3">
-          <button
-            onClick={() => {
-              const currentState = { moveDate, streetAddress, city, zipCode, timestamp: Date.now() };
-              localStorage.setItem('register_progress', JSON.stringify(currentState));
-              navigate(-1);
-            }}
-            className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 hover:bg-slate-50"
-          >
-            <ChevronLeft className="w-4 h-4" />
-            Back
-          </button>
-          <button
-            onClick={handleVerify}
-            disabled={loading}
-            className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all shadow-lg shadow-orange-200 flex items-center justify-center gap-2"
-          >
-            {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Verifying...</> : "Continue →"}
-          </button>
-        </div>
+        <button
+          onClick={handleVerify}
+          disabled={loading}
+          className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all shadow-lg shadow-orange-200 flex items-center justify-center gap-2"
+        >
+          {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Verifying...</> : "Continue →"}
+        </button>
 
 
       </div>
