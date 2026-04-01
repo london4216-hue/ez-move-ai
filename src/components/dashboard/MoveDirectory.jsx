@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Phone, Mail, Plus, X, Check, ChevronDown, ChevronUp, Trash2, CalendarDays, DollarSign, FileText } from "lucide-react";
+import { Phone, Mail, Plus, X, Check, ChevronDown, ChevronUp, Trash2, CalendarDays, DollarSign, FileText, Info } from "lucide-react";
 
 export default function MoveDirectory({ user, contacts: externalContacts, onContactsChange }) {
   const [contacts, setContacts] = useState([]);
@@ -8,7 +8,6 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedContact, setSelectedContact] = useState(null);
   const [expanded, setExpanded] = useState(false);
-  const [prefilledRole, setPrefilledRole] = useState(null);
   const [newContact, setNewContact] = useState({ name: "", role: "", phone: "", email: "", notes: "", cost_of_service: "", service_date: "" });
 
   useEffect(() => {
@@ -33,6 +32,7 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
     if (!user) return;
     const data = await base44.entities.Contact.filter({ user_id: user.id });
     const deduped = dedup(data);
+    // Delete actual duplicates from DB
     const keepIds = new Set(deduped.map(c => c.id));
     const dupes = data.filter(c => !keepIds.has(c.id));
     await Promise.all(dupes.map(c => base44.entities.Contact.delete(c.id)));
@@ -54,6 +54,13 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
     loadContacts();
   };
 
+  const handleDeleteContact = async (contact, e) => {
+    e.stopPropagation();
+    if (!confirm(`Delete ${contact.name}?`)) return;
+    await base44.entities.Contact.delete(contact.id);
+    loadContacts();
+  };
+
   const roles = [
     { label: "Real Estate Agent", emoji: "🏠" },
     { label: "Lawyer", emoji: "⚖️" },
@@ -70,54 +77,146 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
     { label: "Other", emoji: "👤" }
   ];
 
-  return (
-    <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="w-full px-4 py-3 flex items-center justify-between"
-      >
-        <div className="flex items-center gap-2">
-          <h3 className="text-sm font-bold text-slate-800">📇 Move Directory</h3>
-          <span className="text-xs text-slate-500">({contacts.length})</span>
-        </div>
-        <div className="flex items-center gap-2">
-          {!expanded && (
-            <div
-              onClick={(e) => { e.stopPropagation(); setShowAddModal(true); }}
-              className="w-7 h-7 rounded-full bg-orange-500 flex items-center justify-center cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5 text-white" />
-            </div>
-          )}
-          {expanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
-        </div>
-      </button>
+  const CRITICAL_CONTACTS = [
+    { label: "Lawyer", emoji: "⚖️" },
+    { label: "Real Estate Agent", emoji: "🏠" },
+    { label: "Title Company", emoji: "📄" },
+    { label: "Inspector", emoji: "🔍" },
+    { label: "Insurance Agent", emoji: "🛡️" },
+  ];
 
-      {expanded && (
-        <>
-          <div className="p-2 space-y-1.5 border-t border-slate-100 max-h-80 overflow-y-auto">
-            {contacts.length === 0 && (
-              <p className="text-xs text-slate-400 text-center py-4">No contacts yet. Add one to get started.</p>
-            )}
-            {contacts.map(contact => (
+  const missingContacts = CRITICAL_CONTACTS.filter(
+    rc => !contacts.some(c => c.role?.toLowerCase() === rc.label.toLowerCase())
+  );
+
+  return (
+    <>
+      <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+        {/* Missing Contacts Warning */}
+        {missingContacts.length > 0 && !expanded && (
+          <div className="px-4 py-2 bg-amber-50 border-b border-amber-100">
+            <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wide mb-1">⚠️ {missingContacts.length} Missing Critical Contact{missingContacts.length > 1 ? 's' : ''}</p>
+            <div className="flex flex-wrap gap-1">
+              {missingContacts.slice(0, 3).map(rc => (
+                <span key={rc.label} className="text-[9px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-semibold">{rc.emoji} {rc.label}</span>
+              ))}
+              {missingContacts.length > 3 && <span className="text-[9px] text-amber-600 px-1">+{missingContacts.length - 3} more</span>}
+            </div>
+          </div>
+        )}
+
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="w-full px-4 py-3 flex items-center justify-between"
+        >
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-bold text-slate-800">📇 Move Directory</h3>
+            <span className="text-xs text-slate-500">({contacts.length})</span>
+          </div>
+          <div className="flex items-center gap-2">
+            {!expanded && (
               <div
-                key={contact.id}
-                onClick={() => { setSelectedContact(contact); setShowEditModal(true); }}
-                className="p-3 rounded-lg bg-slate-50 border border-slate-100 cursor-pointer hover:bg-slate-100 transition-colors"
+                onClick={(e) => { e.stopPropagation(); setShowAddModal(true); }}
+                className="w-7 h-7 rounded-full bg-orange-500 flex items-center justify-center cursor-pointer"
               >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-slate-700">{contact.name}</p>
-                    <p className="text-[10px] text-slate-500">{contact.role}</p>
-                    {contact.phone && <p className="text-[10px] text-slate-500 flex items-center gap-1 mt-1"><Phone className="w-2.5 h-2.5" /> {contact.phone}</p>}
-                    {contact.service_date && <p className="text-[10px] text-slate-500 flex items-center gap-1 mt-1"><CalendarDays className="w-2.5 h-2.5" /> {contact.service_date}</p>}
-                  </div>
+                <Plus className="w-3.5 h-3.5 text-white" />
+              </div>
+            )}
+            {expanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+          </div>
+        </button>
+
+        {expanded && (
+          <>
+            {/* Missing Contacts Expanded */}
+            {missingContacts.length > 0 && (
+              <div className="px-4 py-3 bg-amber-50 border-b border-amber-100">
+                <p className="text-xs font-bold text-amber-700 uppercase tracking-wide mb-2.5">⚠️ Critical Contacts for Buying/Selling</p>
+                <div className="space-y-1.5">
+                  {missingContacts.map(rc => (
+                    <div key={rc.label} className="flex items-center justify-between bg-white rounded-lg px-3 py-2 border border-amber-200">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm">{rc.emoji}</span>
+                        <p className="text-xs font-semibold text-slate-700">{rc.label}</p>
+                      </div>
+                      <button
+                        onClick={() => setShowAddModal(true)}
+                        className="text-[10px] font-bold text-amber-600 bg-amber-100 hover:bg-amber-200 px-2.5 py-1 rounded transition-colors"
+                      >
+                        + Add
+                      </button>
+                    </div>
+                  ))}
                 </div>
               </div>
-            ))}
-          </div>
-        </>
-      )}
+            )}
+
+            <div className="px-4 pb-3 flex justify-end border-t border-slate-100 pt-2">
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="text-xs text-orange-500 font-bold flex items-center gap-1"
+              >
+                <Plus className="w-3.5 h-3.5" /> Add Contact
+              </button>
+            </div>
+            <div className="divide-y divide-slate-50 max-h-72 overflow-y-auto">
+              {contacts.length === 0 ? (
+                <div className="px-4 py-4 text-center">
+                  <p className="text-xs text-slate-400">No contacts yet</p>
+                </div>
+              ) : (
+                contacts.map((contact) => (
+                  <div key={contact.id} className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors">
+                    <button
+                      onClick={() => { setSelectedContact({ ...contact, cost_of_service: contact.cost_of_service || "" }); setShowEditModal(true); }}
+                      className="flex items-center gap-2 flex-1 min-w-0 text-left"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className={`text-xs font-bold ${contact.not_needed ? "text-slate-400 line-through" : "text-slate-800"} truncate`}>{contact.name}</p>
+                          {contact.not_needed && <span className="text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded flex-shrink-0">N/A</span>}
+                        </div>
+                        <div className="flex items-center gap-2 flex-wrap text-[9px]">
+                          <span className={`font-semibold ${contact.not_needed ? "text-slate-300" : "text-slate-600"}`}>{contact.role}</span>
+                          {contact.service_date && <span className="text-blue-500 font-bold">📅 {contact.service_date}</span>}
+                          {contact.cost_of_service > 0 && <span className="text-emerald-600 font-bold">${Number(contact.cost_of_service).toLocaleString()}</span>}
+                        </div>
+                      </div>
+                    </button>
+                    <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={() => {
+                          base44.entities.Contact.update(contact.id, { not_needed: !contact.not_needed });
+                          setContacts(contacts.map(c => c.id === contact.id ? { ...c, not_needed: !c.not_needed } : c));
+                        }}
+                        className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors ${contact.not_needed ? "bg-slate-100" : "bg-amber-50 hover:bg-amber-100"}`}
+                        title={contact.not_needed ? "Mark as needed" : "Mark as N/A"}
+                      >
+                        <span className="text-[10px] font-bold text-amber-600">—</span>
+                      </button>
+                      <button
+                        onClick={() => { setSelectedContact({ ...contact, cost_of_service: contact.cost_of_service || "" }); setShowEditModal(true); }}
+                        className="w-7 h-7 rounded-full bg-blue-50 flex items-center justify-center hover:bg-blue-100 transition-colors"
+                        title="View details"
+                      >
+                        <Info className="w-3 h-3 text-blue-600" />
+                      </button>
+                      {contact.phone && (
+                        <a href={`tel:${contact.phone}`} className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center">
+                          <Phone className="w-3 h-3 text-slate-600" />
+                        </a>
+                      )}
+                      <button onClick={(e) => handleDeleteContact(contact, e)} className="w-7 h-7 rounded-full bg-red-50 flex items-center justify-center hover:bg-red-100 transition-colors">
+                        <Trash2 className="w-3 h-3 text-red-400" />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </>
+        )}
+      </div>
 
       {/* Add Modal */}
       {showAddModal && (
@@ -130,9 +229,9 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
               </button>
             </div>
             <div className="p-5 space-y-4 overflow-y-auto">
-              <ContactFields contact={prefilledRole ? { ...newContact, role: prefilledRole } : newContact} onChange={setNewContact} roles={roles} />
+              <ContactFields contact={newContact} onChange={setNewContact} roles={roles} />
               <div className="flex gap-3 pb-2">
-                <button onClick={() => { setShowAddModal(false); setPrefilledRole(null); }} className="flex-1 py-3 rounded-xl border-2 border-slate-200 text-slate-700 font-bold">Close</button>
+                <button onClick={() => setShowAddModal(false)} className="flex-1 py-3 rounded-xl border-2 border-slate-200 text-slate-700 font-bold">Close</button>
                 <button
                   onClick={handleAddContact}
                   disabled={!newContact.name || !newContact.role}
@@ -192,7 +291,7 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
 

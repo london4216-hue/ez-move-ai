@@ -72,7 +72,7 @@ export default function Week1OnboardingModal({ user, onDone }) {
     elevator: "no",
     walk_distance: "under 50 ft",
     parking: "street",
-    distance_miles: null,
+    move_distance: "local (under 50 miles)",
     special_items: "",
   });
   const [closingDetails, setClosingDetails] = useState(saved.closingDetails ?? {
@@ -525,14 +525,13 @@ Be specific and realistic, like a professional moving company estimate.`,
                     </div>
 
                     <div>
-                      <label className="text-[11px] font-bold text-slate-500 mb-1 block">Estimated distance (miles)?</label>
-                      <input
-                        type="number"
-                        value={moverQForm.distance_miles || ""}
-                        onChange={e => setMoverQForm(f => ({...f, distance_miles: e.target.value ? parseInt(e.target.value) : null}))}
-                        placeholder="e.g. 50, 250, 1000"
-                        className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs"
-                      />
+                      <label className="text-[11px] font-bold text-slate-500 mb-1 block">Distance from old home to new home?</label>
+                      <div className="flex gap-2 flex-wrap">
+                        {["local (under 50 miles)","50–150 miles","150–500 miles","500+ miles (long distance)"].map(v => (
+                          <button key={v} onClick={() => setMoverQForm(f => ({...f, move_distance: v}))}
+                            className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all ${moverQForm.move_distance === v ? "bg-orange-500 text-white border-orange-500" : "bg-white text-slate-600 border-slate-200"}`}>{v}</button>
+                        ))}
+                      </div>
                     </div>
 
                     <div>
@@ -556,7 +555,7 @@ Be specific and realistic, like a professional moving company estimate.`,
                   <div className="text-center">
                     <div className="bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 mb-4 text-left space-y-1">
                       <p className="text-[11px] font-bold text-slate-600">📋 Your job details:</p>
-                      {[`Floors: ${moverQ?.floors}`, `Stairs: ${moverQ?.stairs}`, `Elevator: ${moverQ?.elevator}`, `Walk to truck: ${moverQ?.walk_distance}`, `Parking: ${moverQ?.parking}`, `Distance: ${moverQ?.distance_miles ? moverQ.distance_miles + " miles" : "not specified"}`, moverQ?.special_items && `Special items: ${moverQ.special_items}`].filter(Boolean).map((line, i) => (
+                      {[`Floors: ${moverQ?.floors}`, `Stairs: ${moverQ?.stairs}`, `Elevator: ${moverQ?.elevator}`, `Walk to truck: ${moverQ?.walk_distance}`, `Parking: ${moverQ?.parking}`, `Move distance: ${moverQ?.move_distance}`, moverQ?.special_items && `Special items: ${moverQ.special_items}`].filter(Boolean).map((line, i) => (
                         <p key={i} className="text-[10px] text-slate-500">{line}</p>
                       ))}
                       <button onClick={() => setShowMoverQ(true)} className="text-[10px] font-bold text-orange-500 mt-1">Edit →</button>
