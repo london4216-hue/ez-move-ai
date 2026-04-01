@@ -224,26 +224,7 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
                     </div>
                   )}
                 </div>
-              )}
-                </div>
-              )}
-                      </div>
-                      )}
-                      )}
-              )}
-                  )}
-                  </div>
-
-      {/* Add Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end justify-center">
-          <div className="w-full max-w-md bg-white rounded-t-3xl shadow-2xl max-h-[90vh] flex flex-col">
-            <div className="sticky top-0 bg-white border-b border-slate-100 px-5 py-4 flex items-center justify-between flex-shrink-0">
-              <h3 className="text-lg font-bold text-slate-800">Add Contact</h3>
-              <button onClick={() => setShowAddModal(false)} className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
-                <X className="w-4 h-4 text-slate-500" />
-              </button>
-            </div>
+                )}
             <div className="p-5 space-y-4 overflow-y-auto">
               <ContactFields contact={prefilledRole ? { ...newContact, role: prefilledRole } : newContact} onChange={setNewContact} roles={roles} />
               <div className="flex gap-3 pb-2">
