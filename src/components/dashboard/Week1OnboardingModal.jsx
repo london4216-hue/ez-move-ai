@@ -64,6 +64,16 @@ export default function Week1OnboardingModal({ user, onDone }) {
   const [moversSaved, setMoversSaved]   = useState(false);
   const [selectedMover, setSelectedMover] = useState(saved.selectedMover ?? null);
   const [selectedEstate, setSelectedEstate] = useState(saved.selectedEstate ?? null);  // provider name
+  const [moverQ, setMoverQ] = useState(saved.moverQ ?? null); // mover questionnaire answers
+  const [showMoverQ, setShowMoverQ] = useState(!saved.moverQ);  // show questionnaire if not answered
+  const [moverQForm, setMoverQForm] = useState(saved.moverQ ?? {
+    floors: "1",
+    stairs: "none",
+    elevator: "no",
+    walk_distance: "under 50 ft",
+    parking: "street",
+    special_items: "",
+  });
 
   const step = STEPS[stepIdx];
 
@@ -112,24 +122,43 @@ export default function Week1OnboardingModal({ user, onDone }) {
   // ── AI insights step ────────────────────────────────────────────────────────
   const loadInsights = async () => {
     setLoadingInsights(true);
-    const moveItems = Object.entries(decisions).filter(([, v]) => v.choice === "move").map(([name, v]) => `${name} (${v.size || "Medium"})`);
+    const moveItems = Object.entries(decisions).filter(([, v]) => v.choice === "move").map(([name, v]) => `${name} (${v.size || "Medium"}, qty ${v.qty || 1})`);
     const donateItems = Object.entries(decisions).filter(([, v]) => v.choice === "donate").map(([name, v]) => `${name} (${v.size || "Medium"})`);
+    const q = moverQ || moverQForm;
     const res = await base44.integrations.Core.InvokeLLM({
-      prompt: `A person is moving. Based on these items, give estimates:
-Moving items: ${moveItems.join(", ") || "none"}
+      prompt: `A person is moving. Give them a professional mover-style quote breakdown.
+
+Items being moved: ${moveItems.join(", ") || "none"}
 Donate items: ${donateItems.join(", ") || "none"}
 
-Provide:
-1. Estimated total move weight in lbs
-2. Estimated move cost range (low and high in $)
-3. Estimated total tax write-off value for donated items (IRS fair market value)
-4. A one-sentence tip about the move
+Job details (as a mover would ask):
+- Floors: ${q.floors} floor(s)
+- Stairs: ${q.stairs}
+- Elevator available: ${q.elevator}
+- Walking distance from home to truck: ${q.walk_distance}
+- Parking situation: ${q.parking}
+- Special/heavy items: ${q.special_items || "none"}
 
-Be realistic and concise.`,
+Provide a detailed mover-style estimate including:
+1. Total estimated weight in lbs (like a mover would calculate it)
+2. How many small/medium/large/wardrobe boxes are needed (wardrobe boxes for hanging clothes)
+3. Recommended truck size (e.g. 10ft, 16ft, 20ft, 26ft)
+4. Estimated move cost range low and high in $, factoring in stairs/distance/special items
+5. Estimated hours to complete the move
+6. Tax write-off value for donated items (IRS fair market value)
+7. A one-sentence pro tip from a mover's perspective
+
+Be specific and realistic, like a professional moving company estimate.`,
       response_json_schema: {
         type: "object",
         properties: {
           move_weight_lbs: { type: "number" },
+          boxes_small: { type: "number" },
+          boxes_medium: { type: "number" },
+          boxes_large: { type: "number" },
+          boxes_wardrobe: { type: "number" },
+          truck_size: { type: "string" },
+          estimated_hours: { type: "number" },
           move_cost_low: { type: "number" },
           move_cost_high: { type: "number" },
           tax_writeoff: { type: "number" },
@@ -139,7 +168,7 @@ Be realistic and concise.`,
     });
     setInsights(res);
     setLoadingInsights(false);
-    persist({ insights: res });
+    persist({ insights: res, moverQ: q });
   };
 
   const selectMoverProvider = async (p) => {
@@ -384,13 +413,93 @@ Be realistic and concise.`,
             </div>
 
             {!insights && !loadingInsights && (
-              <div className="text-center">
-                <button onClick={loadInsights} className="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-500 to-purple-600 text-white font-bold text-sm shadow-lg shadow-purple-200 flex items-center justify-center gap-2 mb-3">
-                  <Sparkles className="w-4 h-4" /> Generate My Estimates
-                </button>
-                <button onClick={() => goTo(3)} className="w-full py-2 text-[11px] font-semibold text-slate-400 hover:text-slate-600 transition-colors">
-                  Skip for now →
-                </button>
+              <div>
+                {showMoverQ ? (
+                  <div className="space-y-3">
+                    <p className="text-xs font-bold text-slate-700 text-center mb-1">📋 Answer a few mover questions for an accurate quote:</p>
+
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-500 mb-1 block">How many floors is your home?</label>
+                      <div className="flex gap-2">
+                        {["1","2","3+"].map(v => (
+                          <button key={v} onClick={() => setMoverQForm(f => ({...f, floors: v}))}
+                            className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all ${moverQForm.floors === v ? "bg-orange-500 text-white border-orange-500" : "bg-white text-slate-600 border-slate-200"}`}>{v}</button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-500 mb-1 block">Stairs to navigate?</label>
+                      <div className="flex gap-2 flex-wrap">
+                        {["none","a few steps","1 flight","2+ flights"].map(v => (
+                          <button key={v} onClick={() => setMoverQForm(f => ({...f, stairs: v}))}
+                            className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all ${moverQForm.stairs === v ? "bg-orange-500 text-white border-orange-500" : "bg-white text-slate-600 border-slate-200"}`}>{v}</button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-500 mb-1 block">Elevator available?</label>
+                      <div className="flex gap-2">
+                        {["yes","no"].map(v => (
+                          <button key={v} onClick={() => setMoverQForm(f => ({...f, elevator: v}))}
+                            className={`flex-1 py-2 rounded-xl text-xs font-bold border capitalize transition-all ${moverQForm.elevator === v ? "bg-orange-500 text-white border-orange-500" : "bg-white text-slate-600 border-slate-200"}`}>{v}</button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-500 mb-1 block">Walking distance from door to truck?</label>
+                      <div className="flex gap-2 flex-wrap">
+                        {["under 50 ft","50–100 ft","100–200 ft","200+ ft"].map(v => (
+                          <button key={v} onClick={() => setMoverQForm(f => ({...f, walk_distance: v}))}
+                            className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all ${moverQForm.walk_distance === v ? "bg-orange-500 text-white border-orange-500" : "bg-white text-slate-600 border-slate-200"}`}>{v}</button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-500 mb-1 block">Truck parking situation?</label>
+                      <div className="flex gap-2 flex-wrap">
+                        {["driveway","street","loading dock","tight/limited"].map(v => (
+                          <button key={v} onClick={() => setMoverQForm(f => ({...f, parking: v}))}
+                            className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all ${moverQForm.parking === v ? "bg-orange-500 text-white border-orange-500" : "bg-white text-slate-600 border-slate-200"}`}>{v}</button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-500 mb-1 block">Any extra-heavy or special items? <span className="text-slate-400 font-normal">(piano, safe, pool table…)</span></label>
+                      <input
+                        value={moverQForm.special_items}
+                        onChange={e => setMoverQForm(f => ({...f, special_items: e.target.value}))}
+                        placeholder="e.g. piano, gun safe — or leave blank"
+                        className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs"
+                      />
+                    </div>
+
+                    <button
+                      onClick={() => { setMoverQ(moverQForm); setShowMoverQ(false); persist({ moverQ: moverQForm }); }}
+                      className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
+                      <Sparkles className="w-4 h-4" /> Continue to Estimate →
+                    </button>
+                    <button onClick={() => goTo(3)} className="w-full py-2 text-[11px] font-semibold text-slate-400 hover:text-slate-600 transition-colors">Skip for now →</button>
+                  </div>
+                ) : (
+                  <div className="text-center">
+                    <div className="bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 mb-4 text-left space-y-1">
+                      <p className="text-[11px] font-bold text-slate-600">📋 Your job details:</p>
+                      {[`Floors: ${moverQ?.floors}`, `Stairs: ${moverQ?.stairs}`, `Elevator: ${moverQ?.elevator}`, `Walk to truck: ${moverQ?.walk_distance}`, `Parking: ${moverQ?.parking}`, moverQ?.special_items && `Special items: ${moverQ.special_items}`].filter(Boolean).map((line, i) => (
+                        <p key={i} className="text-[10px] text-slate-500">{line}</p>
+                      ))}
+                      <button onClick={() => setShowMoverQ(true)} className="text-[10px] font-bold text-orange-500 mt-1">Edit →</button>
+                    </div>
+                    <button onClick={loadInsights} className="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-500 to-purple-600 text-white font-bold text-sm shadow-lg shadow-purple-200 flex items-center justify-center gap-2 mb-3">
+                      <Sparkles className="w-4 h-4" /> Generate My Mover Estimate
+                    </button>
+                    <button onClick={() => goTo(3)} className="w-full py-2 text-[11px] font-semibold text-slate-400 hover:text-slate-600 transition-colors">Skip for now →</button>
+                  </div>
+                )}
               </div>
             )}
 
@@ -403,14 +512,15 @@ Be realistic and concise.`,
 
             {insights && !loadingInsights && (
               <div>
-                <div className="grid grid-cols-2 gap-3 mb-4">
+                {/* Weight + Cost row */}
+                <div className="grid grid-cols-2 gap-3 mb-3">
                   <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4">
                     <div className="flex items-center gap-1.5 mb-1">
                       <Truck className="w-3.5 h-3.5 text-orange-500" />
                       <p className="text-[10px] font-bold text-orange-600 uppercase tracking-wide">Est. Weight</p>
                     </div>
                     <p className="text-2xl font-black text-slate-800">{insights.move_weight_lbs?.toLocaleString() || "—"}</p>
-                    <p className="text-[10px] text-slate-400 font-semibold">lbs</p>
+                    <p className="text-[10px] text-slate-400 font-semibold">lbs total</p>
                   </div>
                   <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4">
                     <div className="flex items-center gap-1.5 mb-1">
@@ -422,8 +532,55 @@ Be realistic and concise.`,
                   </div>
                 </div>
 
+                {/* Truck size + Hours */}
+                <div className="grid grid-cols-2 gap-3 mb-3">
+                  {insights.truck_size && (
+                    <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <Truck className="w-3.5 h-3.5 text-blue-500" />
+                        <p className="text-[10px] font-bold text-blue-600 uppercase tracking-wide">Truck Size</p>
+                      </div>
+                      <p className="text-2xl font-black text-slate-800">{insights.truck_size}</p>
+                      <p className="text-[10px] text-slate-400 font-semibold">recommended</p>
+                    </div>
+                  )}
+                  {insights.estimated_hours > 0 && (
+                    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <Sparkles className="w-3.5 h-3.5 text-slate-500" />
+                        <p className="text-[10px] font-bold text-slate-600 uppercase tracking-wide">Est. Hours</p>
+                      </div>
+                      <p className="text-2xl font-black text-slate-800">{insights.estimated_hours}</p>
+                      <p className="text-[10px] text-slate-400 font-semibold">hours to complete</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Box breakdown */}
+                {(insights.boxes_small > 0 || insights.boxes_medium > 0 || insights.boxes_large > 0 || insights.boxes_wardrobe > 0) && (
+                  <div className="bg-amber-50 border border-amber-100 rounded-2xl overflow-hidden mb-3">
+                    <div className="px-4 py-2 border-b border-amber-100">
+                      <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wide">📦 Boxes You'll Need</p>
+                    </div>
+                    <div className="grid grid-cols-4 gap-px bg-amber-100">
+                      {[
+                        { label: "Small", qty: insights.boxes_small, sub: "books, kitchen" },
+                        { label: "Medium", qty: insights.boxes_medium, sub: "general items" },
+                        { label: "Large", qty: insights.boxes_large, sub: "bulky items" },
+                        { label: "Wardrobe", qty: insights.boxes_wardrobe, sub: "hanging clothes" },
+                      ].map(b => (
+                        <div key={b.label} className="bg-white px-2 py-3 text-center">
+                          <p className="text-lg font-black text-amber-600">{b.qty || 0}</p>
+                          <p className="text-[9px] font-bold text-slate-600">{b.label}</p>
+                          <p className="text-[8px] text-slate-400 leading-tight">{b.sub}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {insights.tax_writeoff > 0 && (
-                  <div className="bg-purple-50 border border-purple-100 rounded-2xl p-4 mb-4">
+                  <div className="bg-purple-50 border border-purple-100 rounded-2xl p-4 mb-3">
                     <div className="flex items-center gap-1.5 mb-1">
                       <DollarSign className="w-3.5 h-3.5 text-purple-500" />
                       <p className="text-[10px] font-bold text-purple-600 uppercase tracking-wide">Estimated Tax Write-Off</p>
