@@ -110,7 +110,7 @@ export default function Register() {
       }
       setLoading(false);
       localStorage.removeItem('register_progress');
-      navigate(createPageUrl("OnboardingWeek1"));
+      setShowOnboarding(true);
     } catch (e) {
       console.error(e);
       setError("Something went wrong. Please try again.");
@@ -125,6 +125,7 @@ export default function Register() {
           <Week1Setup
             userId={`pending_${inviteCode}`}
             userAddress={`${streetAddress}, ${city}, ${zipCode}`}
+            hideButtons={true}
             onComplete={async (answerMap) => {
               const user = await base44.auth.me();
               localStorage.setItem(`user_selections_${user.id}`, JSON.stringify(answerMap));
