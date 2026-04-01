@@ -5,6 +5,37 @@ import { useNavigate } from "react-router-dom";
 import { Loader2, LogOut } from "lucide-react";
 import Week1Setup from "../components/register/Week1Setup";
 
+// Wrapper that gets real user ID for Week1Setup
+function Week1SetupWrapper({ userAddress, onNavigateToDashboard }) {
+  const [userId, setUserId] = useState(null);
+
+  useEffect(() => {
+    base44.auth.me().then(user => {
+      if (user?.id) setUserId(user.id);
+    });
+  }, []);
+
+  if (!userId) return <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />;
+
+  return (
+    <div className="w-full max-w-sm">
+      <Week1Setup
+        userId={userId}
+        userAddress={userAddress}
+        hideButtons={true}
+        onComplete={async () => {
+          localStorage.setItem(`walkthrough_done_w1_${userId}`, "1");
+          onNavigateToDashboard();
+        }}
+        onSaveExit={async (partialAnswers) => {
+          localStorage.setItem(`week1_setup_${userId}`, JSON.stringify({ step: 0, answers: partialAnswers }));
+          base44.auth.logout("/");
+        }}
+      />
+    </div>
+  );
+}
+
 // Week1Setup now handled by Week1Setup component
 
 export default function Register() {
@@ -115,27 +146,10 @@ export default function Register() {
   if (showOnboarding) {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
-        <div className="w-full max-w-sm">
-          <Week1Setup
-            userId={`pending_${inviteCode}`}
-            userAddress={`${streetAddress}, ${city}, ${zipCode}`}
-            hideButtons={true}
-            onComplete={async (answerMap) => {
-              const user = await base44.auth.me();
-              localStorage.setItem(`user_selections_${user.id}`, JSON.stringify(answerMap));
-              localStorage.setItem(`week1_answers_${user.id}`, JSON.stringify(answerMap));
-              localStorage.setItem(`walkthrough_done_w1_${user.id}`, "1");
-              navigate(createPageUrl("Dashboard"));
-            }}
-            onSaveExit={async (partialAnswers) => {
-              const user = await base44.auth.me().catch(() => null);
-              if (user?.id) {
-                localStorage.setItem(`week1_setup_${user.id}`, JSON.stringify({ step: 0, answers: partialAnswers }));
-              }
-              base44.auth.logout("/");
-            }}
-          />
-        </div>
+        <Week1SetupWrapper
+          userAddress={`${streetAddress}, ${city}, ${zipCode}`}
+          onNavigateToDashboard={() => navigate(createPageUrl("Dashboard"))}
+        />
       </div>
     );
   }
