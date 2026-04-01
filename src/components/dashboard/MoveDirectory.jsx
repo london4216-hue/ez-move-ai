@@ -221,9 +221,11 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
                           </div>
                         </div>
                       ))}}
-                    </div>
-                  )}
-                </div>
+                      </div>
+                      )}
+                      </div>
+                      )}
+                      )}
               )}
                   )}
                   </div>
