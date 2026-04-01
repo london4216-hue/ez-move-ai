@@ -169,28 +169,17 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
                   <div key={contact.id} className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors">
                     <button
                       onClick={() => { setSelectedContact({ ...contact, cost_of_service: contact.cost_of_service || "" }); setShowEditModal(true); }}
-                      className="flex items-center gap-3 flex-1 min-w-0 text-left"
+                      className="flex items-center gap-2 flex-1 min-w-0 text-left"
                     >
-                      <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
-                        <span className="text-[10px] font-bold text-orange-600">{contact.avatar_initials}</span>
-                      </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <p className={`text-xs font-bold ${contact.not_needed ? "text-slate-400 line-through" : "text-slate-800"} truncate`}>{contact.name}</p>
                           {contact.not_needed && <span className="text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded flex-shrink-0">N/A</span>}
                         </div>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <p className={`text-[10px] font-semibold ${contact.not_needed ? "text-slate-300" : "text-orange-500"}`}>{contact.role}</p>
-                          {contact.service_date && (
-                            <span className="text-[9px] text-blue-500 font-bold flex items-center gap-0.5">
-                              <CalendarDays className="w-2.5 h-2.5" />{contact.service_date}
-                            </span>
-                          )}
-                          {contact.cost_of_service > 0 && (
-                            <span className="text-[9px] text-emerald-600 font-bold flex items-center gap-0.5">
-                              <DollarSign className="w-2.5 h-2.5" />{Number(contact.cost_of_service).toLocaleString()}
-                            </span>
-                          )}
+                        <div className="flex items-center gap-2 flex-wrap text-[9px]">
+                          <span className={`font-semibold ${contact.not_needed ? "text-slate-300" : "text-slate-600"}`}>{contact.role}</span>
+                          {contact.service_date && <span className="text-blue-500 font-bold">📅 {contact.service_date}</span>}
+                          {contact.cost_of_service > 0 && <span className="text-emerald-600 font-bold">${Number(contact.cost_of_service).toLocaleString()}</span>}
                         </div>
                       </div>
                     </button>
@@ -307,6 +296,7 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
 }
 
 function ContactFields({ contact, onChange, roles }) {
+  const [customRole, setCustomRole] = useState(false);
   return (
     <>
       <div>
@@ -315,15 +305,42 @@ function ContactFields({ contact, onChange, roles }) {
       </div>
       <div>
         <label className="text-xs font-semibold text-slate-600 mb-1.5 block">Role *</label>
-        <div className="grid grid-cols-2 gap-2">
-          {roles.map((r, i) => (
-            <button key={i} onClick={() => onChange({ ...contact, role: r.label })}
-              className={`p-3 rounded-xl border-2 text-left transition-all ${contact.role === r.label ? "border-orange-500 bg-orange-50" : "border-slate-200"}`}>
-              <span className="text-base">{r.emoji}</span>
-              <p className="text-xs font-semibold text-slate-700 mt-1">{r.label}</p>
+        {!customRole ? (
+          <>
+            <select
+              value={contact.role || ""}
+              onChange={(e) => onChange({ ...contact, role: e.target.value })}
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm appearance-none bg-white cursor-pointer"
+            >
+              <option value="">Select a role...</option>
+              {roles.map((r, i) => (
+                <option key={i} value={r.label}>{r.emoji} {r.label}</option>
+              ))}
+            </select>
+            <button
+              onClick={() => setCustomRole(true)}
+              className="text-[11px] font-bold text-orange-500 mt-2 hover:text-orange-600 transition-colors"
+            >
+              + Create custom role
             </button>
-          ))}
-        </div>
+          </>
+        ) : (
+          <>
+            <input
+              type="text"
+              value={contact.role || ""}
+              onChange={(e) => onChange({ ...contact, role: e.target.value })}
+              placeholder="e.g., Title Agent, Home Inspector..."
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm"
+            />
+            <button
+              onClick={() => { setCustomRole(false); onChange({ ...contact, role: "" }); }}
+              className="text-[11px] font-bold text-slate-400 mt-2 hover:text-slate-600 transition-colors"
+            >
+              ← Back to preset roles
+            </button>
+          </>
+        )}
       </div>
       <div>
         <label className="text-xs font-semibold text-slate-600 mb-1.5 block">Phone</label>
