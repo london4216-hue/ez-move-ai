@@ -86,7 +86,7 @@ export default function UpcomingEvents({ user }) {
     });
   }, [user?.id]);
 
-  if (events.length === 0) return null;
+
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -94,13 +94,16 @@ export default function UpcomingEvents({ user }) {
     <>
       {/* Red Alert Banner */}
       <div className="mb-4 bg-red-50 border-2 border-red-300 rounded-2xl p-3 flex items-start gap-2.5">
-        <div className="w-2 h-2 rounded-full bg-red-500 mt-1.5 flex-shrink-0 animate-pulse" />
+        <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${events.length > 0 ? "bg-red-500 animate-pulse" : "bg-red-300"}`} />
         <div className="flex-1">
           <p className="text-xs font-black text-red-700 uppercase tracking-wide">🚨 Upcoming Events</p>
-          <p className="text-[10px] text-red-600 font-semibold mt-0.5">{events.length} scheduled event{events.length !== 1 ? 's' : ''} — tap to review details</p>
+          <p className="text-[10px] text-red-600 font-semibold mt-0.5">
+            {events.length === 0 ? "No scheduled events yet" : `${events.length} scheduled event${events.length !== 1 ? 's' : ''} — tap to review details`}
+          </p>
         </div>
       </div>
 
+      {events.length > 0 && (
       <div className="mb-4">
 
 
@@ -133,6 +136,7 @@ export default function UpcomingEvents({ user }) {
           })}
         </div>
       </div>
+      )}
 
       {/* Detail Modal */}
       {selected && (

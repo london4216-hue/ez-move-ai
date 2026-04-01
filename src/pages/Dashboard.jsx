@@ -10,7 +10,6 @@ import MyStuffTab from "@/components/dashboard/MyStuffTab";
 import MoveCommandCenter from "@/components/dashboard/MoveCommandCenter";
 import Week1OnboardingModal from "@/components/dashboard/Week1OnboardingModal";
 import AIMoveAssist from "@/components/dashboard/AIMoveAssist";
-import UpcomingEvents from "@/components/dashboard/UpcomingEvents";
 
 const TABS = [
   { id: "plan", label: "My Move", Icon: Home },
@@ -131,7 +130,6 @@ export default function Dashboard() {
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto px-4 pt-4 pb-24">
-        {activeTab === "plan" && <UpcomingEvents user={user} />}
         {activeTab === "plan" && <ChecklistPanel user={user} />}
         {activeTab === "inventory" && <MyStuffTab user={user} onNavigate={setActiveTab} onStartOnboarding={() => setShowOnboarding(true)} />}
         {activeTab === "ai" && <AIMoveAssist user={user} />}
