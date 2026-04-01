@@ -17,7 +17,7 @@ export default function BrokerDashboard() {
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [addStep, setAddStep] = useState(null);
-  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", close_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] });
+  const [form, setForm] = useState({ firstName: "", lastName: "", close_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] });
   const [pendingClient, setPendingClient] = useState(null);
   const [paying, setPaying] = useState(false);
   const [doneData, setDoneData] = useState(null);
@@ -54,7 +54,7 @@ export default function BrokerDashboard() {
 
   const resetAdd = () => {
     setAddStep(null);
-    setForm({ firstName: "", lastName: "", email: "", close_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] });
+    setForm({ firstName: "", lastName: "", close_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] });
     setPendingClient(null);
     setDoneData(null);
   };
@@ -63,7 +63,7 @@ export default function BrokerDashboard() {
     const code = Math.random().toString(36).substring(2, 10);
     const clientName = `${form.firstName} ${form.lastName}`;
     const newClient = await base44.entities.Client.create({
-      agent_id: agent.id, user_email: form.email, user_name: clientName,
+      agent_id: agent.id, user_name: clientName,
       close_date: form.close_date, invitation_code: code, status: "invited",
       invited_date: new Date().toISOString(), billing_status: "pending",
     });
@@ -114,7 +114,7 @@ export default function BrokerDashboard() {
   };
 
 
-  const canSave = form.firstName.trim() && form.lastName.trim() && form.email.trim() && form.close_date;
+  const canSave = form.firstName.trim() && form.lastName.trim() && form.close_date;
 
   if (loading) return (
     <div className="min-h-screen bg-blue-50 flex items-center justify-center">
@@ -314,7 +314,7 @@ export default function BrokerDashboard() {
                       </div>
                     ))}
                   </div>
-                  {[{ label: "Email", key: "email", type: "email" }, { label: "Est. Close / Purchase Date", key: "close_date", type: "date" }].map(f => (
+                  {[{ label: "Est. Close / Purchase Date", key: "close_date", type: "date" }].map(f => (
                     <div key={f.key}>
                       <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wide block mb-1">{f.label}</label>
                       <input type={f.type} value={form[f.key]} onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))}
