@@ -312,8 +312,7 @@ export default function Register() {
               onChange={(e) => { setStreetAddress(e.target.value); fetchAddressSuggestions(e.target.value); }}
               onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
               onFocus={() => addressSuggestions.length > 0 && setShowSuggestions(true)}
-              disabled={detailsSaved}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10 bg-white disabled:bg-slate-50 disabled:text-slate-500"
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10 bg-white"
             />
             {showSuggestions && addressSuggestions.length > 0 && (
               <div className="absolute z-50 left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden">
@@ -343,7 +342,6 @@ export default function Register() {
                 value={city}
                 autoComplete="address-level2"
                 onChange={(e) => { setCity(e.target.value); }}
-                disabled={detailsSaved}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10 bg-white disabled:bg-slate-50 disabled:text-slate-500"
               />
             </div>
@@ -357,7 +355,6 @@ export default function Register() {
                 inputMode="numeric"
                 maxLength={10}
                 onChange={(e) => { setZipCode(e.target.value.replace(/[^0-9-]/g,'')); }}
-                disabled={detailsSaved}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10 bg-white disabled:bg-slate-50 disabled:text-slate-500"
               />
             </div>
@@ -368,7 +365,6 @@ export default function Register() {
               type="date"
               value={moveDate}
               onChange={(e) => { setMoveDate(e.target.value); }}
-              disabled={detailsSaved}
               className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10 bg-white disabled:bg-slate-50 disabled:text-slate-500"
             />
           </div>
@@ -379,7 +375,6 @@ export default function Register() {
               placeholder="1234567890"
               value={phoneNumber}
               onChange={(e) => { handlePhoneChange(e.target.value); }}
-              disabled={detailsSaved}
               className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10 bg-white disabled:bg-slate-50 disabled:text-slate-500"
             />
             <p className="text-xs text-slate-400 mt-1">{phoneNumber.length}/10 digits</p>

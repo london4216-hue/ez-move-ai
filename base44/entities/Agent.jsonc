@@ -1,0 +1,59 @@
+{
+  "name": "Agent",
+  "type": "object",
+  "properties": {
+    "company_name": {
+      "type": "string",
+      "description": "Real estate company/brokerage name"
+    },
+    "account_type": {
+      "type": "string",
+      "enum": [
+        "agent",
+        "broker_firm"
+      ],
+      "default": "agent",
+      "description": "Whether this is a single agent or a broker firm with multiple agents"
+    },
+    "agents_count": {
+      "type": "number",
+      "default": 1,
+      "description": "Number of agents under this account (for broker firms)"
+    },
+    "contact_name": {
+      "type": "string",
+      "description": "Primary contact person name"
+    },
+    "license_number": {
+      "type": "string",
+      "description": "Real estate license number"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Agent contact phone"
+    },
+    "clients_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of active clients"
+    },
+    "total_charged": {
+      "type": "number",
+      "default": 0,
+      "description": "Total amount charged ($40 per client)"
+    },
+    "subscription_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "paused",
+        "cancelled"
+      ],
+      "default": "active",
+      "description": "Agent subscription status"
+    }
+  },
+  "required": [
+    "company_name"
+  ]
+}
