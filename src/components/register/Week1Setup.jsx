@@ -7,7 +7,7 @@ import { WEEK1_TASKS } from "@/lib/week1Tasks";
 
 // Week1Setup — guided, resumable onboarding through Week 1 tasks
 // Tasks with ai_search_query MUST complete AI sub-task inline before proceeding
-export default function Week1Setup({ userId, userAddress, onComplete, onSaveExit }) {
+export default function Week1Setup({ userId, userAddress, onComplete, onSaveExit, hideButtons }) {
   const navigate = useNavigate();
   const storageKey = `week1_setup_${userId}`;
 
@@ -226,22 +226,24 @@ export default function Week1Setup({ userId, userAddress, onComplete, onSaveExit
       )}
 
       {/* Bottom nav */}
-      <div className="flex gap-2">
-        {stepIdx > 0 || aiPhase ? (
+      {!hideButtons && (
+        <div className="flex gap-2">
+          {stepIdx > 0 || aiPhase ? (
+            <button
+              onClick={handleBack}
+              className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm flex items-center justify-center gap-1"
+            >
+              <ChevronLeft className="w-4 h-4" /> Back
+            </button>
+          ) : null}
           <button
-            onClick={handleBack}
-            className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm flex items-center justify-center gap-1"
+            onClick={handleSaveExit}
+            className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-500 font-bold text-sm flex items-center justify-center gap-1 hover:bg-slate-200 transition-colors"
           >
-            <ChevronLeft className="w-4 h-4" /> Back
+            <Save className="w-3.5 h-3.5" /> Save & Exit
           </button>
-        ) : null}
-        <button
-          onClick={handleSaveExit}
-          className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-500 font-bold text-sm flex items-center justify-center gap-1 hover:bg-slate-200 transition-colors"
-        >
-          <Save className="w-3.5 h-3.5" /> Save & Exit
-        </button>
-      </div>
+        </div>
+      )}
     </div>
   );
 }
