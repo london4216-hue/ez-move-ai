@@ -88,13 +88,13 @@ export default function Register() {
 
 
   const handleVerify = async () => {
-    const code = inviteCode;
     if (!streetAddress.trim() || !city.trim() || !zipCode.trim()) {
       setError("Please fill in your address");
       return;
     }
     setLoading(true);
     setError("");
+    const code = inviteCode;
     try {
       const currentUser = await base44.auth.me();
       const fullAddress = `${streetAddress}, ${city}, ${zipCode}`;
@@ -125,6 +125,7 @@ export default function Register() {
         });
       }
       setLoading(false);
+      localStorage.removeItem('register_progress');
       navigate(createPageUrl("OnboardingWeek1"));
     } catch (e) {
       console.error(e);
