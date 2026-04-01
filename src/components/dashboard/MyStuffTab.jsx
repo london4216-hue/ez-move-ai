@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { ChevronRight, Mail, Loader2, CheckCircle2, Trash2, Plus, ArrowRight, Package, DollarSign, LayoutList } from "lucide-react";
+import { ChevronRight, Mail, Loader2, CheckCircle2, Trash2, Plus, ArrowRight, Package, DollarSign, LayoutList, CalendarDays, Phone } from "lucide-react";
 
 const LISTS = [
   { key: "move",   label: "Move List",  emoji: "📦", color: "bg-blue-500",    light: "bg-blue-50 border-blue-200",       text: "text-blue-700",    desc: "Things you're taking with you" },
@@ -196,6 +196,80 @@ function SummaryScreen({ lists, setLists, onBack, user, saveEstimates }) {
   );
 }
 
+function ServicesDashboard({ user }) {
+  const [contacts, setContacts] = useState([]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    base44.entities.Contact.filter({ user_id: user.id }).then(data => {
+      const withData = data.filter(c => c.service_date || c.cost_of_service > 0);
+      withData.sort((a, b) => (a.service_date || "").localeCompare(b.service_date || ""));
+      setContacts(withData);
+    });
+  }, [user?.id]);
+
+  if (contacts.length === 0) return null;
+
+  const totalCost = contacts.reduce((sum, c) => sum + (c.cost_of_service || 0), 0);
+  const today = new Date().toISOString().split("T")[0];
+  const upcoming = contacts.filter(c => c.service_date && c.service_date >= today);
+
+  return (
+    <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+      <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+        <h3 className="text-sm font-bold text-slate-800">📅 Services Dashboard</h3>
+        {totalCost > 0 && (
+          <div className="flex items-center gap-1 bg-emerald-50 border border-emerald-200 rounded-xl px-2.5 py-1">
+            <DollarSign className="w-3 h-3 text-emerald-600" />
+            <span className="text-xs font-black text-emerald-700">${totalCost.toLocaleString()} total est.</span>
+          </div>
+        )}
+      </div>
+      <div className="divide-y divide-slate-50">
+        {contacts.map(c => {
+          const isPast = c.service_date && c.service_date < today;
+          return (
+            <div key={c.id} className="px-4 py-3 flex items-start gap-3">
+              <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-[10px] font-bold text-orange-600">{(c.avatar_initials || c.name?.[0] || "?").slice(0,2)}</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="text-xs font-bold text-slate-800">{c.name}</p>
+                  <span className="text-[9px] font-bold text-orange-500 bg-orange-50 px-1.5 py-0.5 rounded-full">{c.role}</span>
+                </div>
+                <div className="flex items-center gap-3 mt-1 flex-wrap">
+                  {c.service_date && (
+                    <span className={`text-[10px] font-bold flex items-center gap-1 ${isPast ? "text-slate-400" : "text-blue-600"}`}>
+                      <CalendarDays className="w-3 h-3" />{c.service_date}{isPast ? " (past)" : ""}
+                    </span>
+                  )}
+                  {c.cost_of_service > 0 && (
+                    <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-0.5">
+                      <DollarSign className="w-3 h-3" />{Number(c.cost_of_service).toLocaleString()}
+                    </span>
+                  )}
+                  {c.phone && (
+                    <a href={`tel:${c.phone}`} className="text-[10px] font-bold text-slate-500 flex items-center gap-0.5 hover:text-orange-500 transition-colors">
+                      <Phone className="w-3 h-3" />{c.phone}
+                    </a>
+                  )}
+                </div>
+                {c.notes && <p className="text-[10px] text-slate-400 mt-1 leading-relaxed">{c.notes}</p>}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      {upcoming.length > 0 && (
+        <div className="px-4 py-2 bg-blue-50 border-t border-blue-100">
+          <p className="text-[10px] font-bold text-blue-600">{upcoming.length} upcoming service{upcoming.length > 1 ? "s" : ""} scheduled</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function MyStuffTab({ user, onStartOnboarding }) {
   const [activeList, setActiveList] = useState(null);
   const [lists, setLists] = useState(() => {
@@ -270,6 +344,7 @@ export default function MyStuffTab({ user, onStartOnboarding }) {
   if (!activeList) {
     return (
       <div className="space-y-3">
+        <ServicesDashboard user={user} />
         <div className="bg-white rounded-2xl px-4 py-4 border border-slate-100">
           <div className="flex items-center justify-between">
             <div>

@@ -1,0 +1,46 @@
+{
+  "name": "Contact",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "role": {
+      "type": "string",
+      "description": "e.g. Broker, Agent, Mover, Estate Sale"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "avatar_initials": {
+      "type": "string"
+    },
+    "color": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Free text notes about this contact / service"
+    },
+    "cost_of_service": {
+      "type": "number",
+      "description": "Estimated cost of this service in dollars"
+    },
+    "service_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Scheduled date of service"
+    }
+  },
+  "required": [
+    "user_id",
+    "name",
+    "role"
+  ]
+}
