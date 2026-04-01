@@ -145,10 +145,10 @@ export default function Dashboard() {
               <button
                 key={id}
                 onClick={() => setActiveTab(id)}
-                className={`flex-1 flex flex-col items-center gap-1 py-1.5 rounded-xl transition-all active:scale-95 ${active ? "text-orange-500" : "text-slate-400"}`}
+                className={`flex-1 flex flex-col items-center gap-1 py-1.5 rounded-xl transition-all active:scale-95 ${active ? 'text-orange-500' : 'text-slate-400'}`}
               >
-                <Icon className={`w-5 h-5 ${active ? "stroke-[2.5]" : ""}`} />
-                <span className={`text-[10px] font-bold leading-none ${active ? "text-orange-500" : "text-slate-400"}`}>{label}</span>
+                <Icon className={active ? 'w-5 h-5 stroke-[2.5]' : 'w-5 h-5'} />
+                <span className={active ? 'text-[10px] font-bold leading-none text-orange-500' : 'text-[10px] font-bold leading-none text-slate-400'}>{label}</span>
               </button>
             );
           })}
