@@ -9,6 +9,7 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
   const [selectedContact, setSelectedContact] = useState(null);
   const [expanded, setExpanded] = useState(false);
   const [prefilledRole, setPrefilledRole] = useState(null);
+  const [criticalExpanded, setCriticalExpanded] = useState(false);
   const [newContact, setNewContact] = useState({ name: "", role: "", phone: "", email: "", notes: "", cost_of_service: "", service_date: "" });
 
   useEffect(() => {
@@ -131,9 +132,16 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
           <>
             {/* Missing Contacts Expanded */}
             {missingContacts.length > 0 && (
-              <div className="px-4 py-3 bg-amber-50 border-b border-amber-100">
-                <p className="text-xs font-bold text-amber-700 uppercase tracking-wide mb-2.5">⚠️ Critical Contacts for Buying/Selling</p>
-                <div className="space-y-1.5">
+              <div className="border-b border-amber-100 bg-amber-50">
+                <button
+                  onClick={() => setCriticalExpanded(!criticalExpanded)}
+                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-amber-100 transition-colors"
+                >
+                  <p className="text-xs font-bold text-amber-700 uppercase tracking-wide">⚠️ Critical Contacts ({missingContacts.length})</p>
+                  {criticalExpanded ? <ChevronUp className="w-4 h-4 text-amber-600" /> : <ChevronDown className="w-4 h-4 text-amber-600" />}
+                </button>
+                {criticalExpanded && (
+                  <div className="px-4 pb-3 pt-1 space-y-1.5">
                   {missingContacts.map(rc => (
                     <div key={rc.label} className="flex items-center justify-between bg-white rounded-lg px-3 py-2 border border-amber-200">
                       <div className="flex items-center gap-2">
@@ -166,7 +174,8 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
                       </div>
                     </div>
                   ))}
-                </div>
+                  </div>
+                )}
               </div>
             )}
 
