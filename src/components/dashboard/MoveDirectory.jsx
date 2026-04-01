@@ -175,9 +175,12 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
                         <span className="text-[10px] font-bold text-orange-600">{contact.avatar_initials}</span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-bold text-slate-800 truncate">{contact.name}</p>
+                        <div className="flex items-center gap-2">
+                          <p className={`text-xs font-bold ${contact.not_needed ? "text-slate-400 line-through" : "text-slate-800"} truncate`}>{contact.name}</p>
+                          {contact.not_needed && <span className="text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded flex-shrink-0">N/A</span>}
+                        </div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <p className="text-[10px] text-orange-500 font-semibold">{contact.role}</p>
+                          <p className={`text-[10px] font-semibold ${contact.not_needed ? "text-slate-300" : "text-orange-500"}`}>{contact.role}</p>
                           {contact.service_date && (
                             <span className="text-[9px] text-blue-500 font-bold flex items-center gap-0.5">
                               <CalendarDays className="w-2.5 h-2.5" />{contact.service_date}
@@ -192,6 +195,16 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
                       </div>
                     </button>
                     <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={() => {
+                          base44.entities.Contact.update(contact.id, { not_needed: !contact.not_needed });
+                          setContacts(contacts.map(c => c.id === contact.id ? { ...c, not_needed: !c.not_needed } : c));
+                        }}
+                        className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors ${contact.not_needed ? "bg-slate-100" : "bg-amber-50 hover:bg-amber-100"}`}
+                        title={contact.not_needed ? "Mark as needed" : "Mark as N/A"}
+                      >
+                        <span className="text-[10px] font-bold text-amber-600">—</span>
+                      </button>
                       <button
                         onClick={() => { setSelectedContact({ ...contact, cost_of_service: contact.cost_of_service || "" }); setShowEditModal(true); }}
                         className="w-7 h-7 rounded-full bg-blue-50 flex items-center justify-center hover:bg-blue-100 transition-colors"
