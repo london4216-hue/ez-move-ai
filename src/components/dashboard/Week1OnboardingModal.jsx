@@ -62,6 +62,7 @@ export default function Week1OnboardingModal({ user, onDone }) {
   const [insights, setInsights]         = useState(saved.insights ?? null);
   const [loadingInsights, setLoadingInsights] = useState(false);
   const [moversSaved, setMoversSaved]   = useState(false);
+  const [selectedMover, setSelectedMover] = useState(saved.selectedMover ?? null);
   const [selectedEstate, setSelectedEstate] = useState(saved.selectedEstate ?? null);  // provider name
 
   const step = STEPS[stepIdx];
@@ -141,6 +142,23 @@ Be realistic and concise.`,
     persist({ insights: res });
   };
 
+  const selectMoverProvider = async (p) => {
+    setSelectedMover(p.name);
+    persist({ selectedMover: p.name });
+    if (user?.id) {
+      await base44.entities.Contact.create({
+        user_id: user.id,
+        name: p.name,
+        role: "Mover",
+        phone: p.phone || "",
+        email: "",
+        avatar_initials: p.name?.[0] || "M",
+        color: "#f97316",
+      }).catch(() => {});
+      setMoversSaved(true);
+    }
+  };
+
   // ── Estate / Movers ─────────────────────────────────────────────────────────
   const handleEstateAnswer = async (answer) => {
     setNeedsEstate(answer);
@@ -178,22 +196,7 @@ Be realistic and concise.`,
       const found = await findProviders("local moving companies", user?.home_address);
       setProviders(found);
       setLoadingAI(false);
-      // Save movers as contacts
-      if (found.length > 0 && user?.id) {
-        const savePromises = found.map(p =>
-          base44.entities.Contact.create({
-            user_id: user.id,
-            name: p.name,
-            role: "Mover",
-            phone: p.phone || "",
-            email: "",
-            avatar_initials: p.name?.[0] || "M",
-            color: "#f97316",
-          }).catch(() => {})
-        );
-        await Promise.all(savePromises);
-        setMoversSaved(true);
-      }
+      // Save movers as contacts handled via selectMoverProvider
     } else {
       goTo(stepIdx + 1, { needsMover: answer });
     }
@@ -541,20 +544,37 @@ Be realistic and concise.`,
               <div>
                 {providers.length > 0 && (
                   <div className="space-y-2 mb-3 text-left">
+                    <p className="text-xs font-bold text-slate-500 mb-2 text-center">Select one to save to your contacts:</p>
                     {providers.map((p, i) => (
-                      <div key={i} className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
-                        <p className="font-bold text-slate-800 text-sm">{p.name}</p>
-                        {p.description && <p className="text-xs text-slate-500 mt-0.5">{p.description}</p>}
-                        {p.phone && <a href={`tel:${p.phone}`} className="text-xs font-bold text-orange-500 flex items-center gap-1 mt-1"><Phone className="w-3 h-3" />{p.phone}</a>}
+                      <div key={i} className={`bg-white border rounded-2xl p-4 shadow-sm transition-all ${selectedMover === p.name ? "border-orange-400 ring-1 ring-orange-300" : "border-slate-100"}`}>
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1">
+                            <p className="font-bold text-slate-800 text-sm">{p.name}</p>
+                            {p.description && <p className="text-xs text-slate-500 mt-0.5">{p.description}</p>}
+                            {p.phone && <a href={`tel:${p.phone}`} className="text-xs font-bold text-orange-500 flex items-center gap-1 mt-1"><Phone className="w-3 h-3" />{p.phone}</a>}
+                          </div>
+                          <button
+                            onClick={() => selectMoverProvider(p)}
+                            className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl text-[11px] font-bold border transition-all ${
+                              selectedMover === p.name
+                                ? "bg-orange-500 text-white border-orange-500"
+                                : "bg-white text-orange-600 border-orange-300 hover:bg-orange-50"
+                            }`}>
+                            {selectedMover === p.name ? <><CheckCircle2 className="w-3 h-3" /> Selected</> : "Select"}
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
                 )}
-                {moversSaved && (
-                  <div className="bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-2.5 mb-4 flex items-center gap-2">
+                {moversSaved && selectedMover && (
+                  <div className="bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-2.5 mb-3 flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                    <p className="text-xs font-bold text-emerald-700">Movers saved to your dashboard contacts!</p>
+                    <p className="text-xs font-bold text-emerald-700">{selectedMover} saved to your dashboard contacts!</p>
                   </div>
+                )}
+                {providers.length > 0 && !selectedMover && (
+                  <p className="text-[11px] text-amber-600 font-semibold text-center mb-2">Please select a mover to continue</p>
                 )}
                 {needsMover === false && (
                   <div className="bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-3 mb-4">
@@ -565,7 +585,7 @@ Be realistic and concise.`,
                   <button onClick={() => { setNeedsMover(null); setProviders([]); setMoversSaved(false); }} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
                     <ChevronLeft className="w-4 h-4" />
                   </button>
-                  <button onClick={() => goTo(5)} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
+                  <button onClick={() => goTo(5)} disabled={needsMover && providers.length > 0 && !selectedMover} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
                     Continue <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
