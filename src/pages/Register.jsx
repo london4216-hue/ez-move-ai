@@ -60,36 +60,31 @@ export default function Register() {
     // Extract invite code from URL
     const urlParams = new URLSearchParams(window.location.search);
     const codeFromUrl = urlParams.get('code');
-    if (codeFromUrl) setInviteCode(codeFromUrl);
-    
-    // Restore saved progress
-    const savedProgress = localStorage.getItem('register_progress');
-    if (savedProgress) {
-      try {
-        const state = JSON.parse(savedProgress);
-        setMoveDate(state.moveDate || "");
-        setStreetAddress(state.streetAddress || "");
-        setCity(state.city || "");
-        setZipCode(state.zipCode || "");
-      } catch (e) {}
-    }
-
-
-
-    // Load client close date from URL code
-    const urlParams2 = new URLSearchParams(window.location.search);
-    const codeParam = urlParams2.get('code');
-    if (codeParam) {
-      base44.entities.Client.filter({ invitation_code: codeParam }).then(clients => {
+    if (codeFromUrl) {
+      setInviteCode(codeFromUrl);
+      // Load client close date from URL code
+      base44.entities.Client.filter({ invitation_code: codeFromUrl }).then(clients => {
         if (clients.length > 0 && clients[0].close_date) {
-          setMoveDate(prev => prev || clients[0].close_date);
+          setMoveDate(clients[0].close_date);
         }
       }).catch(() => {});
+    } else {
+      // Only restore saved progress if NO invite code in URL
+      const savedProgress = localStorage.getItem('register_progress');
+      if (savedProgress) {
+        try {
+          const state = JSON.parse(savedProgress);
+          setMoveDate(state.moveDate || "");
+          setStreetAddress(state.streetAddress || "");
+          setCity(state.city || "");
+          setZipCode(state.zipCode || "");
+        } catch (e) {}
+      }
     }
   }, []);
 
   const fetchAddressSuggestions = async (query) => {
-    if (query.length < 4) { setAddressSuggestions([]); return; }
+    if (query.length < 3) { setAddressSuggestions([]); return; }
     try {
       const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5&countrycodes=us`);
       const data = await res.json();
@@ -133,7 +128,6 @@ export default function Register() {
         estimated_close_date: clients.length > 0 ? clients[0].close_date : moveDate,
         registration_date: new Date().toISOString().split("T")[0],
       });
-      setLoading(false);
       localStorage.removeItem('register_progress');
       setShowOnboarding(true);
     } catch (e) {
@@ -141,7 +135,7 @@ export default function Register() {
       setError("Something went wrong. Please try again.");
       setLoading(false);
     }
-  };
+  }
 
   if (showOnboarding) {
     return (
