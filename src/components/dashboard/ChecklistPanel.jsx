@@ -236,8 +236,17 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
   };
 
   const handleRemove = (id) => {
-    setRemovedIds(s => { const n = new Set(s); n.add(id); persist(completedIds, n, customItems); return n; });
+    // Instead of permanently removing, mark as skipped in userSelections
+    const updated = { ...userSelections, [id]: "skip" };
+    setUserSelections(updated);
+    localStorage.setItem(`user_selections_${user.id}`, JSON.stringify(updated));
     setCompletedIds(s => { const n = new Set(s); n.delete(id); return n; });
+  };
+
+  const handleRestore = (id) => {
+    const updated = { ...userSelections, [id]: "yes" };
+    setUserSelections(updated);
+    localStorage.setItem(`user_selections_${user.id}`, JSON.stringify(updated));
   };
 
   const handleAddTask = () => {
@@ -467,6 +476,9 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
 
                 {isExpanded && (
                   <div className="p-2 space-y-1.5 border-t border-slate-100">
+                    {wItems.length === 0 && (
+                      <p className="text-xs text-slate-400 text-center py-2">No tasks in plan. Add some below ↓</p>
+                    )}
                     {wItems.map(item => (
                       <ChecklistItemCard
                         key={item.id}
@@ -484,6 +496,37 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
                         allItems={Object.values(weeksData).flatMap(w => w.items)}
                       />
                     ))}
+
+                    {/* Skipped / not-in-plan tasks — restore anytime */}
+                    {(() => {
+                      const skippedItems = (wData?.items || []).filter(i =>
+                        !wItems.find(w => w.id === i.id)
+                      );
+                      if (skippedItems.length === 0) return null;
+                      return (
+                        <details className="mt-1">
+                          <summary className="text-[10px] font-bold text-slate-400 uppercase tracking-wide cursor-pointer hover:text-slate-600 transition-colors px-1 py-1 select-none">
+                            + {skippedItems.length} task{skippedItems.length > 1 ? 's' : ''} not in plan — tap to restore
+                          </summary>
+                          <div className="mt-1 space-y-1">
+                            {skippedItems.map(item => (
+                              <div key={item.id} className="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50 border border-dashed border-slate-200 gap-2">
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-xs font-semibold text-slate-400 truncate">{item.title}</p>
+                                  {item.description && <p className="text-[10px] text-slate-300 truncate">{item.description}</p>}
+                                </div>
+                                <button
+                                  onClick={() => handleRestore(item.id)}
+                                  className="flex-shrink-0 text-[10px] font-bold text-orange-500 bg-orange-50 border border-orange-200 px-2.5 py-1 rounded-lg hover:bg-orange-100 transition-colors whitespace-nowrap"
+                                >
+                                  + Add to Plan
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </details>
+                      );
+                    })()}
                   </div>
                 )}
               </div>
