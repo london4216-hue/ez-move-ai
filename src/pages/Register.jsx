@@ -125,7 +125,7 @@ export default function Register() {
         });
       }
       setLoading(false);
-      setShowOnboarding(true);
+      navigate(createPageUrl("OnboardingWeek1"));
     } catch (e) {
       console.error(e);
       setError("Something went wrong. Please try again.");

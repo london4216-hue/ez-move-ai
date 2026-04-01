@@ -9,6 +9,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import AgentOnboarding from './pages/AgentOnboarding';
 import SuperAdmin from './pages/SuperAdmin';
 import BrokerDashboard from './pages/BrokerDashboard';
+import OnboardingWeek1 from './pages/OnboardingWeek1';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -61,6 +62,7 @@ const AuthenticatedApp = () => {
         />
       ))}
 
+      <Route path="/OnboardingWeek1" element={<OnboardingWeek1 />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
