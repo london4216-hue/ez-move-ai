@@ -10,55 +10,44 @@ import UpcomingEvents from "./UpcomingEvents";
 
 const BASE_WEEKS = {
   1: {
-    title: "Week 1 — Foundation",
-    subtitle: "Invite day! Get clarity and line up the big moving pieces.",
-    items: [
-      { id: "w1-1", title: "Confirm what stays vs. goes", description: "Furniture, appliances, personal items", ai_search_query: null, inventory_walkthrough: true },
-      { id: "w1-2", title: "Start donation / sell pile", description: "What's worth selling vs. donating", ai_search_query: null },
-      { id: "w1-3", title: "Estate sale decision", description: "Find local estate sale professionals", ai_search_query: "top rated estate sale professionals near me" },
-      { id: "w1-4", title: "Request mover quotes", description: "Compare 3 top-rated movers side by side", ai_search_query: "top rated local movers near me" },
-    ]
-  },
-  2: {
     title: "Week 2 — Clearing & Logistics",
     subtitle: "Reduce clutter and lock in logistics.",
     items: [
-      { id: "w2-1", title: "Finalize mover", description: "Confirm date aligned with closing timeline", ai_search_query: null, prerequisites: ["w1-1", "w1-4"] },
-      { id: "w2-2", title: "Schedule estate sale", description: "Suggested date based on close date", ai_search_query: null },
-      { id: "w2-3", title: "Schedule a cleaner", description: "Find top-rated cleaners for move prep", ai_search_query: "top rated professional house cleaners near me" },
-      { id: "w2-4", title: "Order packing supplies", description: "Boxes, labels, tape, wardrobe boxes", ai_search_query: null },
-      { id: "w2-5", title: "Begin packing non-essentials", description: "Seasonal items, storage rooms, decor", ai_search_query: null },
-      { id: "w2-6", title: "Utility planning", description: "Start list of utilities to transfer/cancel", ai_search_query: null },
+      { id: "w2-1", title: "Mover confirmed?", description: "Did you confirm the mover date aligned with closing?", ai_search_query: null, task_type: "question" },
+      { id: "w2-2", title: "Schedule an estate sale", description: "Find top-rated estate sale professionals", ai_search_query: "top rated estate sale professionals near me", task_type: "service" },
+      { id: "w2-3", title: "Schedule a cleaner", description: "Find top-rated cleaners for move prep", ai_search_query: "top rated professional house cleaners near me", task_type: "service" },
+      { id: "w2-4", title: "Packing supplies ordered?", description: "Did you order boxes, labels, tape, and wardrobe boxes?", ai_search_query: null, task_type: "question" },
+      { id: "w2-5", title: "Started packing?", description: "Have you begun packing non-essentials (seasonal items, storage, decor)?", ai_search_query: null, task_type: "question" },
+      { id: "w2-6", title: "Utility list started?", description: "Did you start a list of utilities to transfer/cancel?", ai_search_query: null, task_type: "question" },
     ]
   },
   3: {
     title: "Week 3 — Home Prep",
     subtitle: "Make the house buyer-ready with minimal effort.",
     items: [
-      { id: "w3-1", title: "Patch & repair checklist", description: "Nail holes, touch-ups, minor fixes", ai_search_query: null },
-      { id: "w3-2", title: "Painting (if needed)", description: "Find top-rated painters, neutral color guidance", ai_search_query: "top rated painters near me" },
-      { id: "w3-3", title: "Deep cleaning", description: "Kitchen, baths, windows, appliances", ai_search_query: "professional house cleaning near me" },
-      { id: "w3-4", title: "Junk removal", description: "Same-day or next-day local haulers", ai_search_query: "local junk removal same day near me" },
+      { id: "w3-1", title: "Repairs completed?", description: "Did you patch nail holes and complete minor touch-ups?", ai_search_query: null, task_type: "question" },
+      { id: "w3-2", title: "Schedule a painter", description: "Find top-rated painters for neutral color guidance", ai_search_query: "top rated painters near me", task_type: "service" },
+      { id: "w3-3", title: "Schedule deep cleaning", description: "Find professional cleaners for kitchen, baths, windows", ai_search_query: "professional house cleaning near me", task_type: "service" },
+      { id: "w3-4", title: "Schedule junk removal", description: "Find same-day or next-day local haulers", ai_search_query: "local junk removal same day near me", task_type: "service" },
     ]
   },
   4: {
     title: "Week 4 — Final Move & Close",
     subtitle: "Zero chaos. Zero surprises.",
     items: [
-      { id: "w4-1", title: "Final packing", description: "Daily mini-checklists so nothing piles up", ai_search_query: null },
-      { id: "w4-2", title: "Move-out day guidance", description: "What stays, what leaves, final walkthrough prep", ai_search_query: null },
-      { id: "w4-3", title: "Utility transfers", description: "Electric, water, gas, internet", ai_search_query: null },
-      { id: "w4-5", title: "Cancel security system", description: "Contact provider to terminate or transfer service", ai_search_query: null },
-      { id: "w4-6", title: "Cancel electric service", description: "Schedule final meter reading and disconnect date", ai_search_query: null },
-      { id: "w4-7", title: "Cancel gas service", description: "Arrange final billing and service end date", ai_search_query: null },
-      { id: "w4-8", title: "Cancel internet/cable", description: "Return equipment and close account", ai_search_query: null },
-      { id: "w4-9", title: "Cancel homeowners insurance", description: "Notify insurance company of sale date", ai_search_query: null },
-      { id: "w4-10", title: "Forward mail", description: "Set up USPS mail forwarding to new address", ai_search_query: null },
-      { id: "w4-11", title: "Cancel lawn/pool service", description: "End recurring maintenance contracts", ai_search_query: null },
-      { id: "w4-12", title: "Return garage/gate remotes", description: "Gather all access devices for new owner", ai_search_query: null },
-      { id: "w4-13", title: "Leave manuals & warranties", description: "Organize appliance docs for buyer", ai_search_query: null },
-      { id: "w4-4", title: "Final clean", description: "Quick refresh before buyer walkthrough", ai_search_query: "professional house cleaning near me" },
-      { id: "w4-14", title: "Closing day checklist", description: "Keys, remotes, final walkthrough ✅", ai_search_query: null },
+      { id: "w4-1", title: "Final packing done?", description: "Have you completed all final packing with daily mini-checklists?", ai_search_query: null, task_type: "question" },
+      { id: "w4-2", title: "Move day prepared?", description: "Did you prepare what stays, what leaves, and final walkthrough?", ai_search_query: null, task_type: "question" },
+      { id: "w4-3", title: "Utilities transferred?", description: "Did you arrange electric, water, gas, and internet transfers?", ai_search_query: null, task_type: "question" },
+      { id: "w4-5", title: "Security system cancelled?", description: "Did you terminate or transfer your security service?", ai_search_query: null, task_type: "question" },
+      { id: "w4-6", title: "Electric cancelled?", description: "Did you schedule final meter reading and disconnect?", ai_search_query: null, task_type: "question" },
+      { id: "w4-7", title: "Gas cancelled?", description: "Did you arrange final billing and service end date?", ai_search_query: null, task_type: "question" },
+      { id: "w4-8", title: "Internet/cable cancelled?", description: "Did you return equipment and close your account?", ai_search_query: null, task_type: "question" },
+      { id: "w4-9", title: "Insurance notified?", description: "Did you notify your insurance company of the sale date?", ai_search_query: null, task_type: "question" },
+      { id: "w4-10", title: "Mail forwarded?", description: "Did you set up USPS mail forwarding to your new address?", ai_search_query: null, task_type: "question" },
+      { id: "w4-11", title: "Lawn/pool service cancelled?", description: "Did you end any recurring maintenance contracts?", ai_search_query: null, task_type: "question" },
+      { id: "w4-12", title: "Remotes returned?", description: "Did you gather all garage/gate remotes for the new owner?", ai_search_query: null, task_type: "question" },
+      { id: "w4-13", title: "Manuals & warranties left?", description: "Did you organize and leave appliance documentation?", ai_search_query: null, task_type: "question" },
+      { id: "w4-14", title: "Closing checklist done?", description: "Did you complete the final walkthrough with keys and remotes?", ai_search_query: null, task_type: "question" },
     ]
   }
 };
