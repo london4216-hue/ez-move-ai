@@ -89,11 +89,6 @@ export default function Dashboard() {
           </div>
 
           <div className="flex items-center gap-1.5">
-            {closeStatus && (
-              <div className={`${closeStatus.color} rounded-full px-2.5 py-1`}>
-                <span className="text-white text-[10px] font-bold">{closeStatus.label}</span>
-              </div>
-            )}
             <button
               onClick={() => base44.auth.logout(createPageUrl("Register"))}
               className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-colors"
