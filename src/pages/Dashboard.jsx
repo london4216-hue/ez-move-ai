@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
@@ -60,96 +61,96 @@ export default function Dashboard() {
         <Week1OnboardingModal user={user} onDone={handleOnboardingDone} />
       ) : (
         <>
-      {/* Header */}
-      <div className="bg-white border-b border-slate-200 px-4 pt-2 pb-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => {
-                if (!confirm("Reset demo? This clears all checklist progress and onboarding data.")) return;
-                const keys = Object.keys(localStorage).filter(k => k.includes(user?.id) || k === 'register_progress');
-                keys.forEach(k => localStorage.removeItem(k));
-                window.location.reload();
-              }}
-              className="flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 hover:bg-red-50 hover:text-red-500 text-slate-400 text-[9px] font-bold transition-colors border border-slate-200 hover:border-red-200"
-            >
-              <RotateCcw className="w-2.5 h-2.5" />
-              Demo Reset
-            </button>
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-900/30">
-              <span className="text-white text-[10px] font-black tracking-tight">EZ</span>
-            </div>
-            <div>
-              <p className="text-slate-900 font-bold text-sm leading-tight">
-                EZ Move <span className="text-orange-500">AI</span>
-              </p>
-              {user?.full_name && (
-                <p className="text-slate-400 text-[10px] leading-tight">Hi, {user.full_name.split(" ")[0]}</p>
-              )}
-            </div>
-          </div>
+          {/* Header */}
+          <div className="bg-white border-b border-slate-200 px-4 pt-2 pb-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    if (!confirm("Reset demo? This clears all checklist progress and onboarding data.")) return;
+                    const keys = Object.keys(localStorage).filter(k => k.includes(user?.id) || k === 'register_progress');
+                    keys.forEach(k => localStorage.removeItem(k));
+                    window.location.reload();
+                  }}
+                  className="flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 hover:bg-red-50 hover:text-red-500 text-slate-400 text-[9px] font-bold transition-colors border border-slate-200 hover:border-red-200"
+                >
+                  <RotateCcw className="w-2.5 h-2.5" />
+                  Demo Reset
+                </button>
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-900/30">
+                  <span className="text-white text-[10px] font-black tracking-tight">EZ</span>
+                </div>
+                <div>
+                  <p className="text-slate-900 font-bold text-sm leading-tight">
+                    EZ Move <span className="text-orange-500">AI</span>
+                  </p>
+                  {user?.full_name && (
+                    <p className="text-slate-400 text-[10px] leading-tight">Hi, {user.full_name.split(" ")[0]}</p>
+                  )}
+                </div>
+              </div>
 
-          <div className="flex items-center gap-1.5">
-            {closeStatus && (
-              <div className={`${closeStatus.color} rounded-full px-2.5 py-1`}>
-                <span className="text-white text-[10px] font-bold">{closeStatus.label}</span>
+              <div className="flex items-center gap-1.5">
+                {closeStatus && (
+                  <div className={`${closeStatus.color} rounded-full px-2.5 py-1`}>
+                    <span className="text-white text-[10px] font-bold">{closeStatus.label}</span>
+                  </div>
+                )}
+                <button
+                  onClick={() => base44.auth.logout(createPageUrl("Register"))}
+                  className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-colors"
+                >
+                  <span className="text-slate-600 text-[10px] font-bold">{user?.full_name?.[0] || "U"}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Progress bar toward close */}
+            {user?.estimated_close_date && (
+              <div className="mt-3">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-slate-500 text-[9px] font-semibold uppercase tracking-wider">Move Timeline</span>
+                  <span className="text-orange-400 text-[9px] font-bold">
+                    {daysToClose !== null && daysToClose > 0 ? `${daysToClose} days to close` : daysToClose === 0 ? "Closing today!" : "Closed!"}
+                  </span>
+                </div>
+                <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-orange-500 to-orange-400 rounded-full transition-all duration-700"
+                    style={{
+                      width: daysToClose === null ? '2%' : `${Math.max(2, Math.min(100, Math.round((Math.max(0, daysToClose) / Math.max(1, differenceInDays(parseISO(user.estimated_close_date), user.registration_date ? parseISO(user.registration_date) : new Date()))) * 100)))}%`
+                    }}
+                  />
+                </div>
               </div>
             )}
-            <button
-              onClick={() => base44.auth.logout(createPageUrl("Register"))}
-              className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-colors"
-            >
-              <span className="text-slate-600 text-[10px] font-bold">{user?.full_name?.[0] || "U"}</span>
-            </button>
           </div>
-        </div>
 
-        {/* Progress bar toward close */}
-        {user?.estimated_close_date && (
-          <div className="mt-3">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-slate-500 text-[9px] font-semibold uppercase tracking-wider">Move Timeline</span>
-              <span className="text-orange-400 text-[9px] font-bold">
-                {daysToClose !== null && daysToClose > 0 ? `${daysToClose} days to close` : daysToClose === 0 ? "Closing today!" : "Closed!"}
-              </span>
-            </div>
-            <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-orange-500 to-orange-400 rounded-full transition-all duration-700"
-                style={{
-                  width: daysToClose === null ? '2%' : `${Math.max(2, Math.min(100, Math.round((Math.max(0, daysToClose) / Math.max(1, differenceInDays(parseISO(user.estimated_close_date), user.registration_date ? parseISO(user.registration_date) : new Date()))) * 100)))}%`
-                }}
-              />
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto px-4 pt-4 pb-24">
+            {activeTab === "plan" && <ChecklistPanel user={user} />}
+            {activeTab === "inventory" && <MyStuffTab user={user} onNavigate={setActiveTab} onStartOnboarding={() => setShowOnboarding(true)} />}
+            {activeTab === "ai" && <AIMoveAssist user={user} />}
+          </div>
+
+          {/* Bottom Nav */}
+          <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-slate-100 px-4 py-2 z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
+            <div className="flex">
+              {TABS.map(({ id, label, Icon }) => {
+                const active = activeTab === id;
+                return (
+                  <button
+                    key={id}
+                    onClick={() => setActiveTab(id)}
+                    className={active ? 'flex-1 flex flex-col items-center gap-1 py-1.5 rounded-xl transition-all active:scale-95 text-orange-500' : 'flex-1 flex flex-col items-center gap-1 py-1.5 rounded-xl transition-all active:scale-95 text-slate-400'}
+                  >
+                    <Icon className={active ? 'w-5 h-5 stroke-[2.5]' : 'w-5 h-5'} />
+                    <span className={active ? 'text-[10px] font-bold leading-none text-orange-500' : 'text-[10px] font-bold leading-none text-slate-400'}>{label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
-        )}
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-24">
-        {activeTab === "plan" && <ChecklistPanel user={user} />}
-        {activeTab === "inventory" && <MyStuffTab user={user} onNavigate={setActiveTab} onStartOnboarding={() => setShowOnboarding(true)} />}
-        {activeTab === "ai" && <AIMoveAssist user={user} />}
-      </div>
-
-      {/* Bottom Nav */}
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-slate-100 px-4 py-2 z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
-        <div className="flex">
-          {TABS.map(({ id, label, Icon }) => {
-            const active = activeTab === id;
-            return (
-              <button
-                key={id}
-                onClick={() => setActiveTab(id)}
-                className={active ? 'flex-1 flex flex-col items-center gap-1 py-1.5 rounded-xl transition-all active:scale-95 text-orange-500' : 'flex-1 flex flex-col items-center gap-1 py-1.5 rounded-xl transition-all active:scale-95 text-slate-400'}
-              >
-                <Icon className={active ? 'w-5 h-5 stroke-[2.5]' : 'w-5 h-5'} />
-                <span className={active ? 'text-[10px] font-bold leading-none text-orange-500' : 'text-[10px] font-bold leading-none text-slate-400'}>{label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
         </>
       )}
     </div>
