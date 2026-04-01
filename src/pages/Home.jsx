@@ -1,7 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { useNavigate } from "react-router-dom";
-import { createPageUrl } from "@/utils";
 import {
   Shield, ArrowRight, Zap, CheckCircle2,
   Users, CalendarDays, Package, Sparkles,
@@ -16,26 +14,8 @@ function getPricing(count) {
 }
 
 export default function Home() {
-  const navigate = useNavigate();
-  const [checking, setChecking] = useState(true);
+  const [checking, setChecking] = useState(false);
   const [clientCount, setClientCount] = useState(3);
-
-  useEffect(() => {
-    base44.auth.me()
-      .then(user => {
-        if (user?.role === "super_admin") navigate("/SuperAdmin");
-        else if (user?.role === "admin") navigate(createPageUrl("AgentDashboard"));
-        else if (user?.registration_date) navigate(createPageUrl("Dashboard"));
-        else setChecking(false);
-      })
-      .catch(() => setChecking(false));
-  }, []);
-
-  if (checking) return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-900">
-      <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
-    </div>
-  );
 
   const pricing = getPricing(clientCount);
 
