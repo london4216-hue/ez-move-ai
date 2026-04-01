@@ -8,14 +8,26 @@ import Week1Setup from "../components/register/Week1Setup";
 // Wrapper that gets real user ID for Week1Setup
 function Week1SetupWrapper({ userAddress, onNavigateToDashboard }) {
   const [userId, setUserId] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    base44.auth.me().then(user => {
-      if (user?.id) setUserId(user.id);
-    });
+    const load = async () => {
+      try {
+        const user = await base44.auth.me();
+        if (!user?.id) {
+          setError("Not authenticated. Please refresh.");
+          return;
+        }
+        setUserId(user.id);
+      } catch (e) {
+        setError("Failed to load user. " + e.message);
+      }
+    };
+    load();
   }, []);
 
-  if (!userId) return <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />;
+  if (error) return <div className="text-red-600 text-center">{error}</div>;
+  if (!userId) return <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto" />;
 
   return (
     <div className="w-full max-w-sm">
@@ -23,8 +35,11 @@ function Week1SetupWrapper({ userAddress, onNavigateToDashboard }) {
         userId={userId}
         userAddress={userAddress}
         hideButtons={true}
-        onComplete={async () => {
+        onComplete={async (answerMap) => {
+          localStorage.setItem(`user_selections_${userId}`, JSON.stringify(answerMap || {}));
+          localStorage.setItem(`week1_answers_${userId}`, JSON.stringify(answerMap || {}));
           localStorage.setItem(`walkthrough_done_w1_${userId}`, "1");
+          localStorage.setItem(`onboarding_done_${userId}`, "true");
           onNavigateToDashboard();
         }}
         onSaveExit={async (partialAnswers) => {
