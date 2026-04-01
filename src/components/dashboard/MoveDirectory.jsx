@@ -63,6 +63,7 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
 
   const roles = [
     { label: "Real Estate Agent", emoji: "🏠" },
+    { label: "Lawyer", emoji: "⚖️" },
     { label: "Broker", emoji: "💼" },
     { label: "Escrow Officer", emoji: "📋" },
     { label: "Lender", emoji: "🏦" },
@@ -71,12 +72,39 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
     { label: "Inspector", emoji: "🔍" },
     { label: "Contractor", emoji: "🔨" },
     { label: "Cleaner", emoji: "🧹" },
+    { label: "Insurance Agent", emoji: "🛡️" },
+    { label: "Title Company", emoji: "📄" },
     { label: "Other", emoji: "👤" }
   ];
+
+  const CRITICAL_CONTACTS = [
+    { label: "Lawyer", emoji: "⚖️" },
+    { label: "Real Estate Agent", emoji: "🏠" },
+    { label: "Title Company", emoji: "📄" },
+    { label: "Inspector", emoji: "🔍" },
+    { label: "Insurance Agent", emoji: "🛡️" },
+  ];
+
+  const missingContacts = CRITICAL_CONTACTS.filter(
+    rc => !contacts.some(c => c.role?.toLowerCase() === rc.label.toLowerCase())
+  );
 
   return (
     <>
       <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+        {/* Missing Contacts Warning */}
+        {missingContacts.length > 0 && !expanded && (
+          <div className="px-4 py-2 bg-amber-50 border-b border-amber-100">
+            <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wide mb-1">⚠️ {missingContacts.length} Missing Critical Contact{missingContacts.length > 1 ? 's' : ''}</p>
+            <div className="flex flex-wrap gap-1">
+              {missingContacts.slice(0, 3).map(rc => (
+                <span key={rc.label} className="text-[9px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-semibold">{rc.emoji} {rc.label}</span>
+              ))}
+              {missingContacts.length > 3 && <span className="text-[9px] text-amber-600 px-1">+{missingContacts.length - 3} more</span>}
+            </div>
+          </div>
+        )}
+
         <button
           onClick={() => setExpanded(!expanded)}
           className="w-full px-4 py-3 flex items-center justify-between"
@@ -100,6 +128,29 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
 
         {expanded && (
           <>
+            {/* Missing Contacts Expanded */}
+            {missingContacts.length > 0 && (
+              <div className="px-4 py-3 bg-amber-50 border-b border-amber-100">
+                <p className="text-xs font-bold text-amber-700 uppercase tracking-wide mb-2.5">⚠️ Critical Contacts for Buying/Selling</p>
+                <div className="space-y-1.5">
+                  {missingContacts.map(rc => (
+                    <div key={rc.label} className="flex items-center justify-between bg-white rounded-lg px-3 py-2 border border-amber-200">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm">{rc.emoji}</span>
+                        <p className="text-xs font-semibold text-slate-700">{rc.label}</p>
+                      </div>
+                      <button
+                        onClick={() => setShowAddModal(true)}
+                        className="text-[10px] font-bold text-amber-600 bg-amber-100 hover:bg-amber-200 px-2.5 py-1 rounded transition-colors"
+                      >
+                        + Add
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="px-4 pb-3 flex justify-end border-t border-slate-100 pt-2">
               <button
                 onClick={() => setShowAddModal(true)}
