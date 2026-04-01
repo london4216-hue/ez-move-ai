@@ -34,6 +34,7 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
     if (!user) return;
     const data = await base44.entities.Contact.filter({ user_id: user.id });
     const deduped = dedup(data);
+    // Delete actual duplicates from DB
     const keepIds = new Set(deduped.map(c => c.id));
     const dupes = data.filter(c => !keepIds.has(c.id));
     await Promise.all(dupes.map(c => base44.entities.Contact.delete(c.id)));
@@ -52,6 +53,13 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
     });
     setNewContact({ name: "", role: "", phone: "", email: "", notes: "", cost_of_service: "", service_date: "" });
     setShowAddModal(false);
+    loadContacts();
+  };
+
+  const handleDeleteContact = async (contact, e) => {
+    e.stopPropagation();
+    if (!confirm(`Delete ${contact.name}?`)) return;
+    await base44.entities.Contact.delete(contact.id);
     loadContacts();
   };
 
@@ -84,57 +92,56 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
   );
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
-      {/* Missing Contacts Warning */}
-      {missingContacts.length > 0 && !expanded && (
-        <div className="px-4 py-2 bg-amber-50 border-b border-amber-100">
-          <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wide mb-1">⚠️ {missingContacts.length} Missing Critical Contact{missingContacts.length > 1 ? 's' : ''}</p>
-          <div className="flex flex-wrap gap-1">
-            {missingContacts.slice(0, 3).map(rc => (
-              <span key={rc.label} className="text-[9px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-semibold">{rc.emoji} {rc.label}</span>
-            ))}
-            {missingContacts.length > 3 && <span className="text-[9px] text-amber-600 px-1">+{missingContacts.length - 3} more</span>}
-          </div>
-        </div>
-      )}
-
-      {/* Header */}
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="w-full px-4 py-3 flex items-center justify-between hover:bg-slate-50 transition-colors"
-      >
-        <div className="flex items-center gap-2">
-          <h3 className="text-sm font-bold text-slate-800">📇 Move Directory</h3>
-          <span className="text-xs text-slate-500">({contacts.length})</span>
-        </div>
-        <div className="flex items-center gap-2">
-          {!expanded && (
-            <div
-              onClick={(e) => { e.stopPropagation(); setShowAddModal(true); }}
-              className="w-7 h-7 rounded-full bg-orange-500 flex items-center justify-center cursor-pointer hover:bg-orange-600 transition-colors"
-            >
-              <Plus className="w-3.5 h-3.5 text-white" />
+    <>
+      <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+        {/* Missing Contacts Warning */}
+        {missingContacts.length > 0 && !expanded && (
+          <div className="px-4 py-2 bg-amber-50 border-b border-amber-100">
+            <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wide mb-1">⚠️ {missingContacts.length} Missing Critical Contact{missingContacts.length > 1 ? 's' : ''}</p>
+            <div className="flex flex-wrap gap-1">
+              {missingContacts.slice(0, 3).map(rc => (
+                <span key={rc.label} className="text-[9px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-semibold">{rc.emoji} {rc.label}</span>
+              ))}
+              {missingContacts.length > 3 && <span className="text-[9px] text-amber-600 px-1">+{missingContacts.length - 3} more</span>}
             </div>
-          )}
-          {expanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
-        </div>
-      </button>
+          </div>
+        )}
 
-      {/* Expanded Content */}
-      {expanded && (
-        <div className="border-t border-slate-100">
-          {/* Missing Contacts Section */}
-          {missingContacts.length > 0 && (
-            <div className="border-b border-amber-100 bg-amber-50">
-              <button
-                onClick={() => setCriticalExpanded(!criticalExpanded)}
-                className="w-full px-4 py-3 flex items-center justify-between hover:bg-amber-100 transition-colors"
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="w-full px-4 py-3 flex items-center justify-between"
+        >
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-bold text-slate-800">📇 Move Directory</h3>
+            <span className="text-xs text-slate-500">({contacts.length})</span>
+          </div>
+          <div className="flex items-center gap-2">
+            {!expanded && (
+              <div
+                onClick={(e) => { e.stopPropagation(); setShowAddModal(true); }}
+                className="w-7 h-7 rounded-full bg-orange-500 flex items-center justify-center cursor-pointer"
               >
-                <p className="text-xs font-bold text-amber-700 uppercase tracking-wide">⚠️ Critical Contacts ({missingContacts.length})</p>
-                {criticalExpanded ? <ChevronUp className="w-4 h-4 text-amber-600" /> : <ChevronDown className="w-4 h-4 text-amber-600" />}
-              </button>
-              {criticalExpanded && (
-                <div className="px-4 pb-3 pt-1 space-y-1.5">
+                <Plus className="w-3.5 h-3.5 text-white" />
+              </div>
+            )}
+            {expanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+          </div>
+        </button>
+
+        {expanded && (
+          <>
+            {/* Missing Contacts Expanded */}
+            {missingContacts.length > 0 && (
+              <div className="border-b border-amber-100 bg-amber-50">
+                <button
+                  onClick={() => setCriticalExpanded(!criticalExpanded)}
+                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-amber-100 transition-colors"
+                >
+                  <p className="text-xs font-bold text-amber-700 uppercase tracking-wide">⚠️ Critical Contacts ({missingContacts.length})</p>
+                  {criticalExpanded ? <ChevronUp className="w-4 h-4 text-amber-600" /> : <ChevronDown className="w-4 h-4 text-amber-600" />}
+                </button>
+                {criticalExpanded && (
+                  <div className="px-4 pb-3 pt-1 space-y-1.5">
                   {missingContacts.map(rc => (
                     <div key={rc.label} className="flex items-center justify-between bg-white rounded-lg px-3 py-2 border border-amber-200">
                       <div className="flex items-center gap-2">
@@ -167,43 +174,61 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
                       </div>
                     </div>
                   ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* All Contacts */}
-          <div className="p-4 space-y-2">
-            {contacts.length === 0 ? (
-              <p className="text-xs text-slate-400 text-center py-4">No contacts yet. Add one above.</p>
-            ) : (
-              contacts.map(contact => (
-                <div
-                  key={contact.id}
-                  onClick={() => { setSelectedContact(contact); setShowEditModal(true); }}
-                  className="p-3 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors"
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-slate-800">{contact.name}</p>
-                      <p className="text-xs text-slate-500">{contact.role}</p>
-                      {contact.phone && <p className="text-xs text-slate-500 flex items-center gap-1 mt-1"><Phone className="w-3 h-3" /> {contact.phone}</p>}
-                      {contact.service_date && <p className="text-xs text-slate-500 flex items-center gap-1"><CalendarDays className="w-3 h-3" /> {contact.service_date}</p>}
-                      {contact.cost_of_service && <p className="text-xs font-semibold text-emerald-600 flex items-center gap-1"><DollarSign className="w-3 h-3" /> ${contact.cost_of_service}</p>}
-                    </div>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); base44.entities.Contact.delete(contact.id); loadContacts(); }}
-                      className="flex-shrink-0 text-slate-400 hover:text-red-600 transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
                   </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      )}
+                  )}
+
+                  {/* Missing Critical Contacts - Collapsed at Bottom */}
+                  {missingContacts.length > 0 && (
+                  <div className="border-t border-amber-100 bg-amber-50">
+                  <button
+                    onClick={() => setCriticalExpanded(!criticalExpanded)}
+                    className="w-full px-4 py-3 flex items-center justify-between hover:bg-amber-100 transition-colors"
+                  >
+                    <p className="text-xs font-bold text-amber-700 uppercase tracking-wide">⚠️ Critical Contacts ({missingContacts.length})</p>
+                    {criticalExpanded ? <ChevronUp className="w-4 h-4 text-amber-600" /> : <ChevronDown className="w-4 h-4 text-amber-600" />}
+                  </button>
+                  {criticalExpanded && (
+                    <div className="px-4 pb-3 pt-1 space-y-1.5">
+                      {missingContacts.map(rc => (
+                        <div key={rc.label} className="flex items-center justify-between bg-white rounded-lg px-3 py-2 border border-amber-200">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm">{rc.emoji}</span>
+                            <p className="text-xs font-semibold text-slate-700">{rc.label}</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => { setPrefilledRole(rc.label); setShowAddModal(true); }}
+                              className="text-[10px] font-bold text-amber-600 bg-amber-100 hover:bg-amber-200 px-2.5 py-1 rounded transition-colors"
+                            >
+                              + Add
+                            </button>
+                            <button
+                              onClick={() => {
+                                base44.entities.Contact.create({
+                                  user_id: user.id,
+                                  name: rc.label,
+                                  role: rc.label,
+                                  not_needed: true,
+                                  avatar_initials: rc.label.slice(0, 2).toUpperCase(),
+                                  color: "slate"
+                                });
+                                loadContacts();
+                              }}
+                              className="text-[10px] font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded transition-colors"
+                            >
+                              N/A
+                            </button>
+                          </div>
+                        </div>
+                      ))}}
+                      </div>
+                      )}
+                      </div>
+                      )}
+                      )}
+              )}
+                  )}
+                  </div>
 
       {/* Add Modal */}
       {showAddModal && (
@@ -211,7 +236,7 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
           <div className="w-full max-w-md bg-white rounded-t-3xl shadow-2xl max-h-[90vh] flex flex-col">
             <div className="sticky top-0 bg-white border-b border-slate-100 px-5 py-4 flex items-center justify-between flex-shrink-0">
               <h3 className="text-lg font-bold text-slate-800">Add Contact</h3>
-              <button onClick={() => { setShowAddModal(false); setPrefilledRole(null); }} className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
+              <button onClick={() => setShowAddModal(false)} className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
                 <X className="w-4 h-4 text-slate-500" />
               </button>
             </div>
@@ -278,7 +303,7 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
 
