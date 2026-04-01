@@ -56,9 +56,10 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col max-w-md mx-auto border-x border-slate-200 shadow-[0_0_40px_rgba(0,0,0,0.08)]" style={{paddingTop: 0}}>
-      {showOnboarding && <Week1OnboardingModal user={user} onDone={handleOnboardingDone} />}
-      {showOnboarding && null /* hide dashboard until onboarding is done */}
-      {!showOnboarding && (<>
+      {showOnboarding ? (
+        <Week1OnboardingModal user={user} onDone={handleOnboardingDone} />
+      ) : (
+        <>
       {/* Header */}
       <div className="bg-white border-b border-slate-200 px-4 pt-2 pb-4">
         <div className="flex items-center justify-between">
@@ -120,7 +121,7 @@ export default function Dashboard() {
                     (Math.max(0, daysToClose) / Math.max(1,
                       differenceInDays(parseISO(user.estimated_close_date), user.registration_date ? parseISO(user.registration_date) : new Date())
                     )) * 100
-                  )))}%`
+                  )))%`
                 }}
               />
             </div>
@@ -153,7 +154,7 @@ export default function Dashboard() {
           })}
         </div>
       </div>
-    </>)}
+        </>
+      )}
     </div>
   );
-}
