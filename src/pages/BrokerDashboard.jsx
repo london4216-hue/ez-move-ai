@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Plus, LogOut, Edit2, X, Trash2, Users, DollarSign, Building2, ArrowLeft, Loader2, CheckCircle2, CreditCard, Palette, Clock } from "lucide-react";
+import { Plus, LogOut, Edit2, X, Trash2, Users, Building2, ArrowLeft, Loader2, CheckCircle2, CreditCard, Palette, Copy, Check } from "lucide-react";
 import { format, differenceInDays, parseISO } from "date-fns";
 
 const STATUS_COLORS = {
@@ -25,6 +25,14 @@ export default function BrokerDashboard() {
   const [editForm, setEditForm] = useState({});
   const [showBranding, setShowBranding] = useState(false);
   const [brandName, setBrandName] = useState("");
+  const [copiedId, setCopiedId] = useState(null);
+
+  const copyInviteLink = (client) => {
+    const link = `${window.location.origin}/Register?code=${client.invitation_code}`;
+    navigator.clipboard.writeText(link);
+    setCopiedId(client.id);
+    setTimeout(() => setCopiedId(null), 2500);
+  };
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -192,7 +200,19 @@ export default function BrokerDashboard() {
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${STATUS_COLORS[client.status] || "bg-slate-50 text-slate-500 border-slate-100"}`}>{client.status}</span>
                       </div>
                       <p className="text-[11px] text-slate-400 truncate">{client.user_email}</p>
-                      {client.invitation_code && <span className="text-[10px] text-orange-500 font-black tracking-widest">Code: {client.invitation_code}</span>}
+                      {client.invitation_code && (
+                        <button
+                          onClick={() => copyInviteLink(client)}
+                          className={`inline-flex items-center gap-1.5 mt-0.5 px-2.5 py-1 rounded-lg border text-[11px] font-semibold transition-all ${
+                            copiedId === client.id
+                              ? "bg-emerald-50 border-emerald-200 text-emerald-600"
+                              : "bg-slate-50 border-slate-200 text-slate-500 hover:bg-orange-50 hover:border-orange-200 hover:text-orange-600"
+                          }`}
+                        >
+                          {copiedId === client.id ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                          {copiedId === client.id ? "Copied!" : "Copy Invite Link"}
+                        </button>
+                      )}
                     </div>
                     <div className="flex-shrink-0 text-right flex flex-col items-end gap-1.5">
                       {daysLeft !== null && (
@@ -333,9 +353,16 @@ export default function BrokerDashboard() {
                   <CheckCircle2 className="w-14 h-14 text-emerald-500 mx-auto mb-4" />
                   <p className="text-xl font-bold text-slate-800 mb-1">All Set!</p>
                   <p className="text-sm text-slate-500 mb-5">{doneData.name} is now active.</p>
-                  <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4 mb-5">
-                    <p className="text-xs text-slate-500 mb-1">4-Digit Invite Code</p>
-                    <p className="text-4xl font-black text-orange-500 tracking-widest">{doneData.code}</p>
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 mb-5 text-left">
+                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-2">📎 Send this link to your client</p>
+                    <p className="text-xs text-slate-600 break-all font-mono mb-3">{`${window.location.origin}/Register?code=${doneData.code}`}</p>
+                    <button
+                      onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/Register?code=${doneData.code}`); }}
+                      className="w-full bg-orange-500 text-white text-sm font-bold px-4 py-2.5 rounded-xl hover:bg-orange-600 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Copy className="w-4 h-4" /> Copy Invite Link
+                    </button>
+                    <p className="text-[10px] text-slate-400 mt-2 text-center">Share via text, WhatsApp, or any messaging app</p>
                   </div>
                   <button onClick={resetAdd} className="w-full py-3 rounded-2xl bg-orange-500 text-white font-bold text-sm hover:bg-orange-600 transition-colors">Done</button>
                 </div>
