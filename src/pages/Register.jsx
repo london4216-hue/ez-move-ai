@@ -122,6 +122,8 @@ export default function Register() {
           registration_date: new Date().toISOString().split("T")[0],
           move_date: moveDate || "",
           phone: phoneNumber || "",
+          agent_name: "Gina Slusher",
+          agent_phone: "555-123-4757",
         });
       } else {
         await base44.auth.updateMe({
@@ -129,6 +131,8 @@ export default function Register() {
           registration_date: new Date().toISOString().split("T")[0],
           move_date: moveDate || "",
           phone: phoneNumber || "",
+          agent_name: "Gina Slusher",
+          agent_phone: "555-123-4757",
         });
       }
       setLoading(false);

@@ -28,7 +28,7 @@ const SIZE_COLORS = {
 
 // decisions shape: { "Sofa": { choice: "move"|"donate"|"junk", size: "Medium" | null } }
 
-const STEPS = ["welcome", "stays_goes", "ai_insights", "estate_sale", "movers", "done"];
+const STEPS = ["welcome", "stays_goes", "ai_insights", "estate_sale", "movers", "closing_details", "done"];
 const STORAGE_KEY = (id) => `onboarding_progress_${id}`;
 
 async function findProviders(query, address) {
@@ -74,6 +74,13 @@ export default function Week1OnboardingModal({ user, onDone }) {
     parking: "street",
     move_distance: "local (under 50 miles)",
     special_items: "",
+  });
+  const [closingDetails, setClosingDetails] = useState(saved.closingDetails ?? {
+    walkthrough_date: "",
+    lawyer_name: "",
+    lawyer_phone: "",
+    closing_time: "",
+    closing_location: "",
   });
 
   const step = STEPS[stepIdx];
@@ -234,11 +241,58 @@ Be specific and realistic, like a professional moving company estimate.`,
   };
 
   // ── Finish ──────────────────────────────────────────────────────────────────
-  const finish = () => {
+  // Create default appointments for closing date and walkthrough
+  const createDefaultAppointments = async () => {
+    if (!user?.id) return;
+    const uid = user.id;
+    
+    // Default closing date appointment (from estimated_close_date)
+    if (user.estimated_close_date) {
+      await base44.entities.Appointment.create({
+        user_id: uid,
+        title: "Closing Day",
+        provider_name: "Real Estate Agent",
+        phone: user.agent_phone || "555-123-4757",
+        date: user.estimated_close_date,
+        time: closingDetails.closing_time || "",
+        notes: closingDetails.closing_location ? `Location: ${closingDetails.closing_location}` : "Closing scheduled",
+        status: "scheduled",
+      }).catch(() => {});
+    }
+    
+    // Walkthrough appointment
+    if (closingDetails.walkthrough_date) {
+      await base44.entities.Appointment.create({
+        user_id: uid,
+        title: "Final Walkthrough",
+        provider_name: "Real Estate Agent",
+        phone: user.agent_phone || "555-123-4757",
+        date: closingDetails.walkthrough_date,
+        time: "",
+        notes: "Final walkthrough before closing",
+        status: "scheduled",
+      }).catch(() => {});
+    }
+    
+    // Lawyer appointment
+    if (closingDetails.lawyer_name && closingDetails.lawyer_phone) {
+      await base44.entities.Contact.create({
+        user_id: uid,
+        name: closingDetails.lawyer_name,
+        role: "Lawyer",
+        phone: closingDetails.lawyer_phone,
+        avatar_initials: closingDetails.lawyer_name?.[0] || "L",
+        color: "#8b5cf6",
+      }).catch(() => {});
+    }
+  };
+
+  const finish = async () => {
     const stuffLists = { move: [], junk: [], donate: [] };
     Object.entries(decisions).forEach(([name, { choice, size, qty }]) => {
       if (stuffLists[choice]) stuffLists[choice].push({ id: `seed-${name}`, name, size: size || "Medium", qty: qty || 1 });
     });
+    await createDefaultAppointments();
     base44.auth.updateMe({ stuff_lists: JSON.stringify(stuffLists), needs_mover: needsMover, needs_estate_sale: needsEstate }).catch(() => {});
 
     // Reflect onboarding progress in Week 1 checklist
@@ -781,6 +835,93 @@ Be specific and realistic, like a professional moving company estimate.`,
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* ── CLOSING DETAILS ── */}
+        {step === "closing_details" && (
+          <div>
+            <div className="text-center mb-6">
+              <div className="text-5xl mb-4">📅</div>
+              <h2 className="text-xl font-black text-slate-900 mb-2">Closing & Walkthrough</h2>
+              <p className="text-sm text-slate-500 leading-relaxed">Set dates and add key contacts so you don't miss critical deadlines.</p>
+            </div>
+
+            <div className="space-y-4 mb-6">
+              {/* Closing Date Display */}
+              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-3">
+                <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wide mb-0.5">📍 Closing Date</p>
+                {user?.estimated_close_date ? (
+                  <p className="text-sm font-black text-emerald-700">{new Date(user.estimated_close_date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+                ) : (
+                  <p className="text-xs text-emerald-600 italic">No closing date set</p>
+                )}
+              </div>
+
+              {/* Closing Time & Location */}
+              <div className="space-y-2">
+                <div>
+                  <label className="text-[11px] font-bold text-slate-600 mb-1 block">Closing Time (optional)</label>
+                  <input
+                    type="time"
+                    value={closingDetails.closing_time}
+                    onChange={e => setClosingDetails(d => ({...d, closing_time: e.target.value}))}
+                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-bold text-slate-600 mb-1 block">Closing Location (optional)</label>
+                  <input
+                    type="text"
+                    value={closingDetails.closing_location}
+                    onChange={e => setClosingDetails(d => ({...d, closing_location: e.target.value}))}
+                    placeholder="e.g., Title Company Office, 123 Main St"
+                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs"
+                  />
+                </div>
+              </div>
+
+              {/* Walkthrough Date */}
+              <div>
+                <label className="text-[11px] font-bold text-slate-600 mb-1 block">📸 Final Walkthrough Date *</label>
+                <input
+                  type="date"
+                  value={closingDetails.walkthrough_date}
+                  onChange={e => setClosingDetails(d => ({...d, walkthrough_date: e.target.value}))}
+                  className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs"
+                  required
+                />
+                <p className="text-[10px] text-slate-400 mt-1">Usually 24-48 hours before closing</p>
+              </div>
+
+              {/* Lawyer Contact */}
+              <div className="bg-purple-50 border border-purple-200 rounded-2xl p-3.5 space-y-2">
+                <p className="text-[11px] font-bold text-purple-700 uppercase tracking-wide">⚖️ Closing Attorney / Lawyer</p>
+                <input
+                  type="text"
+                  value={closingDetails.lawyer_name}
+                  onChange={e => setClosingDetails(d => ({...d, lawyer_name: e.target.value}))}
+                  placeholder="Full name"
+                  className="w-full px-3 py-2.5 rounded-xl border border-purple-200 text-xs placeholder-slate-300"
+                />
+                <input
+                  type="tel"
+                  value={closingDetails.lawyer_phone}
+                  onChange={e => setClosingDetails(d => ({...d, lawyer_phone: e.target.value}))}
+                  placeholder="Phone number"
+                  className="w-full px-3 py-2.5 rounded-xl border border-purple-200 text-xs placeholder-slate-300"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button onClick={() => goTo(stepIdx - 1)} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button onClick={() => { persist({ closingDetails }); goTo(stepIdx + 1); }} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
+                Continue <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         )}
 
