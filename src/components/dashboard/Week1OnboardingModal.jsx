@@ -93,10 +93,18 @@ export default function Week1OnboardingModal({ user, onDone }) {
   };
 
   const selectSize = (item, size) => {
-    const updated = { ...decisions, [item]: { ...decisions[item], size } };
+    const updated = { ...decisions, [item]: { ...decisions[item], size, qty: decisions[item]?.qty || 1 } };
     setDecisions(updated);
     persist({ decisions: updated });
     setSizePrompt(null);
+  };
+
+  const changeQty = (item, delta) => {
+    const current = decisions[item]?.qty || 1;
+    const next = Math.max(1, current + delta);
+    const updated = { ...decisions, [item]: { ...decisions[item], qty: next } };
+    setDecisions(updated);
+    persist({ decisions: updated });
   };
 
   // ── AI insights step ────────────────────────────────────────────────────────
@@ -177,8 +185,8 @@ Be realistic and concise.`,
   // ── Finish ──────────────────────────────────────────────────────────────────
   const finish = () => {
     const stuffLists = { move: [], junk: [], donate: [] };
-    Object.entries(decisions).forEach(([name, { choice, size }]) => {
-      if (stuffLists[choice]) stuffLists[choice].push({ id: `seed-${name}`, name, size: size || "Medium" });
+    Object.entries(decisions).forEach(([name, { choice, size, qty }]) => {
+      if (stuffLists[choice]) stuffLists[choice].push({ id: `seed-${name}`, name, size: size || "Medium", qty: qty || 1 });
     });
     base44.auth.updateMe({ stuff_lists: JSON.stringify(stuffLists), needs_mover: needsMover, needs_estate_sale: needsEstate }).catch(() => {});
     localStorage.setItem(`onboarding_done_${user?.id}`, "1");
@@ -268,6 +276,9 @@ Be realistic and concise.`,
                             {d?.size && (
                               <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md border ${SIZE_COLORS[d.size]}`}>{d.size}</span>
                             )}
+                            {d?.qty > 1 && (
+                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md border bg-slate-100 border-slate-200 text-slate-600">x{d.qty}</span>
+                            )}
                             <div className="flex gap-1">
                               {CHOICES.map((c) => (
                                 <button key={c.id} onClick={() => selectChoice(item, c.id)}
@@ -277,18 +288,29 @@ Be realistic and concise.`,
                               ))}
                             </div>
                           </div>
-                          {/* Inline size picker */}
+                          {/* Inline size + qty picker */}
                           {isPrompting && (
-                            <div className="mt-1 mb-1 bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2.5 flex items-center gap-2">
-                              <span className="text-[10px] font-bold text-slate-500 whitespace-nowrap">Size?</span>
-                              <div className="flex gap-1.5 flex-wrap">
-                                {SIZES.map((s) => (
-                                  <button key={s} onClick={() => selectSize(item, s)}
-                                    className={`px-2.5 py-1 rounded-xl text-[10px] font-bold border transition-all hover:scale-105 ${SIZE_COLORS[s]}`}>
-                                    {s}
-                                  </button>
-                                ))}
+                            <div className="mt-1 mb-1 bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2.5 space-y-2">
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-bold text-slate-500 whitespace-nowrap">Size?</span>
+                                <div className="flex gap-1.5 flex-wrap">
+                                  {SIZES.map((s) => (
+                                    <button key={s} onClick={() => selectSize(item, s)}
+                                      className={`px-2.5 py-1 rounded-xl text-[10px] font-bold border transition-all hover:scale-105 ${SIZE_COLORS[s]}`}>
+                                      {s}
+                                    </button>
+                                  ))}
+                                </div>
                               </div>
+                            </div>
+                          )}
+                          {/* Qty picker — shown after size chosen */}
+                          {d?.size && !isPrompting && (
+                            <div className="mt-1 mb-0.5 flex items-center gap-2 pl-2">
+                              <span className="text-[10px] font-semibold text-slate-400">Qty:</span>
+                              <button onClick={() => changeQty(item, -1)} className="w-5 h-5 rounded-full bg-slate-200 text-slate-600 text-xs font-bold flex items-center justify-center">−</button>
+                              <span className="text-xs font-black text-slate-700 w-4 text-center">{d.qty || 1}</span>
+                              <button onClick={() => changeQty(item, 1)} className="w-5 h-5 rounded-full bg-orange-100 text-orange-600 text-xs font-bold flex items-center justify-center">+</button>
                             </div>
                           )}
                         </div>
