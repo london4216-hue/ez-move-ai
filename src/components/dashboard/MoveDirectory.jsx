@@ -220,9 +220,13 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
                             </button>
                           </div>
                         </div>
-                      ))}}
-                      </div>
-                      )}
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+                </div>
+              )}
                       </div>
                       )}
                       )}
