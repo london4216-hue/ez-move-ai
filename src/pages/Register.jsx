@@ -13,7 +13,6 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [moveDate, setMoveDate] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
   const [streetAddress, setStreetAddress] = useState("");
   const [city, setCity] = useState("");
   const [zipCode, setZipCode] = useState("");
@@ -38,7 +37,6 @@ export default function Register() {
       try {
         const state = JSON.parse(savedProgress);
         setMoveDate(state.moveDate || "");
-        setPhoneNumber(state.phoneNumber || "");
         setStreetAddress(state.streetAddress || "");
         setCity(state.city || "");
         setZipCode(state.zipCode || "");
@@ -85,21 +83,14 @@ export default function Register() {
     } catch (e) {}
   };
 
-  const handlePhoneChange = (val) => {
-    const d = val.replace(/\D/g, "");
-    if (d.length <= 10) setPhoneNumber(d);
-  };
+
 
 
 
   const handleVerify = async () => {
     const code = inviteCode;
-    if (!phoneNumber || !streetAddress.trim() || !city.trim() || !zipCode.trim()) {
-      setError("Please fill in your address and phone number");
-      return;
-    }
-    if (phoneNumber.length !== 10) {
-      setError("Phone number must be 10 digits");
+    if (!streetAddress.trim() || !city.trim() || !zipCode.trim()) {
+      setError("Please fill in your address");
       return;
     }
     setLoading(true);
@@ -121,7 +112,6 @@ export default function Register() {
           estimated_close_date: client.close_date || moveDate || "",
           registration_date: new Date().toISOString().split("T")[0],
           move_date: moveDate || "",
-          phone: phoneNumber || "",
           agent_name: "Gina Slusher",
           agent_phone: "555-123-4757",
         });
@@ -130,7 +120,6 @@ export default function Register() {
           home_address: fullAddress || "",
           registration_date: new Date().toISOString().split("T")[0],
           move_date: moveDate || "",
-          phone: phoneNumber || "",
           agent_name: "Gina Slusher",
           agent_phone: "555-123-4757",
         });
@@ -179,8 +168,8 @@ export default function Register() {
       
       <button
         onClick={() => {
-          const currentState = { moveDate, phoneNumber, streetAddress, city, zipCode, timestamp: Date.now() };
-          localStorage.setItem('register_progress', JSON.stringify(currentState));
+               const currentState = { moveDate, streetAddress, city, zipCode, timestamp: Date.now() };
+               localStorage.setItem('register_progress', JSON.stringify(currentState));
           base44.auth.logout();
         }}
         className="absolute top-5 right-5 flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all text-sm font-semibold"
@@ -281,23 +270,13 @@ export default function Register() {
               className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10 bg-white disabled:bg-slate-50 disabled:text-slate-500"
             />
           </div>
-          <div>
-            <label className="text-xs font-semibold text-slate-600 mb-1.5 block">Phone Number</label>
-            <input
-              type="tel"
-              placeholder="1234567890"
-              value={phoneNumber}
-              onChange={(e) => { handlePhoneChange(e.target.value); }}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10 bg-white disabled:bg-slate-50 disabled:text-slate-500"
-            />
-            <p className="text-xs text-slate-400 mt-1">{phoneNumber.length}/10 digits</p>
-          </div>
+
         </div>
 
         <div className="flex gap-3">
           <button
             onClick={() => {
-              const currentState = { moveDate, phoneNumber, streetAddress, city, zipCode, timestamp: Date.now() };
+              const currentState = { moveDate, streetAddress, city, zipCode, timestamp: Date.now() };
               localStorage.setItem('register_progress', JSON.stringify(currentState));
               navigate(-1);
             }}

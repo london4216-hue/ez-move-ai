@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { useNavigate } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 import { ChevronRight, ChevronLeft, CheckCircle2, Loader2, Save, Sparkles } from "lucide-react";
 import { WEEK1_TASKS } from "@/lib/week1Tasks";
 
 // Week1Setup — guided, resumable onboarding through Week 1 tasks
 // Tasks with ai_search_query MUST complete AI sub-task inline before proceeding
 export default function Week1Setup({ userId, userAddress, onComplete, onSaveExit }) {
+  const navigate = useNavigate();
   const storageKey = `week1_setup_${userId}`;
 
   const [stepIdx, setStepIdx] = useState(() => {
@@ -66,10 +69,15 @@ export default function Week1Setup({ userId, userAddress, onComplete, onSaveExit
     advance(newAnswers);
   };
 
-  const advance = (ans) => {
+  const advance = async (ans) => {
     if (isLast) {
       localStorage.removeItem(storageKey);
-      onComplete && onComplete(ans);
+      if (onComplete) {
+        await onComplete(ans);
+      } else {
+        // Auto-redirect to Dashboard if no onComplete handler
+        navigate(createPageUrl("Dashboard"));
+      }
     } else {
       const next = stepIdx + 1;
       setStepIdx(next);
@@ -208,7 +216,7 @@ export default function Week1Setup({ userId, userAddress, onComplete, onSaveExit
 
               <button
                 onClick={() => advance(answers)}
-                className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-orange-200"
+                className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-orange-200 active:scale-[0.98] transition-transform"
               >
                 Got it — Continue <ChevronRight className="w-4 h-4" />
               </button>
