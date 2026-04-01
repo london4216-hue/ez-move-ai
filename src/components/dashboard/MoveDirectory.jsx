@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Phone, Mail, Plus, X, Check, ChevronDown, ChevronUp, Trash2, CalendarDays, DollarSign, FileText } from "lucide-react";
+import { Phone, Mail, Plus, X, Check, ChevronDown, ChevronUp, Trash2, CalendarDays, DollarSign, FileText, Info } from "lucide-react";
 
 export default function MoveDirectory({ user, contacts: externalContacts, onContactsChange }) {
   const [contacts, setContacts] = useState([]);
@@ -192,6 +192,13 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
                       </div>
                     </button>
                     <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={() => { setSelectedContact({ ...contact, cost_of_service: contact.cost_of_service || "" }); setShowEditModal(true); }}
+                        className="w-7 h-7 rounded-full bg-blue-50 flex items-center justify-center hover:bg-blue-100 transition-colors"
+                        title="View details"
+                      >
+                        <Info className="w-3 h-3 text-blue-600" />
+                      </button>
                       {contact.phone && (
                         <a href={`tel:${contact.phone}`} className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center">
                           <Phone className="w-3 h-3 text-slate-600" />
