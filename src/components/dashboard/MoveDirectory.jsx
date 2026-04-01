@@ -62,12 +62,12 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
           </div>
           <div className="flex items-center gap-2">
             {!expanded && (
-              <button
+              <div
                 onClick={(e) => { e.stopPropagation(); setShowAddModal(true); }}
-                className="w-7 h-7 rounded-full bg-orange-500 flex items-center justify-center"
+                className="w-7 h-7 rounded-full bg-orange-500 flex items-center justify-center cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5 text-white" />
-              </button>
+              </div>
             )}
             {expanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
           </div>
