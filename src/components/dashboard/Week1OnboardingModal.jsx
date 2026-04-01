@@ -222,7 +222,8 @@ export default function Week1OnboardingModal({ user, onDone }) {
               ))}
             </div>
 
-            <p className="text-[10px] text-slate-400 text-center mb-4">You can always edit these in the "My Stuff" tab later</p>
+            <p className="text-[10px] text-slate-400 text-center mb-2">You can always edit these in the "My Stuff" tab later</p>
+            <button onClick={() => goTo(2)} className="w-full py-2 text-[11px] font-semibold text-slate-400 hover:text-slate-600 transition-colors">Skip for now →</button>
             <div className="flex gap-3">
               <button onClick={() => goTo(0)} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
                 <ChevronLeft className="w-4 h-4" />
