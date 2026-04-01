@@ -82,9 +82,12 @@ export default function UpcomingEvents({ user }) {
         .filter(e => e.date >= today)
         .sort((a, b) => a.date.localeCompare(b.date));
 
-      // Deduplicate: remove appointments that match closing-day closing appointments from same date
+      // Deduplicate: remove duplicate closing/walkthrough appointments on same date
       const deduped = all.filter((e, idx) => {
-        if (e.type !== 'appointment' || !e.title.toLowerCase().includes('closing')) return true;
+        if (e.type !== 'appointment') return true;
+        const titleLower = e.title.toLowerCase();
+        const isClosingOrWalk = titleLower.includes('closing') || titleLower.includes('walkthrough');
+        if (!isClosingOrWalk) return true;
         const isDupe = all.some((other, oidx) => 
           oidx < idx && other.date === e.date && 
           (other.title.toLowerCase().includes('closing') || other.title.toLowerCase().includes('walkthrough'))
