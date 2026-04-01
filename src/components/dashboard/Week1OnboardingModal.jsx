@@ -209,6 +209,27 @@ Be realistic and concise.`,
       if (stuffLists[choice]) stuffLists[choice].push({ id: `seed-${name}`, name, size: size || "Medium", qty: qty || 1 });
     });
     base44.auth.updateMe({ stuff_lists: JSON.stringify(stuffLists), needs_mover: needsMover, needs_estate_sale: needsEstate }).catch(() => {});
+
+    // Reflect onboarding progress in Week 1 checklist
+    const uid = user?.id;
+    if (uid) {
+      // Ensure all w1 tasks appear in the plan
+      const existingSelections = (() => { try { return JSON.parse(localStorage.getItem(`user_selections_${uid}`) || "{}"); } catch { return {}; } })();
+      const updatedSelections = { ...existingSelections, "w1-1": "yes", "w1-2": "yes", "w1-3": "yes", "w1-4": "yes" };
+      localStorage.setItem(`user_selections_${uid}`, JSON.stringify(updatedSelections));
+
+      // Mark tasks complete based on what user actually did
+      const existingCompleted = (() => { try { return JSON.parse(localStorage.getItem(`checklist_complete_${uid}`) || "[]"); } catch { return []; } })();
+      const completedSet = new Set(existingCompleted);
+      const sortedCount = Object.values(decisions).filter(v => v?.choice).length;
+      const hasDonate = Object.values(decisions).some(v => v?.choice === "donate");
+      if (sortedCount > 0)       completedSet.add("w1-1");  // sorted stays vs. goes
+      if (hasDonate)             completedSet.add("w1-2");  // started donation pile
+      if (needsEstate !== null)  completedSet.add("w1-3");  // made estate sale decision
+      if (selectedMover)         completedSet.add("w1-4");  // selected a mover
+      localStorage.setItem(`checklist_complete_${uid}`, JSON.stringify([...completedSet]));
+    }
+
     localStorage.setItem(`onboarding_done_${user?.id}`, "1");
     localStorage.removeItem(savedKey);
     onDone();
