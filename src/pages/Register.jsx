@@ -2,22 +2,16 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
-import { Loader2, ChevronRight, CheckCircle2, ChevronLeft, LogOut } from "lucide-react";
+import { Loader2, ChevronLeft, LogOut } from "lucide-react";
+import Week1Setup from "../components/register/Week1Setup";
 
-const week1Questions = [
-  { id: "w1-1", title: "Confirm what stays vs. goes", description: "Furniture, appliances, personal items" },
-  { id: "w1-2", title: "Estate sale decision", description: "Find local estate sale professionals" },
-  { id: "w1-3", title: "Request mover quotes", description: "Compare 3 top-rated movers side by side" },
-  { id: "w1-4", title: "Start donation / sell pile", description: "What's worth selling vs. donating" }
-];
+// Week1Setup now handled by Week1Setup component
 
 export default function Register() {
   const [inviteCode, setInviteCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [onboardingStep, setOnboardingStep] = useState(0);
-  const [answers, setAnswers] = useState({});
   const [moveDate, setMoveDate] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [streetAddress, setStreetAddress] = useState("");
@@ -146,113 +140,28 @@ export default function Register() {
     }
   };
 
-  const handleAnswer = async (answer) => {
-    const question = week1Questions[onboardingStep];
-    const updatedAnswers = { ...answers, [question.id]: answer };
-    setAnswers(updatedAnswers);
-    
-    if (onboardingStep === week1Questions.length - 1) {
-      // Save Week 1 selections and mark as complete
-      const user = await base44.auth.me();
-      
-      // Save the answers directly (IDs already match w1-1, w1-2, w1-3, w1-4)
-      const taskSelections = updatedAnswers;
-      
-      localStorage.setItem(`user_selections_${user.id}`, JSON.stringify(taskSelections));
-      localStorage.setItem(`week1_answers_${user.id}`, JSON.stringify(taskSelections));
-      localStorage.setItem(`walkthrough_done_w1_${user.id}`, "1");
-      navigate(createPageUrl("Dashboard"));
-    } else {
-      setOnboardingStep(prev => prev + 1);
-    }
-  };
-
-  const currentQuestion = week1Questions[onboardingStep];
-  const progress = ((onboardingStep) / week1Questions.length) * 100;
-
   if (showOnboarding) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-end justify-center">
-        <div className="w-full max-w-md bg-white rounded-t-3xl shadow-2xl overflow-hidden">
-          <div className="h-1 bg-slate-100">
-            <div
-              className="h-full bg-gradient-to-r from-orange-500 to-orange-400 transition-all duration-500"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-
-          <div className="px-5 pt-4 pb-2 flex items-center justify-between">
-            <button
-              onClick={() => {
-                if (onboardingStep > 0) {
-                  setOnboardingStep(prev => prev - 1);
-                } else {
-                  setShowOnboarding(false);
-                }
-              }}
-              className="text-slate-400 hover:text-slate-600 transition-colors flex items-center gap-1"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              <span className="text-[11px] font-bold">Back</span>
-            </button>
-            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">
-              Week 1 Setup · {onboardingStep + 1}/{week1Questions.length}
-            </p>
-            <div className="flex gap-1">
-              {week1Questions.map((_, i) => (
-                <div
-                  key={i}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${
-                    i < onboardingStep ? "bg-orange-500 w-3" : i === onboardingStep ? "bg-orange-400 w-5" : "bg-slate-200 w-1.5"
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-
-          <div className="px-5 pt-4 pb-8">
-            <div className="mb-6">
-              <p className="text-2xl mb-3">
-                {onboardingStep === 0 ? "📋" : onboardingStep === 1 ? "🚚" : onboardingStep === 2 ? "📦" : "⚡"}
-              </p>
-              <h2 className="text-xl font-black text-slate-900 mb-2">{currentQuestion.title}</h2>
-              <p className="text-sm text-slate-500 leading-relaxed">{currentQuestion.description}</p>
-            </div>
-
-            <p className="text-xs text-slate-400 font-semibold mb-3">Will you do this this week?</p>
-
-            <div className="space-y-2.5">
-              <button
-                onClick={() => handleAnswer("yes")}
-                className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-orange-500/30 active:scale-[0.98] transition-transform"
-              >
-                <CheckCircle2 className="w-4 h-4" />
-                Yes, add to my plan
-                <ChevronRight className="w-4 h-4 ml-auto" />
-              </button>
-              <button
-                onClick={() => handleAnswer("maybe")}
-                className="w-full py-3.5 rounded-2xl border-2 border-amber-300 bg-amber-50 text-amber-700 text-sm font-bold active:scale-[0.98] transition-transform"
-              >
-                🤔 Maybe — add later
-              </button>
-              <button
-                onClick={() => handleAnswer("skip")}
-                className="w-full py-3 rounded-2xl border border-slate-200 text-slate-400 text-sm font-semibold active:scale-[0.98] transition-transform"
-              >
-                ⏰ Not at this time
-              </button>
-              {onboardingStep > 0 && (
-                <button
-                  onClick={() => setOnboardingStep(prev => prev - 1)}
-                  className="w-full py-3 rounded-2xl border border-slate-200 text-slate-500 text-sm font-semibold active:scale-[0.98] transition-transform flex items-center justify-center gap-1"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                  Back
-                </button>
-              )}
-            </div>
-          </div>
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
+        <div className="w-full max-w-sm">
+          <Week1Setup
+            userId={`pending_${inviteCode}`}
+            userAddress={`${streetAddress}, ${city}, ${zipCode}`}
+            onComplete={async (answerMap) => {
+              const user = await base44.auth.me();
+              localStorage.setItem(`user_selections_${user.id}`, JSON.stringify(answerMap));
+              localStorage.setItem(`week1_answers_${user.id}`, JSON.stringify(answerMap));
+              localStorage.setItem(`walkthrough_done_w1_${user.id}`, "1");
+              navigate(createPageUrl("Dashboard"));
+            }}
+            onSaveExit={async (partialAnswers) => {
+              const user = await base44.auth.me().catch(() => null);
+              if (user?.id) {
+                localStorage.setItem(`week1_setup_${user.id}`, JSON.stringify({ step: 0, answers: partialAnswers }));
+              }
+              base44.auth.logout("/");
+            }}
+          />
         </div>
       </div>
     );

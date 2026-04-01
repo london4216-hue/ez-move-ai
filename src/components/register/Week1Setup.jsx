@@ -1,89 +1,237 @@
-import { useState } from "react";
-import { ChevronRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { base44 } from "@/api/base44Client";
+import { ChevronRight, ChevronLeft, CheckCircle2, Loader2, Save, Sparkles } from "lucide-react";
+import { WEEK1_TASKS } from "@/lib/week1Tasks";
 
-const WEEK1_ITEMS = [
-  { id: "w1-1", title: "Confirm what stays vs. goes", description: "Furniture, appliances, personal items checklist" },
-  { id: "w1-2", title: "Start donation / sell pile", description: "Sort items worth selling vs. donating" },
-  { id: "w1-3", title: "Estate sale decision", description: "Decide if you need to schedule an estate sale" },
-  { id: "w1-4", title: "Request mover quotes", description: "Get 3 moving company quotes to compare" },
-];
+// Week1Setup — guided, resumable onboarding through Week 1 tasks
+// Tasks with ai_search_query MUST complete AI sub-task inline before proceeding
+export default function Week1Setup({ userId, userAddress, onComplete, onSaveExit }) {
+  const storageKey = `week1_setup_${userId}`;
 
-export default function Week1Setup({ onComplete }) {
-  const [stepIdx, setStepIdx] = useState(0);
-  const [answers, setAnswers] = useState({});
+  const [stepIdx, setStepIdx] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(storageKey))?.step ?? 0; } catch { return 0; }
+  });
+  const [answers, setAnswers] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(storageKey))?.answers ?? {}; } catch { return {}; }
+  });
+  const [aiPhase, setAiPhase] = useState(null); // null | "loading" | "results"
+  const [aiResults, setAiResults] = useState([]);
 
-  const item = WEEK1_ITEMS[stepIdx];
-  const isLast = stepIdx === WEEK1_ITEMS.length - 1;
+  const task = WEEK1_TASKS[stepIdx];
+  const isLast = stepIdx === WEEK1_TASKS.length - 1;
 
-  const handleAnswer = (answer) => {
-    const newAnswers = { ...answers, [item.id]: answer };
+  const saveProgress = (step, ans) => {
+    localStorage.setItem(storageKey, JSON.stringify({ step, answers: ans }));
+  };
+
+  const runAiSearch = async () => {
+    setAiPhase("loading");
+    setAiResults([]);
+    const locationHint = userAddress || "my area";
+    const res = await base44.integrations.Core.InvokeLLM({
+      prompt: `Find the top 3 local businesses for: "${task.ai_search_query} ${locationHint}". For each provide name, rating (e.g. 4.8★), one-line description, and phone number if available.`,
+      response_json_schema: {
+        type: "object",
+        properties: {
+          results: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                name: { type: "string" },
+                rating: { type: "string" },
+                description: { type: "string" },
+                phone: { type: "string" }
+              }
+            }
+          }
+        }
+      }
+    });
+    setAiResults(res?.results || []);
+    setAiPhase("results");
+  };
+
+  const handleAnswer = async (answer) => {
+    const newAnswers = { ...answers, [task.id]: answer };
     setAnswers(newAnswers);
-    
+    saveProgress(stepIdx, newAnswers);
+
+    // If "yes" and has AI sub-task, run it now (required)
+    if (answer === "yes" && task.ai_search_query) {
+      runAiSearch();
+      return;
+    }
+
+    advance(newAnswers);
+  };
+
+  const advance = (ans) => {
     if (isLast) {
-      // Pass answers back to onComplete
-      onComplete && onComplete(newAnswers);
+      localStorage.removeItem(storageKey);
+      onComplete && onComplete(ans);
     } else {
-      setStepIdx(i => i + 1);
+      const next = stepIdx + 1;
+      setStepIdx(next);
+      setAiPhase(null);
+      setAiResults([]);
+      saveProgress(next, ans);
     }
   };
 
   const handleBack = () => {
+    if (aiPhase) {
+      setAiPhase(null);
+      setAiResults([]);
+      return;
+    }
     if (stepIdx > 0) {
-      setStepIdx(i => i - 1);
+      const prev = stepIdx - 1;
+      setStepIdx(prev);
+      saveProgress(prev, answers);
     }
   };
 
+  const handleSaveExit = () => {
+    saveProgress(stepIdx, answers);
+    onSaveExit && onSaveExit(answers);
+  };
+
+  const progress = (stepIdx / WEEK1_TASKS.length) * 100;
+
   return (
     <div className="w-full max-w-sm mx-auto">
-      <div className="text-center mb-10">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-gradient-to-br from-[#4F7EFF] to-[#2563EB] mb-6 mx-auto">
-          <span className="text-white text-2xl">📋</span>
+      {/* Progress */}
+      <div className="mb-6">
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wide">Week 1 Setup</span>
+          <span className="text-xs font-bold text-orange-500">{stepIdx + 1} / {WEEK1_TASKS.length}</span>
         </div>
-        <h1 className="text-3xl font-bold text-[#1A1A2E] mb-2">Week 1 Setup</h1>
-        <p className="text-sm text-[#6B7280]">{stepIdx + 1} of {WEEK1_ITEMS.length}</p>
-      </div>
-
-      <div className="mb-8">
-        <h2 className="text-xl font-bold text-[#1A1A2E] mb-2">{item.title}?</h2>
-        <p className="text-sm text-[#6B7280] mb-6">{item.description}</p>
-
-        <div className="space-y-2.5">
-          <button
-            onClick={() => handleAnswer("yes")}
-            className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#C85A17] to-[#F97316] text-white font-bold text-sm flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(200,90,23,0.2)] active:scale-[0.98] transition-transform"
-          >
-            Yes, I will
-            <ChevronRight className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => handleAnswer("maybe")}
-            className="w-full py-3.5 rounded-2xl border-2 border-[#FCD34D] bg-[#FEFCE8] text-[#92400E] text-sm font-bold active:scale-[0.98] transition-transform"
-          >
-            Maybe later
-          </button>
-          <button
-            onClick={() => handleAnswer("skip")}
-            className="w-full py-3 rounded-2xl border border-[#E5E7EB] text-[#6B7280] text-sm font-semibold active:scale-[0.98] transition-transform"
-          >
-            No, skip this
-          </button>
+        <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-gradient-to-r from-orange-500 to-orange-400 rounded-full transition-all duration-500"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+        <div className="flex gap-1.5 mt-2">
+          {WEEK1_TASKS.map((t, i) => (
+            <div
+              key={t.id}
+              className={`flex-1 h-1 rounded-full transition-all ${
+                i < stepIdx ? "bg-orange-500" : i === stepIdx ? "bg-orange-300" : "bg-slate-100"
+              }`}
+            />
+          ))}
         </div>
       </div>
 
+      {/* Task card */}
+      {aiPhase === null && (
+        <div className="mb-8">
+          <div className="text-4xl mb-4">{task.emoji}</div>
+          <h2 className="text-2xl font-black text-slate-900 mb-2">{task.title}</h2>
+          <p className="text-sm text-slate-500 leading-relaxed mb-6">{task.description}</p>
+
+          {task.ai_search_query && (
+            <div className="bg-purple-50 border border-purple-200 rounded-2xl px-4 py-3 mb-5 flex items-start gap-2">
+              <Sparkles className="w-4 h-4 text-purple-500 mt-0.5 flex-shrink-0" />
+              <p className="text-xs text-purple-700 font-semibold">
+                If you say <strong>Yes</strong>, we'll find top-rated local providers for you right now — takes 10 seconds.
+              </p>
+            </div>
+          )}
+
+          <p className="text-xs text-slate-400 font-semibold mb-3 uppercase tracking-wide">Will you do this this week?</p>
+
+          <div className="space-y-2.5">
+            <button
+              onClick={() => handleAnswer("yes")}
+              className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-orange-200 active:scale-[0.98] transition-transform"
+            >
+              <CheckCircle2 className="w-4 h-4" />
+              Yes, add to my plan
+              <ChevronRight className="w-4 h-4 ml-auto" />
+            </button>
+            <button
+              onClick={() => handleAnswer("maybe")}
+              className="w-full py-3.5 rounded-2xl border-2 border-amber-300 bg-amber-50 text-amber-700 text-sm font-bold active:scale-[0.98] transition-transform"
+            >
+              🤔 Maybe — add later
+            </button>
+            <button
+              onClick={() => handleAnswer("na")}
+              className="w-full py-3 rounded-2xl border border-slate-200 text-slate-400 text-sm font-semibold active:scale-[0.98] transition-transform"
+            >
+              N/A — not applicable to me
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* AI Sub-task — REQUIRED to complete before continuing */}
+      {(aiPhase === "loading" || aiPhase === "results") && (
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <Sparkles className="w-5 h-5 text-purple-500" />
+            <h3 className="text-base font-black text-slate-800">{task.ai_label}</h3>
+          </div>
+
+          {aiPhase === "loading" && (
+            <div className="flex flex-col items-center py-10 gap-3">
+              <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
+              <p className="text-sm text-slate-500 font-semibold">Finding top providers near you…</p>
+            </div>
+          )}
+
+          {aiPhase === "results" && (
+            <>
+              {aiResults.length === 0 ? (
+                <p className="text-sm text-slate-400 py-4 text-center">No results found. You can always search later in the AI tools tab.</p>
+              ) : (
+                <div className="space-y-3 mb-5">
+                  {aiResults.map((r, i) => (
+                    <div key={i} className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <p className="font-bold text-slate-800 text-sm">{r.name}</p>
+                        {r.rating && <span className="text-xs font-bold text-amber-500 whitespace-nowrap">{r.rating}</span>}
+                      </div>
+                      <p className="text-xs text-slate-500 mb-1.5">{r.description}</p>
+                      {r.phone && (
+                        <a href={`tel:${r.phone}`} className="text-xs font-bold text-orange-500">📞 {r.phone}</a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <p className="text-xs text-slate-400 text-center mb-4">These results are also saved in your AI Tools tab for reference.</p>
+
+              <button
+                onClick={() => advance(answers)}
+                className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-orange-200"
+              >
+                Got it — Continue <ChevronRight className="w-4 h-4" />
+              </button>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Bottom nav */}
       <div className="flex gap-2">
-        {stepIdx > 0 && (
+        {stepIdx > 0 || aiPhase ? (
           <button
             onClick={handleBack}
-            className="flex-1 py-3 rounded-xl border border-[#E5E7EB] text-[#6B7280] font-bold text-sm active:scale-[0.98] transition-transform"
+            className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm flex items-center justify-center gap-1"
           >
-            Back
+            <ChevronLeft className="w-4 h-4" /> Back
           </button>
-        )}
+        ) : null}
         <button
-          onClick={() => onComplete && onComplete(answers)}
-          className={`${stepIdx > 0 ? "flex-1" : "w-full"} py-3 rounded-xl bg-[#F3F4F6] text-[#6B7280] font-bold text-sm active:scale-[0.98] transition-transform`}
+          onClick={handleSaveExit}
+          className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-500 font-bold text-sm flex items-center justify-center gap-1 hover:bg-slate-200 transition-colors"
         >
-          Skip Setup
+          <Save className="w-3.5 h-3.5" /> Save & Exit
         </button>
       </div>
     </div>

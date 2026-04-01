@@ -433,11 +433,11 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
 
         <div className="px-3 pb-3 space-y-2 max-h-[520px] overflow-y-auto">
           {Array.from({ length: totalWeeks }, (_, i) => i + 1).map(weekNum => {
-            // Week 1 always shown (set during registration). Other weeks only shown after walkthrough done.
-            const isUnlocked = weekNum === 1 || !!localStorage.getItem(`walkthrough_done_w${weekNum}_${user?.id}`);
-            if (!isUnlocked) return null;  // hide weeks not yet set up
+            // Week 1 always active. Future weeks visible as preview — shepherding activates Friday prior.
+            const isSetup = weekNum === 1 || !!localStorage.getItem(`walkthrough_done_w${weekNum}_${user?.id}`);
+            const isPreview = !isSetup;
             const wData = weeksData[weekNum];
-            const wItems = [
+            const wItems = isPreview ? (wData?.items || []) : [
               ...(wData?.items || []).filter(i => userSelections[i.id] === "yes"),
               ...(customItems[weekNum] || [])
             ];
@@ -446,7 +446,7 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
             const isExpanded = expandedWeeks.has(weekNum);
 
             return (
-              <div key={weekNum} className="rounded-2xl border border-slate-200 overflow-hidden">
+              <div key={weekNum} className={`rounded-2xl border overflow-hidden ${isPreview ? "border-slate-100 opacity-60" : "border-slate-200"}`}>
                 <button
                   onClick={() => {
                     setExpandedWeeks(prev => {
@@ -459,74 +459,95 @@ export default function ChecklistPanel({ user, onProviderSaved }) {
                 >
                   <div className="flex items-center gap-2 flex-1 min-w-0">
                     <h4 className="text-xs font-bold text-slate-700">Week {weekNum}</h4>
-                    <div className="flex-1 max-w-[120px]">
-                      <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-orange-500 to-orange-400 rounded-full transition-all duration-500"
-                          style={{ width: `${wProgress}%` }}
-                        />
+                    {isPreview ? (
+                      <span className="text-[9px] font-bold text-slate-300 uppercase tracking-wide bg-slate-100 px-2 py-0.5 rounded-full">Preview</span>
+                    ) : (
+                      <div className="flex-1 max-w-[120px]">
+                        <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-orange-500 to-orange-400 rounded-full transition-all duration-500"
+                            style={{ width: `${wProgress}%` }}
+                          />
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <span className="text-[10px] font-bold text-orange-500">{wProgress}%</span>
+                    {!isPreview && <span className="text-[10px] font-bold text-orange-500">{wProgress}%</span>}
                     {isExpanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
                   </div>
                 </button>
 
                 {isExpanded && (
                   <div className="p-2 space-y-1.5 border-t border-slate-100">
-                    {wItems.length === 0 && (
-                      <p className="text-xs text-slate-400 text-center py-2">No tasks in plan. Add some below ↓</p>
-                    )}
-                    {wItems.map(item => (
-                      <ChecklistItemCard
-                        key={item.id}
-                        item={item}
-                        completed={completedIds.has(item.id)}
-                        skipped={false}
-                        onComplete={() => handleComplete(item.id)}
-                        onSkip={() => item.custom
-                          ? setCustomItems(prev => { const u = { ...prev, [weekNum]: prev[weekNum].filter(i => i.id !== item.id) }; persist(completedIds, removedIds, u); return u; })
-                          : handleRemove(item.id)}
-                        userAddress={user?.home_address}
-                        onProviderSaved={onProviderSaved}
-                        user={user}
-                        completedIds={completedIds}
-                        allItems={Object.values(weeksData).flatMap(w => w.items)}
-                      />
-                    ))}
-
-                    {/* Skipped / not-in-plan tasks — restore anytime */}
-                    {(() => {
-                      const skippedItems = (wData?.items || []).filter(i =>
-                        !wItems.find(w => w.id === i.id)
-                      );
-                      if (skippedItems.length === 0) return null;
-                      return (
-                        <details className="mt-1">
-                          <summary className="text-[10px] font-bold text-slate-400 uppercase tracking-wide cursor-pointer hover:text-slate-600 transition-colors px-1 py-1 select-none">
-                            + {skippedItems.length} task{skippedItems.length > 1 ? 's' : ''} not in plan — tap to restore
-                          </summary>
-                          <div className="mt-1 space-y-1">
-                            {skippedItems.map(item => (
-                              <div key={item.id} className="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50 border border-dashed border-slate-200 gap-2">
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-xs font-semibold text-slate-400 truncate">{item.title}</p>
-                                  {item.description && <p className="text-[10px] text-slate-300 truncate">{item.description}</p>}
-                                </div>
-                                <button
-                                  onClick={() => handleRestore(item.id)}
-                                  className="flex-shrink-0 text-[10px] font-bold text-orange-500 bg-orange-50 border border-orange-200 px-2.5 py-1 rounded-lg hover:bg-orange-100 transition-colors whitespace-nowrap"
-                                >
-                                  + Add to Plan
-                                </button>
-                              </div>
-                            ))}
+                    {isPreview ? (
+                      <>
+                        <p className="text-[10px] text-slate-400 text-center pt-1 pb-0.5 italic">
+                          🔔 Your guide will walk you through this week starting the Friday before it begins
+                        </p>
+                        {wItems.slice(0, 3).map(item => (
+                          <div key={item.id} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 border border-dashed border-slate-100">
+                            <div className="w-3.5 h-3.5 rounded-full border-2 border-slate-200 flex-shrink-0" />
+                            <p className="text-xs text-slate-400 truncate">{item.title}</p>
                           </div>
-                        </details>
-                      );
-                    })()}
+                        ))}
+                        {wItems.length > 3 && (
+                          <p className="text-[10px] text-slate-300 text-center">+ {wItems.length - 3} more tasks</p>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        {wItems.length === 0 && (
+                          <p className="text-xs text-slate-400 text-center py-2">No tasks in plan. Add some below ↓</p>
+                        )}
+                        {wItems.map(item => (
+                          <ChecklistItemCard
+                            key={item.id}
+                            item={item}
+                            completed={completedIds.has(item.id)}
+                            skipped={false}
+                            onComplete={() => handleComplete(item.id)}
+                            onSkip={() => item.custom
+                              ? setCustomItems(prev => { const u = { ...prev, [weekNum]: prev[weekNum].filter(i => i.id !== item.id) }; persist(completedIds, removedIds, u); return u; })
+                              : handleRemove(item.id)}
+                            userAddress={user?.home_address}
+                            onProviderSaved={onProviderSaved}
+                            user={user}
+                            completedIds={completedIds}
+                            allItems={Object.values(weeksData).flatMap(w => w.items)}
+                          />
+                        ))}
+
+                        {/* Skipped / not-in-plan tasks */}
+                        {(() => {
+                          const skippedItems = (wData?.items || []).filter(i => !wItems.find(w => w.id === i.id));
+                          if (skippedItems.length === 0) return null;
+                          return (
+                            <details className="mt-1">
+                              <summary className="text-[10px] font-bold text-slate-400 uppercase tracking-wide cursor-pointer hover:text-slate-600 transition-colors px-1 py-1 select-none">
+                                + {skippedItems.length} task{skippedItems.length > 1 ? 's' : ''} not in plan — tap to restore
+                              </summary>
+                              <div className="mt-1 space-y-1">
+                                {skippedItems.map(item => (
+                                  <div key={item.id} className="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50 border border-dashed border-slate-200 gap-2">
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-xs font-semibold text-slate-400 truncate">{item.title}</p>
+                                      {item.description && <p className="text-[10px] text-slate-300 truncate">{item.description}</p>}
+                                    </div>
+                                    <button
+                                      onClick={() => handleRestore(item.id)}
+                                      className="flex-shrink-0 text-[10px] font-bold text-orange-500 bg-orange-50 border border-orange-200 px-2.5 py-1 rounded-lg hover:bg-orange-100 transition-colors whitespace-nowrap"
+                                    >
+                                      + Add to Plan
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            </details>
+                          );
+                        })()}
+                      </>
+                    )}
                   </div>
                 )}
               </div>
