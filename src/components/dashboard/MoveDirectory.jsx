@@ -140,12 +140,30 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
                         <span className="text-sm">{rc.emoji}</span>
                         <p className="text-xs font-semibold text-slate-700">{rc.label}</p>
                       </div>
-                      <button
-                        onClick={() => { setPrefilledRole(rc.label); setShowAddModal(true); }}
-                        className="text-[10px] font-bold text-amber-600 bg-amber-100 hover:bg-amber-200 px-2.5 py-1 rounded transition-colors"
-                      >
-                        + Add
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => { setPrefilledRole(rc.label); setShowAddModal(true); }}
+                          className="text-[10px] font-bold text-amber-600 bg-amber-100 hover:bg-amber-200 px-2.5 py-1 rounded transition-colors"
+                        >
+                          + Add
+                        </button>
+                        <button
+                          onClick={() => {
+                            base44.entities.Contact.create({
+                              user_id: user.id,
+                              name: rc.label,
+                              role: rc.label,
+                              not_needed: true,
+                              avatar_initials: rc.label.slice(0, 2).toUpperCase(),
+                              color: "slate"
+                            });
+                            loadContacts();
+                          }}
+                          className="text-[10px] font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded transition-colors"
+                        >
+                          N/A
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
