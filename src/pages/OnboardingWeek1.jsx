@@ -28,10 +28,12 @@ export default function OnboardingWeek1() {
     );
   }
 
-  const handleComplete = async () => {
-    // Mark Week1 onboarding as done
-    localStorage.setItem(`onboarding_done_${user.id}`, "true");
-    // Redirect to main dashboard
+  const handleComplete = async (answerMap) => {
+    const currentUser = await base44.auth.me();
+    localStorage.setItem(`user_selections_${currentUser.id}`, JSON.stringify(answerMap || {}));
+    localStorage.setItem(`week1_answers_${currentUser.id}`, JSON.stringify(answerMap || {}));
+    localStorage.setItem(`walkthrough_done_w1_${currentUser.id}`, "1");
+    localStorage.setItem(`onboarding_done_${currentUser.id}`, "true");
     navigate(createPageUrl("Dashboard"));
   };
 
