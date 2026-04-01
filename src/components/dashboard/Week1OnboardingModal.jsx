@@ -185,6 +185,11 @@ export default function Week1OnboardingModal({ user, onDone }) {
         {/* ── STAYS / GOES ── */}
         {step === "stays_goes" && (
           <div>
+            <div className="flex justify-end mb-1">
+              <button onClick={() => goTo(2)} className="text-[11px] font-semibold text-slate-400 hover:text-slate-600 transition-colors px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200">
+                Skip for now →
+              </button>
+            </div>
             <div className="text-center mb-5">
               <div className="text-4xl mb-2">📦</div>
               <h2 className="text-xl font-black text-slate-900">What Stays vs. Goes?</h2>
@@ -222,8 +227,7 @@ export default function Week1OnboardingModal({ user, onDone }) {
               ))}
             </div>
 
-            <p className="text-[10px] text-slate-400 text-center mb-2">You can always edit these in the "My Stuff" tab later</p>
-            <button onClick={() => goTo(2)} className="w-full py-2 text-[11px] font-semibold text-slate-400 hover:text-slate-600 transition-colors">Skip for now →</button>
+            <p className="text-[10px] text-slate-400 text-center mb-4">You can always edit these in the "My Stuff" tab later</p>
             <div className="flex gap-3">
               <button onClick={() => goTo(0)} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
                 <ChevronLeft className="w-4 h-4" />
