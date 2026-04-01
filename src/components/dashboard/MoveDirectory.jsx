@@ -8,6 +8,7 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedContact, setSelectedContact] = useState(null);
   const [expanded, setExpanded] = useState(false);
+  const [prefilledRole, setPrefilledRole] = useState(null);
   const [newContact, setNewContact] = useState({ name: "", role: "", phone: "", email: "", notes: "", cost_of_service: "", service_date: "" });
 
   useEffect(() => {
@@ -140,7 +141,7 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
                         <p className="text-xs font-semibold text-slate-700">{rc.label}</p>
                       </div>
                       <button
-                        onClick={() => setShowAddModal(true)}
+                        onClick={() => { setPrefilledRole(rc.label); setShowAddModal(true); }}
                         className="text-[10px] font-bold text-amber-600 bg-amber-100 hover:bg-amber-200 px-2.5 py-1 rounded transition-colors"
                       >
                         + Add
@@ -229,9 +230,9 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
               </button>
             </div>
             <div className="p-5 space-y-4 overflow-y-auto">
-              <ContactFields contact={newContact} onChange={setNewContact} roles={roles} />
+              <ContactFields contact={prefilledRole ? { ...newContact, role: prefilledRole } : newContact} onChange={setNewContact} roles={roles} />
               <div className="flex gap-3 pb-2">
-                <button onClick={() => setShowAddModal(false)} className="flex-1 py-3 rounded-xl border-2 border-slate-200 text-slate-700 font-bold">Close</button>
+                <button onClick={() => { setShowAddModal(false); setPrefilledRole(null); }} className="flex-1 py-3 rounded-xl border-2 border-slate-200 text-slate-700 font-bold">Close</button>
                 <button
                   onClick={handleAddContact}
                   disabled={!newContact.name || !newContact.role}
