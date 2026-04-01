@@ -62,7 +62,7 @@ export default function Home() {
       </nav>
 
       {/* Hero */}
-      <section className="flex flex-col items-center text-center px-5 pt-14 pb-10 max-w-3xl mx-auto w-full">
+      <section className="flex flex-col items-center text-center px-5 pt-4 pb-6 max-w-3xl mx-auto w-full">
         <div className="inline-flex items-center gap-2 bg-orange-500/20 border border-orange-500/30 rounded-full px-4 py-1.5 mb-6">
           <Zap className="w-3.5 h-3.5 text-orange-400" />
           <span className="text-orange-300 text-xs font-bold uppercase tracking-wider">AI-Powered Moving Assistant</span>
