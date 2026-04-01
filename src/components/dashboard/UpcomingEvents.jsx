@@ -82,7 +82,17 @@ export default function UpcomingEvents({ user }) {
         .filter(e => e.date >= today)
         .sort((a, b) => a.date.localeCompare(b.date));
 
-      setEvents(all);
+      // Deduplicate: remove appointments that match closing-day closing appointments from same date
+      const deduped = all.filter((e, idx) => {
+        if (e.type !== 'appointment' || !e.title.toLowerCase().includes('closing')) return true;
+        const isDupe = all.some((other, oidx) => 
+          oidx < idx && other.date === e.date && 
+          (other.title.toLowerCase().includes('closing') || other.title.toLowerCase().includes('walkthrough'))
+        );
+        return !isDupe;
+      });
+
+      setEvents(deduped);
     });
   }, [user?.id]);
 
@@ -152,10 +162,31 @@ export default function UpcomingEvents({ user }) {
                   )}
                 </div>
               </div>
-              <button onClick={() => setSelected(null)} className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
-                <X className="w-4 h-4 text-slate-500" />
-              </button>
-            </div>
+              <div className="flex items-center gap-2">
+               <button
+                 onClick={async () => {
+                   if (!confirm(`Delete ${selected.title}?`)) return;
+                   try {
+                     if (selected.type === 'appointment') {
+                       await base44.entities.Appointment.delete(selected.id);
+                     } else {
+                       await base44.entities.Contact.update(selected.id, { service_date: null });
+                     }
+                     setEvents(events.filter(e => e.id !== selected.id));
+                     setSelected(null);
+                   } catch (err) {
+                     console.error('Delete failed:', err);
+                   }
+                 }}
+                 className="w-8 h-8 rounded-full bg-red-50 hover:bg-red-100 flex items-center justify-center transition-colors"
+               >
+                 <X className="w-4 h-4 text-red-500" />
+               </button>
+               <button onClick={() => setSelected(null)} className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
+                 <X className="w-4 h-4 text-slate-500" />
+               </button>
+              </div>
+              </div>
 
             <div className="px-5 pt-4 space-y-3">
               {/* Contact Name & Phone */}
