@@ -77,12 +77,13 @@ export default function Register() {
     const codeFromUrl = urlParams.get('code');
     if (codeFromUrl) {
       setInviteCode(codeFromUrl);
-      // Load client close date from URL code
-      base44.entities.Client.filter({ invitation_code: codeFromUrl }).then(clients => {
-        if (clients.length > 0 && clients[0].close_date) {
-          setMoveDate(clients[0].close_date);
-        }
-      }).catch(() => {});
+      // Load client close date via backend function (no auth required)
+      base44.functions.invoke('getClientByCode', { invitation_code: codeFromUrl })
+        .then(res => {
+          if (res.data?.client?.close_date) {
+            setMoveDate(res.data.client.close_date);
+          }
+        }).catch(() => {});
     } else {
       // Only restore saved progress if NO invite code in URL
       const savedProgress = localStorage.getItem('register_progress');
@@ -128,19 +129,23 @@ export default function Register() {
         return;
       }
       const fullAddress = `${streetAddress}, ${city}, ${zipCode}`;
-      const clients = await base44.entities.Client.filter({ invitation_code: code });
-      if (clients.length === 0 && code !== "1016") {
+      // Use backend function to look up client (bypasses auth restriction on Client entity)
+      let clientRecord = null;
+      if (code) {
+        const res = await base44.functions.invoke('getClientByCode', { invitation_code: code });
+        clientRecord = res.data?.client || null;
+      }
+      if (!clientRecord && code !== "1016") {
         setError("Invalid invite link. Contact your agent.");
         setLoading(false);
         return;
       }
-      if (clients.length > 0) {
-        const client = clients[0];
-        await base44.entities.Client.update(client.id, { status: "registered", user_email: currentUser.email });
+      if (clientRecord) {
+        await base44.entities.Client.update(clientRecord.id, { status: "registered", user_email: currentUser.email });
       }
       await base44.auth.updateMe({
         home_address: fullAddress,
-        estimated_close_date: clients.length > 0 ? clients[0].close_date : moveDate,
+        estimated_close_date: clientRecord?.close_date || moveDate,
         registration_date: new Date().toISOString().split("T")[0],
       });
       localStorage.removeItem('register_progress');
