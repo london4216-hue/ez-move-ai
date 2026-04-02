@@ -151,7 +151,7 @@ export default function Register() {
       });
       localStorage.removeItem('register_progress');
       setLoading(false);
-      setShowOnboarding(true);
+      navigate(createPageUrl("Dashboard"));
     } catch (e) {
       console.error("Register handleVerify error:", e);
       setError("Something went wrong: " + (e?.message || "Please try again."));
