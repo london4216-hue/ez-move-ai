@@ -129,19 +129,20 @@ export default function Register() {
         return;
       }
       const fullAddress = `${streetAddress}, ${city}, ${zipCode}`;
-      // Use backend function to look up client (bypasses auth restriction on Client entity)
+      // Use backend function to look up client and update status in one call
       let clientRecord = null;
       if (code) {
-        const res = await base44.functions.invoke('getClientByCode', { invitation_code: code });
+        const res = await base44.functions.invoke('getClientByCode', {
+          invitation_code: code,
+          update_status: true,
+          user_email: currentUser.email
+        });
         clientRecord = res.data?.client || null;
       }
       if (!clientRecord && code !== "1016") {
         setError("Invalid invite link. Contact your agent.");
         setLoading(false);
         return;
-      }
-      if (clientRecord) {
-        await base44.entities.Client.update(clientRecord.id, { status: "registered", user_email: currentUser.email });
       }
       await base44.auth.updateMe({
         home_address: fullAddress,
