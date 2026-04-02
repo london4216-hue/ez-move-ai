@@ -1,0 +1,70 @@
+{
+  "name": "Client",
+  "type": "object",
+  "properties": {
+    "agent_id": {
+      "type": "string",
+      "description": "Reference to the Agent who invited this client"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email of the client user"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "Client's full name"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Client's phone number"
+    },
+    "home_address": {
+      "type": "string",
+      "description": "Property address"
+    },
+    "close_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Estimated closing date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "invited",
+        "registered",
+        "active",
+        "completed"
+      ],
+      "default": "invited",
+      "description": "Client lifecycle status"
+    },
+    "invitation_code": {
+      "type": "string",
+      "description": "Unique code for client invite link"
+    },
+    "invited_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the client was invited"
+    },
+    "billing_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "charged",
+        "refunded"
+      ],
+      "default": "pending",
+      "description": "Payment status ($40 charge)"
+    },
+    "charge_date": {
+      "type": "string",
+      "format": "date",
+      "description": "When the $40 charge was processed"
+    }
+  },
+  "required": [
+    "agent_id",
+    "invitation_code"
+  ]
+}
