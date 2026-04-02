@@ -8,8 +8,8 @@ Deno.serve(async (req) => {
     return Response.json({ error: "invitation_code required" }, { status: 400 });
   }
 
-  // Use regular entity access (not asServiceRole) to avoid admin-level permission checks
-  const clients = await base44.entities.Client.filter({ invitation_code });
+  // Must use asServiceRole — the Client record was created by the agent, not the new user
+  const clients = await base44.asServiceRole.entities.Client.filter({ invitation_code });
 
   if (clients.length === 0) {
     return Response.json({ client: null });
@@ -17,9 +17,12 @@ Deno.serve(async (req) => {
 
   const c = clients[0];
 
-  // If requested, also update the client status
+  // Update client status using asServiceRole too (same RLS reason)
   if (update_status && c.id) {
-    await base44.entities.Client.update(c.id, { status: "registered", user_email: user_email || "" });
+    await base44.asServiceRole.entities.Client.update(c.id, {
+      status: "registered",
+      user_email: user_email || ""
+    });
   }
 
   return Response.json({
