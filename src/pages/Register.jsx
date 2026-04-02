@@ -144,10 +144,11 @@ export default function Register() {
         registration_date: new Date().toISOString().split("T")[0],
       });
       localStorage.removeItem('register_progress');
+      setLoading(false);
       setShowOnboarding(true);
     } catch (e) {
-      console.error(e);
-      setError("Something went wrong. Please try again.");
+      console.error("Register handleVerify error:", e);
+      setError("Something went wrong: " + (e?.message || "Please try again."));
       setLoading(false);
     }
   }
@@ -270,6 +271,10 @@ export default function Register() {
           </div>
 
         </div>
+
+        {error && (
+          <div className="mb-3 p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm text-center">{error}</div>
+        )}
 
         <button
           onClick={handleVerify}
