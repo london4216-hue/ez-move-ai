@@ -226,16 +226,26 @@ export default function Week1Setup({ userId, userAddress, onComplete, onSaveExit
       )}
 
       {/* Bottom nav */}
-      {!hideButtons && (
+      {(stepIdx > 0 || aiPhase) && (
         <div className="flex gap-2">
-          {stepIdx > 0 || aiPhase ? (
+          <button
+            onClick={handleBack}
+            className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm flex items-center justify-center gap-1"
+          >
+            <ChevronLeft className="w-4 h-4" /> Back
+          </button>
+          {!hideButtons && (
             <button
-              onClick={handleBack}
-              className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm flex items-center justify-center gap-1"
+              onClick={handleSaveExit}
+              className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-500 font-bold text-sm flex items-center justify-center gap-1 hover:bg-slate-200 transition-colors"
             >
-              <ChevronLeft className="w-4 h-4" /> Back
+              <Save className="w-3.5 h-3.5" /> Save & Exit
             </button>
-          ) : null}
+          )}
+        </div>
+      )}
+      {!hideButtons && stepIdx === 0 && !aiPhase && (
+        <div className="flex gap-2">
           <button
             onClick={handleSaveExit}
             className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-500 font-bold text-sm flex items-center justify-center gap-1 hover:bg-slate-200 transition-colors"
