@@ -3,61 +3,13 @@ import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
 import { Loader2, LogOut } from "lucide-react";
-import Week1Setup from "../components/register/Week1Setup";
 
-// Wrapper that gets real user ID for Week1Setup
-function Week1SetupWrapper({ userAddress, onNavigateToDashboard }) {
-  const [userId, setUserId] = useState(null);
-  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const user = await base44.auth.me();
-        if (!user?.id) {
-          setError("Not authenticated. Please refresh.");
-          return;
-        }
-        setUserId(user.id);
-      } catch (e) {
-        setError("Failed to load user. " + e.message);
-      }
-    };
-    load();
-  }, []);
-
-  if (error) return <div className="text-red-600 text-center">{error}</div>;
-  if (!userId) return <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto" />;
-
-  return (
-    <div className="w-full max-w-sm">
-      <Week1Setup
-        userId={userId}
-        userAddress={userAddress}
-        hideButtons={true}
-        onComplete={async (answerMap) => {
-          localStorage.setItem(`user_selections_${userId}`, JSON.stringify(answerMap || {}));
-          localStorage.setItem(`week1_answers_${userId}`, JSON.stringify(answerMap || {}));
-          localStorage.setItem(`walkthrough_done_w1_${userId}`, "1");
-          localStorage.setItem(`onboarding_done_${userId}`, "true");
-          onNavigateToDashboard();
-        }}
-        onSaveExit={async (partialAnswers) => {
-          localStorage.setItem(`week1_setup_${userId}`, JSON.stringify({ step: 0, answers: partialAnswers }));
-          base44.auth.logout("/");
-        }}
-      />
-    </div>
-  );
-}
-
-// Week1Setup now handled by Week1Setup component
 
 export default function Register() {
   const [inviteCode, setInviteCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(false);
   const [moveDate, setMoveDate] = useState("");
   const [streetAddress, setStreetAddress] = useState("");
   const [city, setCity] = useState("");
@@ -149,6 +101,8 @@ export default function Register() {
         estimated_close_date: clientRecord?.close_date || moveDate,
         registration_date: new Date().toISOString().split("T")[0],
       });
+      // Force onboarding modal to show for this new user
+      localStorage.removeItem(`onboarding_done_${currentUser.id}`);
       localStorage.removeItem('register_progress');
       setLoading(false);
       navigate(createPageUrl("Dashboard"));
@@ -159,16 +113,6 @@ export default function Register() {
     }
   }
 
-  if (showOnboarding) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
-        <Week1SetupWrapper
-          userAddress={`${streetAddress}, ${city}, ${zipCode}`}
-          onNavigateToDashboard={() => navigate(createPageUrl("Dashboard"))}
-        />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-5">
