@@ -128,8 +128,9 @@ export default function Register() {
         return;
       }
       const fullAddress = `${streetAddress}, ${city}, ${zipCode}`;
-      const clients = await base44.entities.Client.filter({ invitation_code: code });
-      if (clients.length === 0 && code !== "1016") {
+      const clients = code ? await base44.entities.Client.filter({ invitation_code: code }) : [];
+      // Only block if a code was provided but is invalid
+      if (code && code !== "1016" && clients.length === 0) {
         setError("Invalid invite link. Contact your agent.");
         setLoading(false);
         return;
