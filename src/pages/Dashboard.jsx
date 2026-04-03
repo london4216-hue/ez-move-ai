@@ -75,6 +75,7 @@ export default function Dashboard() {
       <div className="bg-white border-b border-slate-200 px-4 pt-2 pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
+            <div className="flex flex-col items-center gap-0.5">
             <button
               onClick={() => {
                 if (!confirm("Reset demo? This clears all checklist progress and onboarding data.")) return;
@@ -88,6 +89,10 @@ export default function Dashboard() {
               <RotateCcw className="w-2.5 h-2.5" />
               Demo Reset
             </button>
+            {user?.full_name && (
+              <span className="text-[9px] text-slate-400 font-semibold truncate max-w-[80px] text-center">{user.full_name}</span>
+            )}
+            </div>
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-900/30">
               <span className="text-white text-[10px] font-black tracking-tight">EZ</span>
             </div>
