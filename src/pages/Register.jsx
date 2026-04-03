@@ -23,7 +23,7 @@ export default function Register() {
 
   useEffect(() => {
     base44.auth.me().then(user => {
-      if (user?.registration_date) window.location.replace("https://ez-move-ai-a74b3ad5.base44.app/Dashboard");
+      if (user?.registration_date) navigate(createPageUrl("Dashboard"));
       setCurrentUser(user);
     }).catch(() => {});
     
@@ -69,11 +69,6 @@ export default function Register() {
 
 
   const handleVerify = async () => {
-  if (window.location.hostname.includes("preview")) {
-    setError("Registration cannot be completed in preview mode. Please use the real app link.");
-    return;
-  }
-
   if (!streetAddress.trim() || !city.trim() || !zipCode.trim()) {
     setError("Please fill in your address");
     return;
@@ -81,45 +76,34 @@ export default function Register() {
 
   setLoading(true);
   setError("");
-  const code = inviteCode;
 
   try {
-    // Last-chance: if currentUser is null, try to fetch it once more
-    let user = currentUser;
-    if (!user) {
-      try {
-        user = await base44.auth.me();
-        setCurrentUser(user);
-      } catch (e) {
-        // ignore, handled below
-      }
-    }
-
-    if (!user) {
-      setError("Not authenticated. Please reload or open your link from the email again.");
+    if (!currentUser) {
+      setError("Not authenticated. Please reload.");
       setLoading(false);
       return;
     }
 
     const fullAddress = `${streetAddress}, ${city}, ${zipCode}`;
 
-    // Use backend function to look up client and update status in one call
+    // Lookup client & update status
     let clientRecord = null;
-    if (code) {
+    if (inviteCode) {
       const res = await base44.functions.invoke('getClientByCode', {
-        invitation_code: code,
+        invitation_code: inviteCode,
         update_status: true,
-        user_email: user.email
+        user_email: currentUser.email
       });
       clientRecord = res.data?.client || null;
     }
 
-    if (!clientRecord && code !== "1016") {
+    if (!clientRecord && inviteCode !== "1016") {
       setError("Invalid invite link. Contact your agent.");
       setLoading(false);
       return;
     }
 
+    // Update user metadata
     await base44.auth.updateMe({
       home_address: fullAddress,
       estimated_close_date: clientRecord?.close_date || moveDate,
@@ -127,20 +111,21 @@ export default function Register() {
       needs_onboarding: true,
     });
 
-    // Clear any stale onboarding flag
-    localStorage.removeItem(`onboarding_done_${user.id}`);
+    // Clear stale onboarding flags
+    localStorage.removeItem(`onboarding_done_${currentUser.id}`);
     localStorage.removeItem('register_progress');
 
     setLoading(false);
 
-    // Force fresh auth fetch on Dashboard
-    window.location.replace("https://ez-move-ai-a74b3ad5.base44.app/Dashboard");
+    // Force fresh auth state
+    window.location.assign(createPageUrl("Dashboard") + "?newUser=1");
+
   } catch (e) {
     console.error("Register handleVerify error:", e);
     setError("Something went wrong: " + (e?.message || "Please try again."));
     setLoading(false);
   }
-  };
+  }
 
 
   return (
