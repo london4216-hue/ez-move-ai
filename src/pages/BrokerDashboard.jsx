@@ -17,7 +17,7 @@ export default function BrokerDashboard() {
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [addStep, setAddStep] = useState(null);
-  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", close_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] });
+  const [form, setForm] = useState({ firstName: "", lastName: "", close_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] });
   const [pendingClient, setPendingClient] = useState(null);
   const [paying, setPaying] = useState(false);
   const [doneData, setDoneData] = useState(null);
@@ -27,15 +27,8 @@ export default function BrokerDashboard() {
   const [brandName, setBrandName] = useState("");
   const [copiedId, setCopiedId] = useState(null);
 
-  const getAppBaseUrl = () => {
-    const origin = window.location.origin;
-    const sandboxMatch = origin.match(/preview-sandbox--([a-f0-9]+)\.base44\.app/);
-    if (sandboxMatch) return `https://app.base44.com/apps/${sandboxMatch[1]}/editor/preview`;
-    return origin;
-  };
-
   const copyInviteLink = (client) => {
-    const link = `${getAppBaseUrl()}/Register?code=${client.invitation_code}`;
+    const link = `${window.location.origin}/Register?code=${client.invitation_code}`;
     navigator.clipboard.writeText(link);
     setCopiedId(client.id);
     setTimeout(() => setCopiedId(null), 2500);
@@ -61,7 +54,7 @@ export default function BrokerDashboard() {
 
   const resetAdd = () => {
     setAddStep(null);
-    setForm({ firstName: "", lastName: "", email: "", close_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] });
+    setForm({ firstName: "", lastName: "", close_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] });
     setPendingClient(null);
     setDoneData(null);
   };
@@ -76,15 +69,14 @@ export default function BrokerDashboard() {
     });
     setPendingClient({ ...newClient, invitation_code: code });
     setClients(prev => [{ ...newClient, invitation_code: code }, ...prev]);
-    const appUrl = getAppBaseUrl();
+    const appUrl = window.location.origin;
     const inviteLink = `${appUrl}/Register?code=${code}`;
-    // Send invite email only if email was provided
-    if (form.email?.trim()) {
-      base44.integrations.Core.SendEmail({
-        to: form.email.trim(),
-        from_name: agent?.company_name || "EZ Move AI",
-        subject: `Your EZ Move AI Invitation from ${agent?.company_name || "your agent"}`,
-        body: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
+    // Send invite email
+    base44.integrations.Core.SendEmail({
+      to: form.email,
+      from_name: agent?.company_name || "EZ Move AI",
+      subject: `Your EZ Move AI Invitation from ${agent?.company_name || "your agent"}`,
+      body: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
         <div style="background:linear-gradient(135deg,#f97316,#ea580c);border-radius:16px;padding:24px;text-align:center;margin-bottom:24px">
           <h1 style="color:white;margin:0;font-size:28px;font-weight:900">EZ Move <span style="opacity:0.85">AI</span></h1>
           <p style="color:rgba(255,255,255,0.85);margin:8px 0 0;font-size:13px">Your personal moving assistant</p>
@@ -94,8 +86,7 @@ export default function BrokerDashboard() {
         <a href="${inviteLink}" style="display:block;background:#f97316;color:white;text-decoration:none;text-align:center;padding:16px;border-radius:12px;font-weight:700;font-size:16px;margin:24px 0">Get Started →</a>
         <p style="color:#94a3b8;font-size:12px;text-align:center">Click the link above to begin your onboarding.</p>
       </div>`,
-      }).catch(() => {});
-    }
+    }).catch(() => {});
     setAddStep("payment");
   };
 
@@ -323,11 +314,6 @@ export default function BrokerDashboard() {
                       </div>
                     ))}
                   </div>
-                  <div>
-                    <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wide block mb-1">Client Email <span className="text-slate-300 font-normal normal-case">(optional — for invite email)</span></label>
-                    <input type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} placeholder="jane@example.com"
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400" />
-                  </div>
                   {[{ label: "Est. Close / Purchase Date", key: "close_date", type: "date" }].map(f => (
                     <div key={f.key}>
                       <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wide block mb-1">{f.label}</label>
@@ -335,7 +321,7 @@ export default function BrokerDashboard() {
                         className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400" />
                     </div>
                   ))}
-                  <button onClick={handleSaveClient} disabled={!canSave} className="w-full py-3.5 rounded-2xl bg-orange-500 text-white font-bold text-sm disabled:opacity-40 hover:bg-orange-600 transition-colors">Save &amp; Continue →</button>
+                  <button onClick={handleSaveClient} disabled={!canSave} className="w-full py-3.5 rounded-2xl bg-orange-500 text-white font-bold text-sm disabled:opacity-40 hover:bg-orange-600 transition-colors">Save & Continue →</button>
                 </div>
               )}
               {addStep === "payment" && pendingClient && (
@@ -366,9 +352,9 @@ export default function BrokerDashboard() {
                   <p className="text-sm text-slate-500 mb-5">{doneData.name} is now active.</p>
                   <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 mb-5 text-left">
                     <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-2">📎 Send this link to your client</p>
-                    <p className="text-xs text-slate-600 break-all font-mono mb-3">{`${getAppBaseUrl()}/Register?code=${doneData.code}`}</p>
-                     <button
-                      onClick={() => { navigator.clipboard.writeText(`${getAppBaseUrl()}/Register?code=${doneData.code}`); }}
+                    <p className="text-xs text-slate-600 break-all font-mono mb-3">{`${window.location.origin}/Register?code=${doneData.code}`}</p>
+                    <button
+                      onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/Register?code=${doneData.code}`); }}
                       className="w-full bg-orange-500 text-white text-sm font-bold px-4 py-2.5 rounded-xl hover:bg-orange-600 transition-colors flex items-center justify-center gap-2"
                     >
                       <Copy className="w-4 h-4" /> Copy Invite Link

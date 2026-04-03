@@ -74,15 +74,10 @@ export default function Register() {
     setError("");
     const code = inviteCode;
     try {
-      let currentUser;
-      try {
-        currentUser = await base44.auth.me();
-      } catch (authErr) {
-        base44.auth.redirectToLogin(window.location.href);
-        return;
-      }
+      const currentUser = await base44.auth.me();
       if (!currentUser) {
-        base44.auth.redirectToLogin(window.location.href);
+        setError("Not authenticated. Please reload.");
+        setLoading(false);
         return;
       }
       const fullAddress = `${streetAddress}, ${city}, ${zipCode}`;
@@ -110,7 +105,7 @@ export default function Register() {
       localStorage.removeItem(`onboarding_done_${currentUser.id}`);
       localStorage.removeItem('register_progress');
       setLoading(false);
-      navigate(createPageUrl("Dashboard") + "?onboarding=1");
+      navigate(createPageUrl("Dashboard"));
     } catch (e) {
       console.error("Register handleVerify error:", e);
       setError("Something went wrong: " + (e?.message || "Please try again."));
