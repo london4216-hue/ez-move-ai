@@ -28,15 +28,15 @@ export default function Dashboard() {
     base44.auth.me().then(u => {
       setUser(u);
       setLoading(false);
-      // Unified onboarding trigger — same logic for new registration AND Demo Refresh:
-      // 1. Server flag `needs_onboarding` set during registration
-      // 2. URL param ?newUser=1 set by both registration redirect and Demo Refresh
       const urlParams = new URLSearchParams(window.location.search);
       const isNewUser = urlParams.get('newUser') === '1';
       if (u?.needs_onboarding || isNewUser) {
         setShowOnboarding(true);
       }
-    }).catch(() => navigate(createPageUrl("Register")));
+    }).catch(() => {
+      // Not logged in — show demo dashboard without redirecting
+      setLoading(false);
+    });
   }, []);
 
   const daysToClose = user?.estimated_close_date
