@@ -145,6 +145,7 @@ export default function Register() {
         registration_date: new Date().toISOString().split("T")[0],
       });
       localStorage.removeItem('register_progress');
+      localStorage.removeItem(`week1_setup_${currentUser.id}`);
       setLoading(false);
       setShowOnboarding(true);
     } catch (e) {
