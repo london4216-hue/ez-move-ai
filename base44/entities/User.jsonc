@@ -44,11 +44,6 @@
     "onboarded": {
       "type": "boolean",
       "default": false
-    },
-    "needs_onboarding": {
-      "type": "boolean",
-      "default": false,
-      "description": "Set to true on registration, cleared after onboarding modal completes"
     }
   },
   "required": []

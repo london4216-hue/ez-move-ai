@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
 import { differenceInDays, parseISO } from "date-fns";
-import { Package, Home, Sparkles, LogOut } from "lucide-react";
+import { LayoutList, CalendarDays, Package, Home, Sparkles, RotateCcw } from "lucide-react";
 import ChecklistPanel from "@/components/dashboard/ChecklistPanel";
 import CalendarSheet from "@/components/dashboard/CalendarSheet";
 import MyStuffTab from "@/components/dashboard/MyStuffTab";
@@ -26,24 +26,12 @@ export default function Dashboard() {
 
   useEffect(() => {
     base44.auth.me().then(u => {
-      if (!u) {
-        base44.auth.redirectToLogin();
-        return;
-      }
-      if (!u.registration_date) {
-        window.location.assign(createPageUrl("Register"));
-        return;
-      }
       setUser(u);
       setLoading(false);
-      // If somehow needs_onboarding is still true (e.g. user navigated directly), send back to register
-      if (u?.needs_onboarding) {
-        window.location.assign(createPageUrl("Register"));
-        return;
-      }
-    }).catch(() => {
-      base44.auth.redirectToLogin();
-    });
+      // Show onboarding for any user who hasn't completed it yet
+      const alreadyDone = localStorage.getItem(`onboarding_done_${u?.id}`);
+      if (!alreadyDone) setShowOnboarding(true);
+    }).catch(() => navigate(createPageUrl("Register")));
   }, []);
 
   const daysToClose = user?.estimated_close_date
@@ -63,13 +51,6 @@ export default function Dashboard() {
   );
 
   const handleOnboardingDone = () => {
-    if (user?.id) localStorage.setItem(`onboarding_done_${user.id}`, '1');
-    // Clear the server-side flag so it never re-triggers
-    base44.auth.updateMe({ needs_onboarding: false }).catch(() => {});
-    // Remove newUser param from URL without reload
-    const url = new URL(window.location.href);
-    url.searchParams.delete('newUser');
-    window.history.replaceState({}, '', url.toString());
     setShowOnboarding(false);
   };
 
@@ -82,6 +63,18 @@ export default function Dashboard() {
       <div className="bg-white border-b border-slate-200 px-4 pt-2 pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                if (!confirm("Reset demo? This clears all checklist progress and onboarding data.")) return;
+                const keys = Object.keys(localStorage).filter(k => k.includes(user?.id) || k === 'register_progress');
+                keys.forEach(k => localStorage.removeItem(k));
+                window.location.reload();
+              }}
+              className="flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 hover:bg-red-50 hover:text-red-500 text-slate-400 text-[9px] font-bold transition-colors border border-slate-200 hover:border-red-200"
+            >
+              <RotateCcw className="w-2.5 h-2.5" />
+              Demo Reset
+            </button>
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-900/30">
               <span className="text-white text-[10px] font-black tracking-tight">EZ</span>
             </div>
@@ -98,10 +91,9 @@ export default function Dashboard() {
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => base44.auth.logout(createPageUrl("Register"))}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold transition-colors border border-slate-200"
+              className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-colors"
             >
-              <LogOut className="w-3.5 h-3.5" />
-              Save & Exit
+              <span className="text-slate-600 text-[10px] font-bold">{user?.full_name?.[0] || "U"}</span>
             </button>
           </div>
         </div>

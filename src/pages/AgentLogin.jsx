@@ -11,8 +11,7 @@ export default function AgentLogin() {
     base44.auth.me().then(user => {
       if (user?.role === "super_admin") navigate("/SuperAdmin");
       else if (user?.role === "admin") navigate(createPageUrl("AgentDashboard"));
-      else if (user?.registration_date && !user?.needs_onboarding) navigate(createPageUrl("Dashboard"));
-      else if (user) navigate(createPageUrl("Register"));
+      else if (user?.registration_date) navigate(createPageUrl("Dashboard"));
       else navigate("/");
     }).catch(() => navigate("/"));
   }, []);

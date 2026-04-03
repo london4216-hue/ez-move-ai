@@ -3,18 +3,61 @@ import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
 import { Loader2, LogOut } from "lucide-react";
-import Week1OnboardingModal from "@/components/dashboard/Week1OnboardingModal";
+import Week1Setup from "../components/register/Week1Setup";
 
+// Wrapper that gets real user ID for Week1Setup
+function Week1SetupWrapper({ userAddress, onNavigateToDashboard }) {
+  const [userId, setUserId] = useState(null);
+  const [error, setError] = useState(null);
 
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const user = await base44.auth.me();
+        if (!user?.id) {
+          setError("Not authenticated. Please refresh.");
+          return;
+        }
+        setUserId(user.id);
+      } catch (e) {
+        setError("Failed to load user. " + e.message);
+      }
+    };
+    load();
+  }, []);
 
+  if (error) return <div className="text-red-600 text-center">{error}</div>;
+  if (!userId) return <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto" />;
+
+  return (
+    <div className="w-full max-w-sm">
+      <Week1Setup
+        userId={userId}
+        userAddress={userAddress}
+        hideButtons={true}
+        onComplete={async (answerMap) => {
+          localStorage.setItem(`user_selections_${userId}`, JSON.stringify(answerMap || {}));
+          localStorage.setItem(`week1_answers_${userId}`, JSON.stringify(answerMap || {}));
+          localStorage.setItem(`walkthrough_done_w1_${userId}`, "1");
+          localStorage.setItem(`onboarding_done_${userId}`, "true");
+          onNavigateToDashboard();
+        }}
+        onSaveExit={async (partialAnswers) => {
+          localStorage.setItem(`week1_setup_${userId}`, JSON.stringify({ step: 0, answers: partialAnswers }));
+          base44.auth.logout("/");
+        }}
+      />
+    </div>
+  );
+}
+
+// Week1Setup now handled by Week1Setup component
 
 export default function Register() {
-  const [currentUser, setCurrentUser] = useState(null);
-  const [registeredUser, setRegisteredUser] = useState(null);
-  const [showOnboarding, setShowOnboarding] = useState(false);
   const [inviteCode, setInviteCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const [moveDate, setMoveDate] = useState("");
   const [streetAddress, setStreetAddress] = useState("");
   const [city, setCity] = useState("");
@@ -26,38 +69,20 @@ export default function Register() {
 
   useEffect(() => {
     base44.auth.me().then(user => {
-      if (!user) {
-        // Preserve the magic link URL (with ?code=) so after login they land back here
-        base44.auth.redirectToLogin(window.location.href);
-        return;
-      }
-      if (user?.registration_date && !user?.needs_onboarding) {
-        navigate(createPageUrl("Dashboard"));
-        return;
-      }
-      if (user?.registration_date && user?.needs_onboarding) {
-        // Registered but onboarding not done — show onboarding directly
-        setRegisteredUser(user);
-        setShowOnboarding(true);
-        return;
-      }
-      setCurrentUser(user);
-    }).catch(() => {
-      base44.auth.redirectToLogin(window.location.href);
-    });
+      if (user?.registration_date) navigate(createPageUrl("Dashboard"));
+    }).catch(() => {});
     
     // Extract invite code from URL
     const urlParams = new URLSearchParams(window.location.search);
     const codeFromUrl = urlParams.get('code');
     if (codeFromUrl) {
       setInviteCode(codeFromUrl);
-      // Load client close date via backend function (no auth required)
-      base44.functions.invoke('getClientByCode', { invitation_code: codeFromUrl })
-        .then(res => {
-          if (res.data?.client?.close_date) {
-            setMoveDate(res.data.client.close_date);
-          }
-        }).catch(() => {});
+      // Load client close date from URL code
+      base44.entities.Client.filter({ invitation_code: codeFromUrl }).then(clients => {
+        if (clients.length > 0 && clients[0].close_date) {
+          setMoveDate(clients[0].close_date);
+        }
+      }).catch(() => {});
     } else {
       // Only restore saved progress if NO invite code in URL
       const savedProgress = localStorage.getItem('register_progress');
@@ -88,78 +113,54 @@ export default function Register() {
 
 
   const handleVerify = async () => {
-  if (!streetAddress.trim() || !city.trim() || !zipCode.trim()) {
-    setError("Please fill in your address");
-    return;
-  }
-
-  setLoading(true);
-  setError("");
-
-  try {
-    if (!currentUser) {
-      setError("Not authenticated. Please reload.");
-      setLoading(false);
+    if (!streetAddress.trim() || !city.trim() || !zipCode.trim()) {
+      setError("Please fill in your address");
       return;
     }
-
-    const fullAddress = `${streetAddress}, ${city}, ${zipCode}`;
-
-    // Lookup client & update status
-    let clientRecord = null;
-    if (inviteCode) {
-      const res = await base44.functions.invoke('getClientByCode', {
-        invitation_code: inviteCode,
-        update_status: true,
-        user_email: currentUser.email
+    setLoading(true);
+    setError("");
+    const code = inviteCode;
+    try {
+      const currentUser = await base44.auth.me();
+      if (!currentUser) {
+        setError("Not authenticated. Please reload.");
+        setLoading(false);
+        return;
+      }
+      const fullAddress = `${streetAddress}, ${city}, ${zipCode}`;
+      const clients = await base44.entities.Client.filter({ invitation_code: code });
+      if (clients.length === 0 && code !== "1016") {
+        setError("Invalid invite link. Contact your agent.");
+        setLoading(false);
+        return;
+      }
+      if (clients.length > 0) {
+        const client = clients[0];
+        await base44.entities.Client.update(client.id, { status: "registered", user_email: currentUser.email });
+      }
+      await base44.auth.updateMe({
+        home_address: fullAddress,
+        estimated_close_date: clients.length > 0 ? clients[0].close_date : moveDate,
+        registration_date: new Date().toISOString().split("T")[0],
       });
-      clientRecord = res.data?.client || null;
-    }
-
-    if (!clientRecord && inviteCode !== "1016") {
-      setError("Invalid invite link. Contact your agent.");
+      localStorage.removeItem('register_progress');
       setLoading(false);
-      return;
+      setShowOnboarding(true);
+    } catch (e) {
+      console.error("Register handleVerify error:", e);
+      setError("Something went wrong: " + (e?.message || "Please try again."));
+      setLoading(false);
     }
-
-    // Update user metadata
-    await base44.auth.updateMe({
-      home_address: fullAddress,
-      estimated_close_date: clientRecord?.close_date || moveDate,
-      registration_date: new Date().toISOString().split("T")[0],
-      needs_onboarding: true,
-    });
-
-    // Clear stale onboarding flags — including any saved progress so modal always starts from step 0
-    localStorage.removeItem(`onboarding_done_${currentUser.id}`);
-    localStorage.removeItem(`onboarding_progress_${currentUser.id}`);
-    localStorage.removeItem('register_progress');
-
-    setLoading(false);
-
-    // Fetch the freshly updated user and show onboarding inline
-    const freshUser = await base44.auth.me();
-    setRegisteredUser(freshUser);
-    setLoading(false);
-    setShowOnboarding(true);
-    return; // don't fall through to setLoading(false) below
-
-  } catch (e) {
-    console.error("Register handleVerify error:", e);
-    setError("Something went wrong: " + (e?.message || "Please try again."));
-    setLoading(false);
-  }
   }
 
-
-  if (showOnboarding && registeredUser) {
+  if (showOnboarding) {
     return (
-      <Week1OnboardingModal
-        user={registeredUser}
-        onDone={() => {
-          window.location.assign(createPageUrl("Dashboard"));
-        }}
-      />
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
+        <Week1SetupWrapper
+          userAddress={`${streetAddress}, ${city}, ${zipCode}`}
+          onNavigateToDashboard={() => navigate(createPageUrl("Dashboard"))}
+        />
+      </div>
     );
   }
 
