@@ -28,11 +28,13 @@ export default function Dashboard() {
     base44.auth.me().then(u => {
       setUser(u);
       setLoading(false);
-      // ?newUser=1 param from registration guarantees onboarding opens
+      // Trigger onboarding if: user record has needs_onboarding flag (set on registration)
+      // OR if URL param ?newUser=1 is present (demo reset)
+      // OR if no local completion flag (fallback for older users)
       const urlParams = new URLSearchParams(window.location.search);
       const isNewUser = urlParams.get('newUser') === '1';
       const alreadyDone = localStorage.getItem(`onboarding_done_${u?.id}`);
-      if (isNewUser || !alreadyDone) setShowOnboarding(true);
+      if (u?.needs_onboarding || isNewUser || !alreadyDone) setShowOnboarding(true);
     }).catch(() => navigate(createPageUrl("Register")));
   }, []);
 
@@ -54,6 +56,8 @@ export default function Dashboard() {
 
   const handleOnboardingDone = () => {
     if (user?.id) localStorage.setItem(`onboarding_done_${user.id}`, '1');
+    // Clear the server-side flag so it never re-triggers
+    base44.auth.updateMe({ needs_onboarding: false }).catch(() => {});
     // Remove newUser param from URL without reload
     const url = new URL(window.location.href);
     url.searchParams.delete('newUser');

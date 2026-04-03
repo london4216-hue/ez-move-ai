@@ -101,6 +101,7 @@ export default function Register() {
         home_address: fullAddress,
         estimated_close_date: clientRecord?.close_date || moveDate,
         registration_date: new Date().toISOString().split("T")[0],
+        needs_onboarding: true,
       });
       // Clear any stale onboarding flag, then navigate with newUser param to guarantee modal opens
       localStorage.removeItem(`onboarding_done_${currentUser.id}`);
