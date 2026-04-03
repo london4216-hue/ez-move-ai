@@ -26,9 +26,19 @@ export default function Register() {
 
   useEffect(() => {
     base44.auth.me().then(user => {
-      if (user?.registration_date) navigate(createPageUrl("Dashboard"));
+      if (!user) {
+        // Preserve the magic link URL (with ?code=) so after login they land back here
+        base44.auth.redirectToLogin(window.location.href);
+        return;
+      }
+      if (user?.registration_date) {
+        navigate(createPageUrl("Dashboard"));
+        return;
+      }
       setCurrentUser(user);
-    }).catch(() => {});
+    }).catch(() => {
+      base44.auth.redirectToLogin(window.location.href);
+    });
     
     // Extract invite code from URL
     const urlParams = new URLSearchParams(window.location.search);
