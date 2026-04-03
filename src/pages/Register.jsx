@@ -69,6 +69,11 @@ export default function Register() {
 
 
   const handleVerify = async () => {
+  if (window.location.hostname.includes("preview")) {
+    setError("Registration cannot be completed in preview mode. Please use the real app link.");
+    return;
+  }
+
   if (!streetAddress.trim() || !city.trim() || !zipCode.trim()) {
     setError("Please fill in your address");
     return;
