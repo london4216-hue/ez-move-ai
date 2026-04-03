@@ -28,13 +28,14 @@ export default function Dashboard() {
     base44.auth.me().then(u => {
       setUser(u);
       setLoading(false);
-      // Trigger onboarding if: user record has needs_onboarding flag (set on registration)
-      // OR if URL param ?newUser=1 is present (demo reset)
-      // OR if no local completion flag (fallback for older users)
+      // Unified onboarding trigger — same logic for new registration AND Demo Refresh:
+      // 1. Server flag `needs_onboarding` set during registration
+      // 2. URL param ?newUser=1 set by both registration redirect and Demo Refresh
       const urlParams = new URLSearchParams(window.location.search);
       const isNewUser = urlParams.get('newUser') === '1';
-      const alreadyDone = localStorage.getItem(`onboarding_done_${u?.id}`);
-      if (u?.needs_onboarding || isNewUser || !alreadyDone) setShowOnboarding(true);
+      if (u?.needs_onboarding || isNewUser) {
+        setShowOnboarding(true);
+      }
     }).catch(() => navigate(createPageUrl("Register")));
   }, []);
 
