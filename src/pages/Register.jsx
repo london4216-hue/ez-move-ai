@@ -23,7 +23,7 @@ export default function Register() {
 
   useEffect(() => {
     base44.auth.me().then(user => {
-      if (user?.registration_date) navigate(createPageUrl("Dashboard"));
+      if (user?.registration_date) window.location.replace("https://ez-move-ai-a74b3ad5.base44.app/Dashboard");
       setCurrentUser(user);
     }).catch(() => {});
     
@@ -134,7 +134,7 @@ export default function Register() {
     setLoading(false);
 
     // Force fresh auth fetch on Dashboard
-    window.location.assign(createPageUrl("Dashboard") + "?newUser=1");
+    window.location.replace("https://ez-move-ai-a74b3ad5.base44.app/Dashboard");
   } catch (e) {
     console.error("Register handleVerify error:", e);
     setError("Something went wrong: " + (e?.message || "Please try again."));

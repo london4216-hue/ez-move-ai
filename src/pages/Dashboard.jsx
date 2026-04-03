@@ -31,9 +31,7 @@ export default function Dashboard() {
       // Unified onboarding trigger — same logic for new registration AND Demo Refresh:
       // 1. Server flag `needs_onboarding` set during registration
       // 2. URL param ?newUser=1 set by both registration redirect and Demo Refresh
-      const urlParams = new URLSearchParams(window.location.search);
-      const isNewUser = urlParams.get('newUser') === '1';
-      if (u?.needs_onboarding || isNewUser) {
+      if (u?.needs_onboarding) {
         setShowOnboarding(true);
       }
     }).catch(() => navigate(createPageUrl("Register")));
@@ -56,13 +54,8 @@ export default function Dashboard() {
   );
 
   const handleOnboardingDone = () => {
-    if (user?.id) localStorage.setItem(`onboarding_done_${user.id}`, '1');
     // Clear the server-side flag so it never re-triggers
     base44.auth.updateMe({ needs_onboarding: false }).catch(() => {});
-    // Remove newUser param from URL without reload
-    const url = new URL(window.location.href);
-    url.searchParams.delete('newUser');
-    window.history.replaceState({}, '', url.toString());
     setShowOnboarding(false);
   };
 
@@ -80,8 +73,8 @@ export default function Dashboard() {
                 if (!confirm("Reset demo? This clears all checklist progress and onboarding data.")) return;
                 const keys = Object.keys(localStorage).filter(k => k.includes(user?.id) || k === 'register_progress');
                 keys.forEach(k => localStorage.removeItem(k));
-                // Navigate with newUser param so onboarding is guaranteed to open
-                window.location.href = window.location.pathname + '?newUser=1';
+                // Set needs_onboarding flag and reload to trigger onboarding
+                base44.auth.updateMe({ needs_onboarding: true }).then(() => window.location.reload());
               }}
               className="flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 hover:bg-red-50 hover:text-red-500 text-slate-400 text-[9px] font-bold transition-colors border border-slate-200 hover:border-red-200"
             >
