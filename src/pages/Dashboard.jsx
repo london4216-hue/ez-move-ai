@@ -28,12 +28,10 @@ export default function Dashboard() {
     base44.auth.me().then(u => {
       setUser(u);
       setLoading(false);
-      // Show onboarding if: came from registration OR hasn't completed it yet
+      // Only show onboarding when explicitly redirected from registration
       const urlParams = new URLSearchParams(window.location.search);
       const fromRegistration = urlParams.get('onboarding') === '1';
-      const alreadyDone = localStorage.getItem(`onboarding_done_${u?.id}`);
-      if (fromRegistration || !alreadyDone) {
-        localStorage.removeItem(`onboarding_done_${u?.id}`);
+      if (fromRegistration) {
         setShowOnboarding(true);
       }
     }).catch(() => navigate(createPageUrl("Register")));
