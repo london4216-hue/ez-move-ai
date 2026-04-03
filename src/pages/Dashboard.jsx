@@ -36,10 +36,10 @@ export default function Dashboard() {
       }
       setUser(u);
       setLoading(false);
-      const urlParams = new URLSearchParams(window.location.search);
-      const isNewUser = urlParams.get('newUser') === '1';
-      if (u?.needs_onboarding || isNewUser) {
-        setShowOnboarding(true);
+      // If somehow needs_onboarding is still true (e.g. user navigated directly), send back to register
+      if (u?.needs_onboarding) {
+        window.location.assign(createPageUrl("Register"));
+        return;
       }
     }).catch(() => {
       base44.auth.redirectToLogin();

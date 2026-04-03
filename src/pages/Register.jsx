@@ -3,12 +3,15 @@ import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
 import { Loader2, LogOut } from "lucide-react";
+import Week1OnboardingModal from "@/components/dashboard/Week1OnboardingModal";
 
 
 
 
 export default function Register() {
   const [currentUser, setCurrentUser] = useState(null);
+  const [registeredUser, setRegisteredUser] = useState(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const [inviteCode, setInviteCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -118,8 +121,12 @@ export default function Register() {
 
     setLoading(false);
 
-    // Force fresh auth state
-    window.location.assign(createPageUrl("Dashboard") + "?newUser=1");
+    // Fetch the freshly updated user and show onboarding inline
+    const freshUser = await base44.auth.me();
+    setRegisteredUser(freshUser);
+    setLoading(false);
+    setShowOnboarding(true);
+    return; // don't fall through to setLoading(false) below
 
   } catch (e) {
     console.error("Register handleVerify error:", e);
@@ -128,6 +135,17 @@ export default function Register() {
   }
   }
 
+
+  if (showOnboarding && registeredUser) {
+    return (
+      <Week1OnboardingModal
+        user={registeredUser}
+        onDone={() => {
+          window.location.assign(createPageUrl("Dashboard"));
+        }}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-5">
