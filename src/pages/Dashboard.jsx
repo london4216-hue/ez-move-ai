@@ -28,9 +28,11 @@ export default function Dashboard() {
     base44.auth.me().then(u => {
       setUser(u);
       setLoading(false);
-      // Show onboarding for any user who hasn't completed it yet
+      // ?newUser=1 param from registration guarantees onboarding opens
+      const urlParams = new URLSearchParams(window.location.search);
+      const isNewUser = urlParams.get('newUser') === '1';
       const alreadyDone = localStorage.getItem(`onboarding_done_${u?.id}`);
-      if (!alreadyDone) setShowOnboarding(true);
+      if (isNewUser || !alreadyDone) setShowOnboarding(true);
     }).catch(() => navigate(createPageUrl("Register")));
   }, []);
 
@@ -51,6 +53,11 @@ export default function Dashboard() {
   );
 
   const handleOnboardingDone = () => {
+    if (user?.id) localStorage.setItem(`onboarding_done_${user.id}`, '1');
+    // Remove newUser param from URL without reload
+    const url = new URL(window.location.href);
+    url.searchParams.delete('newUser');
+    window.history.replaceState({}, '', url.toString());
     setShowOnboarding(false);
   };
 
@@ -68,7 +75,8 @@ export default function Dashboard() {
                 if (!confirm("Reset demo? This clears all checklist progress and onboarding data.")) return;
                 const keys = Object.keys(localStorage).filter(k => k.includes(user?.id) || k === 'register_progress');
                 keys.forEach(k => localStorage.removeItem(k));
-                window.location.reload();
+                // Navigate with newUser param so onboarding is guaranteed to open
+                window.location.href = window.location.pathname + '?newUser=1';
               }}
               className="flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 hover:bg-red-50 hover:text-red-500 text-slate-400 text-[9px] font-bold transition-colors border border-slate-200 hover:border-red-200"
             >
