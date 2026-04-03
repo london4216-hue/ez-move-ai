@@ -111,8 +111,9 @@ export default function Register() {
       needs_onboarding: true,
     });
 
-    // Clear stale onboarding flags
+    // Clear stale onboarding flags — including any saved progress so modal always starts from step 0
     localStorage.removeItem(`onboarding_done_${currentUser.id}`);
+    localStorage.removeItem(`onboarding_progress_${currentUser.id}`);
     localStorage.removeItem('register_progress');
 
     setLoading(false);
