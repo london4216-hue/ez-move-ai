@@ -69,53 +69,62 @@ export default function Register() {
 
 
   const handleVerify = async () => {
-    if (!streetAddress.trim() || !city.trim() || !zipCode.trim()) {
-      setError("Please fill in your address");
+  if (!streetAddress.trim() || !city.trim() || !zipCode.trim()) {
+    setError("Please fill in your address");
+    return;
+  }
+
+  setLoading(true);
+  setError("");
+
+  try {
+    if (!currentUser) {
+      setError("Not authenticated. Please reload.");
+      setLoading(false);
       return;
     }
-    setLoading(true);
-    setError("");
-    const code = inviteCode;
-    try {
-      if (!currentUser) {
-        setError("Not authenticated. Please reload.");
-        setLoading(false);
-        return;
-      }
-      const fullAddress = `${streetAddress}, ${city}, ${zipCode}`;
-      // Use backend function to look up client and update status in one call
-      let clientRecord = null;
-      if (code) {
-        const res = await base44.functions.invoke('getClientByCode', {
-          invitation_code: code,
-          update_status: true,
-          user_email: currentUser.email
-        });
-        clientRecord = res.data?.client || null;
-      }
-      if (!clientRecord && code !== "1016") {
-        setError("Invalid invite link. Contact your agent.");
-        setLoading(false);
-        return;
-      }
-      await base44.auth.updateMe({
-        home_address: fullAddress,
-        estimated_close_date: clientRecord?.close_date || moveDate,
-        registration_date: new Date().toISOString().split("T")[0],
-        needs_onboarding: true,
+
+    const fullAddress = `${streetAddress}, ${city}, ${zipCode}`;
+
+    // Lookup client & update status
+    let clientRecord = null;
+    if (inviteCode) {
+      const res = await base44.functions.invoke('getClientByCode', {
+        invitation_code: inviteCode,
+        update_status: true,
+        user_email: currentUser.email
       });
-      // Clear any stale onboarding flag
-      localStorage.removeItem(`onboarding_done_${currentUser.id}`);
-      localStorage.removeItem('register_progress');
-      setLoading(false);
-      // Use window.location.assign so the Dashboard gets a fresh auth fetch
-      // (React Router navigate() reuses cached auth state, needs_onboarding wouldn't be visible)
-      window.location.assign(createPageUrl("Dashboard") + "?newUser=1");
-    } catch (e) {
-      console.error("Register handleVerify error:", e);
-      setError("Something went wrong: " + (e?.message || "Please try again."));
-      setLoading(false);
+      clientRecord = res.data?.client || null;
     }
+
+    if (!clientRecord && inviteCode !== "1016") {
+      setError("Invalid invite link. Contact your agent.");
+      setLoading(false);
+      return;
+    }
+
+    // Update user metadata
+    await base44.auth.updateMe({
+      home_address: fullAddress,
+      estimated_close_date: clientRecord?.close_date || moveDate,
+      registration_date: new Date().toISOString().split("T")[0],
+      needs_onboarding: true,
+    });
+
+    // Clear stale onboarding flags
+    localStorage.removeItem(`onboarding_done_${currentUser.id}`);
+    localStorage.removeItem('register_progress');
+
+    setLoading(false);
+
+    // Force fresh auth state
+    window.location.assign(createPageUrl("Dashboard") + "?newUser=1");
+
+  } catch (e) {
+    console.error("Register handleVerify error:", e);
+    setError("Something went wrong: " + (e?.message || "Please try again."));
+    setLoading(false);
+  }
   }
 
 
