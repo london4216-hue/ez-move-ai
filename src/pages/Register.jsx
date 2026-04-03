@@ -105,7 +105,7 @@ export default function Register() {
       localStorage.removeItem(`onboarding_done_${currentUser.id}`);
       localStorage.removeItem('register_progress');
       setLoading(false);
-      navigate(createPageUrl("Dashboard"));
+      navigate(createPageUrl("Dashboard") + "?onboarding=1");
     } catch (e) {
       console.error("Register handleVerify error:", e);
       setError("Something went wrong: " + (e?.message || "Please try again."));
