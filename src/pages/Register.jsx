@@ -74,10 +74,15 @@ export default function Register() {
     setError("");
     const code = inviteCode;
     try {
-      const currentUser = await base44.auth.me();
+      let currentUser;
+      try {
+        currentUser = await base44.auth.me();
+      } catch (authErr) {
+        base44.auth.redirectToLogin(window.location.href);
+        return;
+      }
       if (!currentUser) {
-        setError("Not authenticated. Please reload.");
-        setLoading(false);
+        base44.auth.redirectToLogin(window.location.href);
         return;
       }
       const fullAddress = `${streetAddress}, ${city}, ${zipCode}`;

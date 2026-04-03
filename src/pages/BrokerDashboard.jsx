@@ -27,8 +27,15 @@ export default function BrokerDashboard() {
   const [brandName, setBrandName] = useState("");
   const [copiedId, setCopiedId] = useState(null);
 
+  const getAppBaseUrl = () => {
+    const origin = window.location.origin;
+    const sandboxMatch = origin.match(/preview-sandbox--([a-f0-9]+)\.base44\.app/);
+    if (sandboxMatch) return `https://app.base44.com/apps/${sandboxMatch[1]}/editor/preview`;
+    return origin;
+  };
+
   const copyInviteLink = (client) => {
-    const link = `${window.location.origin}/Register?code=${client.invitation_code}`;
+    const link = `${getAppBaseUrl()}/Register?code=${client.invitation_code}`;
     navigator.clipboard.writeText(link);
     setCopiedId(client.id);
     setTimeout(() => setCopiedId(null), 2500);
@@ -69,7 +76,7 @@ export default function BrokerDashboard() {
     });
     setPendingClient({ ...newClient, invitation_code: code });
     setClients(prev => [{ ...newClient, invitation_code: code }, ...prev]);
-    const appUrl = window.location.origin;
+    const appUrl = getAppBaseUrl();
     const inviteLink = `${appUrl}/Register?code=${code}`;
     // Send invite email only if email was provided
     if (form.email?.trim()) {
@@ -359,9 +366,9 @@ export default function BrokerDashboard() {
                   <p className="text-sm text-slate-500 mb-5">{doneData.name} is now active.</p>
                   <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 mb-5 text-left">
                     <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-2">📎 Send this link to your client</p>
-                    <p className="text-xs text-slate-600 break-all font-mono mb-3">{`${window.location.origin}/Register?code=${doneData.code}`}</p>
-                    <button
-                      onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/Register?code=${doneData.code}`); }}
+                    <p className="text-xs text-slate-600 break-all font-mono mb-3">{`${getAppBaseUrl()}/Register?code=${doneData.code}`}</p>
+                     <button
+                      onClick={() => { navigator.clipboard.writeText(`${getAppBaseUrl()}/Register?code=${doneData.code}`); }}
                       className="w-full bg-orange-500 text-white text-sm font-bold px-4 py-2.5 rounded-xl hover:bg-orange-600 transition-colors flex items-center justify-center gap-2"
                     >
                       <Copy className="w-4 h-4" /> Copy Invite Link
