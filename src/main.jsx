@@ -1,10 +1,11 @@
 import React from 'react'
 
-// Auto-redirect preview users to the real app domain
+// Auto-redirect any preview domain to the real production app
 if (typeof window !== "undefined") {
   const host = window.location.hostname;
-  if (host.includes("preview-sandbox--69a4327be3c6be2ca74b3ad5.base44.app")) {
-    const realDomain = "https://69a4327be3c6be2ca74b3ad5.base44.app";
+  const isPreview = host.includes("preview--") || host.includes("preview-sandbox--");
+  if (isPreview) {
+    const realDomain = "https://ez-move-ai-a74b3ad5.base44.app";
     const path = window.location.pathname + window.location.search;
     window.location.replace(realDomain + path);
   }
