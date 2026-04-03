@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
 import { differenceInDays, parseISO } from "date-fns";
-import { LayoutList, CalendarDays, Package, Home, Sparkles, RotateCcw } from "lucide-react";
+import { LayoutList, CalendarDays, Package, Home, Sparkles, RotateCcw, LogOut } from "lucide-react";
 import ChecklistPanel from "@/components/dashboard/ChecklistPanel";
 import CalendarSheet from "@/components/dashboard/CalendarSheet";
 import MyStuffTab from "@/components/dashboard/MyStuffTab";
@@ -104,9 +104,10 @@ export default function Dashboard() {
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => base44.auth.logout(createPageUrl("Register"))}
-              className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold transition-colors border border-slate-200"
             >
-              <span className="text-slate-600 text-[10px] font-bold">{user?.full_name?.[0] || "U"}</span>
+              <LogOut className="w-3.5 h-3.5" />
+              Save & Exit
             </button>
           </div>
         </div>
