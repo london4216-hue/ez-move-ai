@@ -103,11 +103,13 @@ export default function Register() {
         registration_date: new Date().toISOString().split("T")[0],
         needs_onboarding: true,
       });
-      // Clear any stale onboarding flag, then navigate with newUser param to guarantee modal opens
+      // Clear any stale onboarding flag
       localStorage.removeItem(`onboarding_done_${currentUser.id}`);
       localStorage.removeItem('register_progress');
       setLoading(false);
-      navigate(createPageUrl("Dashboard") + "?newUser=1");
+      // Use window.location.assign so the Dashboard gets a fresh auth fetch
+      // (React Router navigate() reuses cached auth state, needs_onboarding wouldn't be visible)
+      window.location.assign(createPageUrl("Dashboard") + "?newUser=1");
     } catch (e) {
       console.error("Register handleVerify error:", e);
       setError("Something went wrong: " + (e?.message || "Please try again."));
