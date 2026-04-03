@@ -31,8 +31,14 @@ export default function Register() {
         base44.auth.redirectToLogin(window.location.href);
         return;
       }
-      if (user?.registration_date) {
+      if (user?.registration_date && !user?.needs_onboarding) {
         navigate(createPageUrl("Dashboard"));
+        return;
+      }
+      if (user?.registration_date && user?.needs_onboarding) {
+        // Registered but onboarding not done — show onboarding directly
+        setRegisteredUser(user);
+        setShowOnboarding(true);
         return;
       }
       setCurrentUser(user);
