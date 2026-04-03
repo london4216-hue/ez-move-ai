@@ -7,6 +7,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import AgentOnboarding from './pages/AgentOnboarding';
+import Preview from './pages/Preview';
 import SuperAdmin from './pages/SuperAdmin';
 import BrokerDashboard from './pages/BrokerDashboard';
 
@@ -62,6 +63,7 @@ const AuthenticatedApp = () => {
         />
       ))}
 
+      <Route path="/Preview" element={<LayoutWrapper currentPageName="Preview"><Preview /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
