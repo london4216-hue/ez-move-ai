@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
 import { differenceInDays, parseISO } from "date-fns";
-import { LayoutList, CalendarDays, Package, Home, Sparkles, RotateCcw, LogOut } from "lucide-react";
+import { Package, Home, Sparkles, LogOut } from "lucide-react";
 import ChecklistPanel from "@/components/dashboard/ChecklistPanel";
 import CalendarSheet from "@/components/dashboard/CalendarSheet";
 import MyStuffTab from "@/components/dashboard/MyStuffTab";
@@ -26,6 +26,14 @@ export default function Dashboard() {
 
   useEffect(() => {
     base44.auth.me().then(u => {
+      if (!u) {
+        base44.auth.redirectToLogin();
+        return;
+      }
+      if (!u.registration_date) {
+        window.location.assign(createPageUrl("Register"));
+        return;
+      }
       setUser(u);
       setLoading(false);
       const urlParams = new URLSearchParams(window.location.search);
@@ -34,8 +42,7 @@ export default function Dashboard() {
         setShowOnboarding(true);
       }
     }).catch(() => {
-      // Not logged in — show demo dashboard without redirecting
-      setLoading(false);
+      base44.auth.redirectToLogin();
     });
   }, []);
 
@@ -75,24 +82,6 @@ export default function Dashboard() {
       <div className="bg-white border-b border-slate-200 px-4 pt-2 pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="flex flex-col items-center gap-0.5">
-            <button
-              onClick={() => {
-                if (!confirm("Reset demo? This clears all checklist progress and onboarding data.")) return;
-                const keys = Object.keys(localStorage).filter(k => k.includes(user?.id) || k === 'register_progress');
-                keys.forEach(k => localStorage.removeItem(k));
-                // Navigate with newUser param so onboarding is guaranteed to open
-                window.location.href = window.location.pathname + '?newUser=1';
-              }}
-              className="flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 hover:bg-red-50 hover:text-red-500 text-slate-400 text-[9px] font-bold transition-colors border border-slate-200 hover:border-red-200"
-            >
-              <RotateCcw className="w-2.5 h-2.5" />
-              Demo Reset
-            </button>
-            {user?.full_name && (
-              <span className="text-[9px] text-slate-400 font-semibold truncate max-w-[80px] text-center">{user.full_name}</span>
-            )}
-            </div>
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-900/30">
               <span className="text-white text-[10px] font-black tracking-tight">EZ</span>
             </div>
