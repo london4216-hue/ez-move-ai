@@ -38,7 +38,17 @@ export default function BrokerDashboard() {
   useEffect(() => {
     const load = async () => {
       const user = await base44.auth.me();
-      if (user?.role !== "admin") { navigate("/"); setLoading(false); return; }
+      if (!user) { base44.auth.redirectToLogin(window.location.href); return; }
+      if (user?.role !== "admin") {
+        // Non-admin clients must go through Register → onboarding → Dashboard
+        if (!user.registration_date || user.needs_onboarding) {
+          navigate(createPageUrl("Register"));
+        } else {
+          navigate(createPageUrl("Dashboard"));
+        }
+        setLoading(false);
+        return;
+      }
       let agents = await base44.entities.Agent.filter({ created_by: user.email });
       let agentRecord = agents.length === 0
         ? await base44.entities.Agent.create({ company_name: user.full_name || "My Brokerage" })
