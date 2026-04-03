@@ -8,6 +8,7 @@ import { Loader2, LogOut } from "lucide-react";
 
 
 export default function Register() {
+  const [currentUser, setCurrentUser] = useState(null);
   const [inviteCode, setInviteCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -23,6 +24,7 @@ export default function Register() {
   useEffect(() => {
     base44.auth.me().then(user => {
       if (user?.registration_date) navigate(createPageUrl("Dashboard"));
+      setCurrentUser(user);
     }).catch(() => {});
     
     // Extract invite code from URL
@@ -75,7 +77,6 @@ export default function Register() {
     setError("");
     const code = inviteCode;
     try {
-      const currentUser = await base44.auth.me();
       if (!currentUser) {
         setError("Not authenticated. Please reload.");
         setLoading(false);
