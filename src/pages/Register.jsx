@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
 import { Loader2, LogOut } from "lucide-react";
+import Week1OnboardingModal from "@/components/dashboard/Week1OnboardingModal";
 
 
 
@@ -10,6 +11,8 @@ export default function Register() {
   const [inviteCode, setInviteCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [registeredUser, setRegisteredUser] = useState(null);
   const [moveDate, setMoveDate] = useState("");
   const [streetAddress, setStreetAddress] = useState("");
   const [city, setCity] = useState("");
@@ -101,11 +104,14 @@ export default function Register() {
         estimated_close_date: clientRecord?.close_date || moveDate,
         registration_date: new Date().toISOString().split("T")[0],
       });
-      // Force onboarding modal to show for this new user
+      // Mark onboarding as NOT done so Dashboard won't re-trigger it after we complete it here
       localStorage.removeItem(`onboarding_done_${currentUser.id}`);
       localStorage.removeItem('register_progress');
       setLoading(false);
-      navigate(createPageUrl("Dashboard"));
+      // Re-fetch user so we have latest data (including registration_date)
+      const updatedUser = await base44.auth.me();
+      setRegisteredUser(updatedUser);
+      setShowOnboarding(true);
     } catch (e) {
       console.error("Register handleVerify error:", e);
       setError("Something went wrong: " + (e?.message || "Please try again."));
@@ -113,6 +119,18 @@ export default function Register() {
     }
   }
 
+
+  if (showOnboarding && registeredUser) {
+    return (
+      <Week1OnboardingModal
+        user={registeredUser}
+        onDone={() => {
+          localStorage.setItem(`onboarding_done_${registeredUser.id}`, '1');
+          navigate(createPageUrl("Dashboard"));
+        }}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-5">
