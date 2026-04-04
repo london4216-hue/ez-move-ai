@@ -91,6 +91,16 @@ export default function Home() {
         </div>
       </section>
 
+      {/* SMS Consent Notice */}
+      <section className="max-w-5xl mx-auto w-full px-5 pb-4">
+        <div className="bg-slate-800/60 border border-white/10 rounded-2xl px-5 py-4 text-center">
+          <p className="text-slate-400 text-xs leading-relaxed">
+            By entering your phone number and submitting this form, you agree to receive automated text messages from EZ Move AI regarding your account, reminders, and service updates. Message and data rates may apply. Reply STOP to opt out, or HELP for assistance.{" "}
+            <a href="/PrivacyPolicy" className="text-orange-400 underline hover:text-orange-300 font-semibold">View our Privacy &amp; SMS Policy for details.</a>
+          </p>
+        </div>
+      </section>
+
       {/* Returning User Banner */}
       <section className="max-w-5xl mx-auto w-full px-5 pb-6">
         <div className="bg-gradient-to-r from-orange-500/20 to-purple-600/20 border border-white/10 rounded-3xl p-8 flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">

@@ -10,6 +10,7 @@ import AgentOnboarding from './pages/AgentOnboarding';
 import Preview from './pages/Preview';
 import SuperAdmin from './pages/SuperAdmin';
 import BrokerDashboard from './pages/BrokerDashboard';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -64,6 +65,7 @@ const AuthenticatedApp = () => {
       ))}
 
       <Route path="/Preview" element={<LayoutWrapper currentPageName="Preview"><Preview /></LayoutWrapper>} />
+      <Route path="/PrivacyPolicy" element={<PrivacyPolicy />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
