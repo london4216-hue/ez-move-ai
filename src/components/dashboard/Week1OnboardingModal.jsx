@@ -28,7 +28,7 @@ const SIZE_COLORS = {
 
 // decisions shape: { "Sofa": { choice: "move"|"donate"|"junk", size: "Medium" | null } }
 
-const STEPS = ["welcome", "stays_goes", "ai_insights", "estate_sale", "movers", "closing_details", "done"];
+const STEPS = ["welcome", "moving_question", "stays_goes", "ai_insights", "estate_sale", "movers", "closing_details", "done"];
 const STORAGE_KEY = (id) => `onboarding_progress_${id}`;
 
 async function findProviders(query, address) {
@@ -53,6 +53,7 @@ export default function Week1OnboardingModal({ user, onDone }) {
   const saved = (() => { try { return JSON.parse(localStorage.getItem(savedKey) || "{}"); } catch { return {}; } })();
 
   const [stepIdx, setStepIdx]           = useState(saved.stepIdx ?? 0);
+  const [isMoving, setIsMoving]         = useState(saved.isMoving ?? null);
   const [decisions, setDecisions]       = useState(saved.decisions ?? {});  // { item: { choice, size } }
   const [sizePrompt, setSizePrompt]     = useState(null);   // item name waiting for size
   const [needsEstate, setNeedsEstate]   = useState(saved.needsEstate ?? null);
@@ -86,7 +87,7 @@ export default function Week1OnboardingModal({ user, onDone }) {
   const step = STEPS[stepIdx];
 
   const persist = (patch = {}) => {
-    localStorage.setItem(savedKey, JSON.stringify({ stepIdx, decisions, needsEstate, needsMover, insights, ...patch }));
+    localStorage.setItem(savedKey, JSON.stringify({ stepIdx, decisions, needsEstate, needsMover, insights, isMoving, ...patch }));
   };
 
   const goTo = (idx, patch = {}) => {
@@ -370,6 +371,29 @@ Be specific and realistic, like a professional moving company estimate.`,
             <button onClick={() => goTo(1)} className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-black text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
               Let's Get Started <ChevronRight className="w-4 h-4" />
             </button>
+          </div>
+        )}
+
+        {/* ── MOVING QUESTION ── */}
+        {step === "moving_question" && (
+          <div className="text-center">
+            <div className="text-6xl mb-5">🏠</div>
+            <h2 className="text-2xl font-black text-slate-900 mb-3">Are you moving to a new place?</h2>
+            <p className="text-sm text-slate-500 leading-relaxed mb-8">
+              This helps us personalize your plan — we'll only ask moving-related questions if you're relocating.
+            </p>
+            <div className="space-y-3">
+              <button
+                onClick={() => { setIsMoving(true); persist({ isMoving: true }); goTo(2); }}
+                className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200">
+                ✅ Yes, I'm moving to a new place
+              </button>
+              <button
+                onClick={() => { setIsMoving(false); persist({ isMoving: false }); goTo(6); }}
+                className="w-full py-3.5 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm">
+                ❌ No, I'm staying put
+              </button>
+            </div>
           </div>
         )}
 
