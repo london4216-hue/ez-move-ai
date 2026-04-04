@@ -11,6 +11,7 @@ import Preview from './pages/Preview';
 import SuperAdmin from './pages/SuperAdmin';
 import BrokerDashboard from './pages/BrokerDashboard';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+import MyStuff from './pages/MyStuff';
 
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -66,6 +67,7 @@ const AuthenticatedApp = () => {
 
       <Route path="/Preview" element={<LayoutWrapper currentPageName="Preview"><Preview /></LayoutWrapper>} />
       <Route path="/PrivacyPolicy" element={<PrivacyPolicy />} />
+      <Route path="/MyStuff" element={<MyStuff />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
