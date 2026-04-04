@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { toast } from "sonner";
 import { base44 } from "@/api/base44Client";
 import { CheckCircle2, ChevronRight, ChevronLeft, Loader2, Phone, Save, Sparkles, DollarSign, Truck } from "lucide-react";
 
@@ -34,14 +33,14 @@ const STORAGE_KEY = (id) => `onboarding_progress_${id}`;
 
 async function findProviders(query, address) {
   const res = await base44.integrations.Core.InvokeLLM({
-    prompt: `Find 3 real top-rated local businesses for: "${query}" near ${address || "my area"}. Include name, phone number, a 1-line description, and a star rating from 1-5.`,
+    prompt: `Find 3 real top-rated local businesses for: "${query}" near ${address || "my area"}. Include name, phone number, and a 1-line description.`,
     add_context_from_internet: true,
     response_json_schema: {
       type: "object",
       properties: {
         providers: {
           type: "array",
-          items: { type: "object", properties: { name: { type: "string" }, phone: { type: "string" }, description: { type: "string" }, rating: { type: "number" } } }
+          items: { type: "object", properties: { name: { type: "string" }, phone: { type: "string" }, description: { type: "string" } } }
         }
       }
     }
@@ -197,7 +196,6 @@ Be specific and realistic, like a professional moving company estimate.`,
         color: "#f97316",
       }).catch(() => {});
       setMoversSaved(true);
-      toast.success("Added to your contacts");
     }
   };
 
@@ -227,7 +225,6 @@ Be specific and realistic, like a professional moving company estimate.`,
         avatar_initials: p.name?.[0] || "E",
         color: "#a855f7",
       }).catch(() => {});
-      toast.success("Added to your contacts");
     }
   };
 
@@ -767,12 +764,6 @@ Be specific and realistic, like a professional moving company estimate.`,
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1">
                             <p className="font-bold text-slate-800 text-sm">{p.name}</p>
-                            {p.rating && (
-                              <p className="text-amber-400 text-xs mt-0.5">
-                                {"★".repeat(Math.round(p.rating))}{"☆".repeat(5 - Math.round(p.rating))}
-                                <span className="text-slate-400 ml-1">{p.rating}/5</span>
-                              </p>
-                            )}
                             {p.description && <p className="text-xs text-slate-500 mt-0.5">{p.description}</p>}
                             {p.phone && <a href={`tel:${p.phone}`} className="text-xs font-bold text-orange-500 flex items-center gap-1 mt-1"><Phone className="w-3 h-3" />{p.phone}</a>}
                           </div>
@@ -783,7 +774,7 @@ Be specific and realistic, like a professional moving company estimate.`,
                                 ? "bg-purple-500 text-white border-purple-500"
                                 : "bg-white text-purple-600 border-purple-300 hover:bg-purple-50"
                             }`}>
-                            {selectedEstate === p.name ? <><CheckCircle2 className="w-3 h-3" /> Added</> : "Add to Contacts"}
+                            {selectedEstate === p.name ? <><CheckCircle2 className="w-3 h-3" /> Selected</> : "Select"}
                           </button>
                         </div>
                       </div>
@@ -853,12 +844,6 @@ Be specific and realistic, like a professional moving company estimate.`,
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1">
                             <p className="font-bold text-slate-800 text-sm">{p.name}</p>
-                            {p.rating && (
-                              <p className="text-amber-400 text-xs mt-0.5">
-                                {"★".repeat(Math.round(p.rating))}{"☆".repeat(5 - Math.round(p.rating))}
-                                <span className="text-slate-400 ml-1">{p.rating}/5</span>
-                              </p>
-                            )}
                             {p.description && <p className="text-xs text-slate-500 mt-0.5">{p.description}</p>}
                             {p.phone && <a href={`tel:${p.phone}`} className="text-xs font-bold text-orange-500 flex items-center gap-1 mt-1"><Phone className="w-3 h-3" />{p.phone}</a>}
                           </div>
@@ -869,7 +854,7 @@ Be specific and realistic, like a professional moving company estimate.`,
                                 ? "bg-orange-500 text-white border-orange-500"
                                 : "bg-white text-orange-600 border-orange-300 hover:bg-orange-50"
                             }`}>
-                            {selectedMover === p.name ? <><CheckCircle2 className="w-3 h-3" /> Added</> : "Add to Contacts"}
+                            {selectedMover === p.name ? <><CheckCircle2 className="w-3 h-3" /> Selected</> : "Select"}
                           </button>
                         </div>
                       </div>

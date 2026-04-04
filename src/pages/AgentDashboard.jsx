@@ -149,11 +149,11 @@ export default function AgentDashboard() {
           <div className="flex items-center gap-2">
             <button onClick={() => setAddStep("form")}
               className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs px-4 py-2 rounded-xl transition-colors shadow-md shadow-orange-200">
-              <Plus className="w-3.5 h-3.5" /> Add Buyer/Seller
-              </button>
-              <button onClick={() => base44.auth.logout("/")} className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors">
+              <Plus className="w-3.5 h-3.5" /> Add Client
+            </button>
+            <button onClick={() => base44.auth.logout("/")} className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors">
               <LogOut className="w-4 h-4 text-slate-500" />
-              </button>
+            </button>
           </div>
         </div>
       </div>
@@ -162,10 +162,10 @@ export default function AgentDashboard() {
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4">
           {[
-            { label: "Active Buyers/Sellers", value: clients.filter(c => c.status === "active").length, Icon: Users, color: "text-blue-500", bg: "bg-blue-50", border: "border-blue-100" },
+            { label: "Active Clients", value: clients.filter(c => c.status === "active").length, Icon: Users, color: "text-blue-500", bg: "bg-blue-50", border: "border-blue-100" },
             { label: "Pending Invites", value: clients.filter(c => c.status === "invited").length, Icon: Clock, color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-100" },
-            { label: "Total Buyers/Sellers", value: clients.length, Icon: Users, color: "text-slate-600", bg: "bg-slate-50", border: "border-slate-100" },
-            ].map(s => (
+            { label: "Total Clients", value: clients.length, Icon: Users, color: "text-slate-600", bg: "bg-slate-50", border: "border-slate-100" },
+          ].map(s => (
             <div key={s.label} className={`bg-white rounded-2xl p-4 border ${s.border} shadow-sm`}>
               <div className={`w-8 h-8 ${s.bg} rounded-xl flex items-center justify-center mb-2`}>
                 <s.Icon className={`w-4 h-4 ${s.color}`} />
@@ -181,18 +181,18 @@ export default function AgentDashboard() {
           <div className="px-5 py-3.5 border-b border-blue-50 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4 text-orange-500" />
-              <p className="font-bold text-slate-800 text-sm">Buyers & Sellers</p>
+              <p className="font-bold text-slate-800 text-sm">My Clients</p>
             </div>
             <span className="text-slate-400 text-xs font-semibold">{clients.length} total</span>
-            </div>
+          </div>
 
           {clients.length === 0 ? (
             <div className="py-14 text-center">
               <div className="text-4xl mb-3">👥</div>
-              <p className="text-slate-500 font-semibold mb-1">No buyers or sellers yet</p>
-              <button onClick={() => setAddStep("form")} className="text-orange-500 font-bold text-sm">+ Add your first buyer/seller</button>
-              </div>
-              ) : (
+              <p className="text-slate-500 font-semibold mb-1">No clients yet</p>
+              <button onClick={() => setAddStep("form")} className="text-orange-500 font-bold text-sm">+ Add your first client</button>
+            </div>
+          ) : (
             <div className="divide-y divide-slate-50">
               {clients.map(client => {
                 const daysLeft = client.close_date ? differenceInDays(parseISO(client.close_date), new Date()) : null;
@@ -260,9 +260,9 @@ export default function AgentDashboard() {
           <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden border border-blue-100">
             <div className="px-6 pt-5 pb-4 border-b border-slate-100 flex items-center justify-between">
               <button onClick={() => setEditingId(null)} className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center"><X className="w-4 h-4 text-slate-500" /></button>
-              <p className="font-bold text-slate-800 text-sm">Edit Buyer/Seller</p>
+              <p className="font-bold text-slate-800 text-sm">Edit Client</p>
               <div className="w-8" />
-              </div>
+            </div>
             <div className="px-6 py-5 space-y-3">
               {[{ label: "Full Name", key: "user_name", type: "text" }, { label: "Email", key: "user_email", type: "email" }, { label: "Address", key: "home_address", type: "text" }, { label: "Est. Close / First Day of Home", key: "close_date", type: "date" }].map(f => (
                 <div key={f.key}>
@@ -287,10 +287,10 @@ export default function AgentDashboard() {
                 {addStep === "payment" ? <ArrowLeft className="w-4 h-4 text-slate-500" /> : <X className="w-4 h-4 text-slate-500" />}
               </button>
               <p className="font-bold text-slate-800 text-sm">
-                {addStep === "form" ? "New Buyer/Seller" : addStep === "payment" ? "Confirm & Pay" : "Buyer/Seller Added! 🎉"}
+                {addStep === "form" ? "New Client" : addStep === "payment" ? "Confirm & Pay" : "Client Added! 🎉"}
               </p>
               <div className="w-8" />
-              </div>
+            </div>
             <div className="px-6 py-5">
               {addStep === "form" && (
                 <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
@@ -317,7 +317,7 @@ export default function AgentDashboard() {
               {addStep === "payment" && pendingClient && (
                 <div className="space-y-4">
                   <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 space-y-2">
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Buyer/Seller Summary</p>
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Client Summary</p>
                     <div className="flex justify-between"><span className="text-xs text-slate-400">Name</span><span className="text-xs font-bold text-slate-700">{pendingClient.user_name}</span></div>
                     <div className="flex justify-between"><span className="text-xs text-slate-400">Email</span><span className="text-xs font-bold text-slate-700">{pendingClient.user_email}</span></div>
                     <div className="flex justify-between"><span className="text-xs text-slate-400">Close Date</span><span className="text-xs font-bold text-slate-700">{pendingClient.close_date}</span></div>
@@ -325,10 +325,10 @@ export default function AgentDashboard() {
                   </div>
                   <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4 flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-black text-slate-800">EZ Move AI — 1 Buyer/Seller</p>
+                      <p className="text-sm font-black text-slate-800">EZ Move AI — 1 Client</p>
                       <p className="text-xs text-slate-500">Full moving assistant access</p>
-                      </div>
-                      <p className="text-2xl font-black text-orange-500">$40</p>
+                    </div>
+                    <p className="text-2xl font-black text-orange-500">$40</p>
                   </div>
                   <button onClick={handlePayment} disabled={paying} className="w-full py-3.5 rounded-2xl bg-orange-500 text-white font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50 hover:bg-orange-600 transition-colors">
                     {paying ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : <><CreditCard className="w-4 h-4" /> Pay $40 & Activate</>}
@@ -343,9 +343,9 @@ export default function AgentDashboard() {
                 <div className="text-center py-4">
                   <CheckCircle2 className="w-14 h-14 text-emerald-500 mx-auto mb-4" />
                   <p className="text-xl font-bold text-slate-800 mb-1">All Set!</p>
-                  <p className="text-sm text-slate-500 mb-5">{doneData.name} has been added as a buyer/seller.</p>
+                  <p className="text-sm text-slate-500 mb-5">{doneData.name} has been added.</p>
                   <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 mb-4 text-left">
-                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-2">📎 Send this link to your buyer/seller</p>
+                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-2">📎 Send this link to your client</p>
                     <p className="text-xs text-slate-600 break-all font-mono mb-3">{`${window.location.origin}/Register?code=${doneData.code}`}</p>
                     <button
                       onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/Register?code=${doneData.code}`); }}

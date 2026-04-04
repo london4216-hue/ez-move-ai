@@ -125,8 +125,8 @@ export default function Dashboard() {
               <div
                 className="h-full bg-gradient-to-r from-orange-500 to-orange-400 rounded-full transition-all duration-700"
                 style={{
-                  width: daysToClose === null ? '2%' : `${Math.max(2, Math.min(98, Math.round(
-                    (1 - Math.max(0, daysToClose) / Math.max(1,
+                  width: daysToClose === null ? '2%' : `${Math.max(2, Math.min(100, Math.round(
+                    (Math.max(0, daysToClose) / Math.max(1,
                       differenceInDays(parseISO(user.estimated_close_date), user.registration_date ? parseISO(user.registration_date) : new Date())
                     )) * 100
                   )))}%`
