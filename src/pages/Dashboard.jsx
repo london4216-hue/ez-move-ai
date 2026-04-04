@@ -28,10 +28,18 @@ export default function Dashboard() {
     base44.auth.me().then(u => {
       setUser(u);
       setLoading(false);
+      // Force-show modal if user just completed registration
+      const justRegistered = localStorage.getItem('just_registered');
+      if (justRegistered === u?.id) {
+        localStorage.removeItem('just_registered');
+        localStorage.removeItem(`onboarding_done_${u?.id}`);
+        localStorage.removeItem(`onboarding_progress_${u?.id}`);
+        setShowOnboarding(true);
+        return;
+      }
       // Show onboarding for any user who hasn't completed it yet
       const alreadyDone = localStorage.getItem(`onboarding_done_${u?.id}`);
       if (!alreadyDone) {
-        // Clear any stale mid-flow progress so modal always starts at step 0
         localStorage.removeItem(`onboarding_progress_${u?.id}`);
         setShowOnboarding(true);
       }

@@ -117,6 +117,8 @@ export default function Register() {
       localStorage.removeItem(`onboarding_done_${currentUser.id}`);
       localStorage.removeItem(`onboarding_progress_${currentUser.id}`);
       localStorage.removeItem(`week1_setup_${currentUser.id}`);
+      // Set a flag so Dashboard knows to force-show the onboarding modal
+      localStorage.setItem('just_registered', currentUser.id);
       setLoading(false);
       navigate(createPageUrl("Dashboard"));
     } catch (e) {
