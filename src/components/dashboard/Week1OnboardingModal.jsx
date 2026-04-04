@@ -392,22 +392,18 @@ Be specific and realistic, like a professional moving company estimate.`,
                 </div>
               ))}
             </div>
-            <button onClick={() => goTo(1)} className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-black text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
-              Let's Get Started <ChevronRight className="w-4 h-4" />
-            </button>
           </div>
         )}
 
         {/* ── MOVING QUESTION ── */}
         {step === "moving_question" && (
-          <div className="text-center">
-            <div className="text-6xl mb-5">🏠</div>
-            <h2 className="text-2xl font-black text-slate-900 mb-3">Are you moving to a new place?</h2>
-            <p className="text-sm text-slate-500 leading-relaxed mb-8">
-              This helps us personalize your plan — we'll only ask moving-related questions if you're relocating.
-            </p>
-            <NavButtons onContinue={() => { setIsMoving(true); persist({ isMoving: true }); goTo(2); }} />
-          </div>
+         <div className="text-center">
+           <div className="text-6xl mb-5">🏠</div>
+           <h2 className="text-2xl font-black text-slate-900 mb-3">Are you moving to a new place?</h2>
+           <p className="text-sm text-slate-500 leading-relaxed mb-8">
+             This helps us personalize your plan — we'll only ask moving-related questions if you're relocating.
+           </p>
+         </div>
         )}
 
         {/* ── MILEAGE DISTANCE ── */}
@@ -468,7 +464,7 @@ Be specific and realistic, like a professional moving company estimate.`,
               {decisionCount > 0 && <p className="text-xs font-bold text-orange-500 mt-1">{decisionCount} item{decisionCount !== 1 ? "s" : ""} sorted so far</p>}
             </div>
 
-            <div className="space-y-4 mb-4">
+            <div className="space-y-4 mb-8">
               {ROOMS.map(({ room, emoji, items }) => (
                 <div key={room}>
                   <p className="text-xs font-black text-slate-600 uppercase tracking-wider mb-2">{emoji} {room}</p>
@@ -543,9 +539,8 @@ Be specific and realistic, like a professional moving company estimate.`,
             </div>
 
             <p className="text-[10px] text-slate-400 text-center mb-4">You can always edit these in the "My Stuff" tab later</p>
-            <NavButtons onBack={() => goTo(1)} onContinue={() => goTo(3)} onSkip={() => goTo(3)} />
-          </div>
-        )}
+            </div>
+            )}
 
         {/* ── AI INSIGHTS ── */}
         {step === "ai_insights" && (
@@ -762,11 +757,10 @@ Be specific and realistic, like a professional moving company estimate.`,
                   </div>
                 )}
 
-                <NavButtons onBack={() => goTo(2)} onContinue={() => goTo(4)} onSkip={() => goTo(4)} />
-              </div>
-            )}
-          </div>
-        )}
+                </div>
+                )}
+                </div>
+                )}
 
         {/* ── ESTATE SALE ── */}
         {step === "estate_sale" && (
@@ -834,11 +828,10 @@ Be specific and realistic, like a professional moving company estimate.`,
                     <p className="text-sm font-bold text-emerald-700">Got it — we'll skip estate sale planning.</p>
                   </div>
                 )}
-                <NavButtons onBack={() => { setNeedsEstate(null); setProviders([]); }} onContinue={() => goTo(5)} onSkip={() => goTo(5)} />
-              </div>
-            )}
-          </div>
-        )}
+                </div>
+                )}
+                </div>
+                )}
 
         {/* ── MOVERS ── */}
         {step === "movers" && (
@@ -910,11 +903,10 @@ Be specific and realistic, like a professional moving company estimate.`,
                     <p className="text-sm font-bold text-emerald-700">Great — we'll focus your plan on packing & logistics.</p>
                   </div>
                 )}
-                <NavButtons onBack={() => { setNeedsMover(null); setProviders([]); setMoversSaved(false); }} onContinue={() => goTo(6)} onSkip={() => goTo(6)} />
-              </div>
-            )}
-          </div>
-        )}
+                </div>
+                )}
+                </div>
+                )}
 
         {/* ── CLOSING DETAILS ── */}
         {step === "closing_details" && (
@@ -992,16 +984,8 @@ Be specific and realistic, like a professional moving company estimate.`,
               </div>
             </div>
 
-            <div className="flex gap-3">
-              <button onClick={() => goTo(5)} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button onClick={() => { persist({ closingDetails }); goTo(8); }} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
-                Continue <ChevronRight className="w-4 h-4" />
-              </button>
             </div>
-          </div>
-        )}
+            )}
 
         {/* ── DONE ── */}
         {step === "done" && (
@@ -1045,6 +1029,9 @@ Be specific and realistic, like a professional moving company estimate.`,
               <button onClick={() => { setIsMoving(false); persist({ isMoving: false }); goTo(7); }} className="w-full py-3.5 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm">
                 ❌ No, I'm staying put
               </button>
+              <button onClick={() => goTo(2)} className="w-full py-3.5 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm">
+                ⏭️ Skip
+              </button>
             </div>
           )}
           {step === "mileage_distance" && !showMileageInput && (
@@ -1072,13 +1059,13 @@ Be specific and realistic, like a professional moving company estimate.`,
           )}
           {step === "stays_goes" && (
             <div className="flex gap-3">
-              <button onClick={() => goTo(1)} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
+              <button onClick={() => goTo(2)} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <button onClick={() => goTo(3)} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
+              <button onClick={() => goTo(4)} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
                 Continue <ChevronRight className="w-4 h-4" />
               </button>
-              <button onClick={() => goTo(3)} className="px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm hover:bg-slate-50 transition-colors">
+              <button onClick={() => goTo(4)} className="px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm hover:bg-slate-50 transition-colors">
                 Skip
               </button>
             </div>
