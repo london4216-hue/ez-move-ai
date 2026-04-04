@@ -124,7 +124,7 @@ export default function BrokerDashboard() {
   };
 
 
-  const canSave = form.firstName.trim() && form.lastName.trim() && form.email.trim() && form.close_date && form.street?.trim() && form.city?.trim() && form.state && form.zip?.trim(); && form.close_date && form.street?.trim() && form.city?.trim() && form.state && form.zip?.trim();
+  const canSave = form.firstName.trim() && form.lastName.trim() && form.email.trim() && form.close_date && form.street?.trim() && form.city?.trim() && form.state && form.zip?.trim();
 
   if (loading) return (
     <div className="min-h-screen bg-blue-50 flex items-center justify-center">
@@ -171,11 +171,6 @@ export default function BrokerDashboard() {
               <div className={`w-8 h-8 ${s.bg} rounded-xl flex items-center justify-center mb-2`}>
                 <s.Icon className={`w-4 h-4 ${s.color}`} />
               </div>
-              <p className="text-xl font-black text-slate-800">{s.value}</p>
-              <p className="text-slate-400 text-[11px] font-semibold mt-0.5">{s.label}</p>
-            </div>
-          ))}
-        </div>
               <p className="text-xl font-black text-slate-800">{s.value}</p>
               <p className="text-slate-400 text-[11px] font-semibold mt-0.5">{s.label}</p>
             </div>
