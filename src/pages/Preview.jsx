@@ -1,5 +1,5 @@
 import { base44 } from "@/api/base44Client";
-import DemoCarousel from "../components/DemoCarousel";
+import DemoModule from "../components/DemoModule";
 import { Globe, UserCheck, Briefcase, Play, LogIn, LayoutDashboard, ArrowRight } from "lucide-react";
 
 const SECTIONS = [
@@ -39,7 +39,7 @@ const SECTIONS = [
     desc: "Experience the complete client journey — from clicking an invite link, through the 7-question onboarding, all the way to the Move Dashboard.",
     actions: [{ label: "Start Demo →", onClick: () => base44.auth.redirectToLogin("/Register?code=DEMO") }],
     highlight: true,
-    showCarousel: true,
+    showDemoModule: true,
   },
   {
     icon: LogIn,
@@ -112,9 +112,9 @@ export default function Preview() {
                     </button>
                   ))}
                 </div>
-                {s.showCarousel && (
+                {s.showDemoModule && (
                   <div className="mt-5">
-                    <DemoCarousel />
+                    <DemoModule />
                   </div>
                 )}
               </div>
