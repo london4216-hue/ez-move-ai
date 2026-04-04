@@ -27,24 +27,32 @@ export default function Register() {
 
     base44.auth.isAuthenticated().then(async (isAuthed) => {
       if (!isAuthed) {
-        // Not logged in — redirect to login and come BACK to this exact URL (with ?code=)
-        // This ensures the code is preserved after authentication
+        // Not logged in — redirect to login and return to this exact URL (with ?code=)
         base44.auth.redirectToLogin(window.location.href);
         return;
       }
 
       const user = await base44.auth.me();
 
-      // If no invite code and already fully registered, go to dashboard
-      if (!codeFromUrl && user?.registration_date) {
-        navigate(createPageUrl("Dashboard"));
-        return;
-      }
-      // If arriving via invite link, clear stale onboarding flags so journey starts fresh
-      if (codeFromUrl && user?.id) {
+      // If there's an invite code, verify the logged-in user is the intended recipient.
+      // If someone else (e.g. the agent) is logged in, log them out and force
+      // a fresh login that returns to this same invite URL.
+      if (codeFromUrl) {
+        const clients = await base44.entities.Client.filter({ invitation_code: codeFromUrl }).catch(() => []);
+        const clientRecord = clients[0];
+        if (clientRecord?.user_email && clientRecord.user_email !== user.email) {
+          // Wrong user is logged in — log them out and redirect back here
+          base44.auth.logout(window.location.href);
+          return;
+        }
+        // Clear stale onboarding flags so journey starts fresh
         localStorage.removeItem(`onboarding_done_${user.id}`);
         localStorage.removeItem(`onboarding_progress_${user.id}`);
         localStorage.removeItem(`week1_setup_${user.id}`);
+      } else if (user?.registration_date) {
+        // No invite code and already registered — go straight to dashboard
+        navigate(createPageUrl("Dashboard"));
+        return;
       }
     }).catch(() => {
       // On any auth error, redirect to login preserving current URL
