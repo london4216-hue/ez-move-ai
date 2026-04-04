@@ -33,8 +33,18 @@ export default function Register() {
       setInviteCode(codeFromUrl);
       // Load client close date from URL code
       base44.entities.Client.filter({ invitation_code: codeFromUrl }).then(clients => {
-        if (clients.length > 0 && clients[0].close_date) {
-          setMoveDate(clients[0].close_date);
+        if (clients.length > 0) {
+          if (clients[0].close_date) setMoveDate(clients[0].close_date);
+          // Pre-fill address from agent/broker entered data
+          if (clients[0].home_address) {
+            const parts = clients[0].home_address.split(",").map(s => s.trim());
+            setStreetAddress(parts[0] || "");
+            if (parts.length >= 3) {
+              setCity(parts[1] || "");
+              const stateZip = (parts[2] || "").trim().split(" ");
+              setZipCode(stateZip[stateZip.length - 1] || "");
+            }
+          }
         }
       }).catch(() => {});
     } else {

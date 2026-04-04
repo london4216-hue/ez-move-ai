@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Plus, LogOut, Edit2, X, Trash2, Users, Building2, ArrowLeft, Loader2, CheckCircle2, CreditCard, Palette, Copy, Check } from "lucide-react";
+import ClientAddressFields, { buildFullAddress } from "../components/register/ClientAddressFields";
 import { format, differenceInDays, parseISO } from "date-fns";
 
 const STATUS_COLORS = {
@@ -17,7 +18,7 @@ export default function BrokerDashboard() {
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [addStep, setAddStep] = useState(null);
-  const [form, setForm] = useState({ firstName: "", lastName: "", close_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] });
+  const [form, setForm] = useState({ firstName: "", lastName: "", close_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], street: "", unit: "", city: "", state: "", zip: "" });
   const [pendingClient, setPendingClient] = useState(null);
   const [paying, setPaying] = useState(false);
   const [doneData, setDoneData] = useState(null);
@@ -54,18 +55,20 @@ export default function BrokerDashboard() {
 
   const resetAdd = () => {
     setAddStep(null);
-    setForm({ firstName: "", lastName: "", close_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] });
+    setForm({ firstName: "", lastName: "", close_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], street: "", unit: "", city: "", state: "", zip: "" });
     setPendingClient(null);
     setDoneData(null);
   };
 
   const handleSaveClient = async () => {
-    const code = Math.random().toString(36).substring(2, 10);
+    const code = Math.floor(1000 + Math.random() * 9000).toString();
     const clientName = `${form.firstName} ${form.lastName}`;
+    const fullAddress = buildFullAddress(form);
     const newClient = await base44.entities.Client.create({
       agent_id: agent.id, user_name: clientName,
       close_date: form.close_date, invitation_code: code, status: "invited",
       invited_date: new Date().toISOString(), billing_status: "pending",
+      home_address: fullAddress,
     });
     setPendingClient({ ...newClient, invitation_code: code });
     setClients(prev => [{ ...newClient, invitation_code: code }, ...prev]);
@@ -114,7 +117,7 @@ export default function BrokerDashboard() {
   };
 
 
-  const canSave = form.firstName.trim() && form.lastName.trim() && form.close_date;
+  const canSave = form.firstName.trim() && form.lastName.trim() && form.close_date && form.street?.trim() && form.city?.trim() && form.state && form.zip?.trim();
 
   if (loading) return (
     <div className="min-h-screen bg-blue-50 flex items-center justify-center">
@@ -304,7 +307,7 @@ export default function BrokerDashboard() {
             </div>
             <div className="px-6 py-5">
               {addStep === "form" && (
-                <div className="space-y-4">
+                <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
                   <div className="grid grid-cols-2 gap-3">
                     {["firstName", "lastName"].map(k => (
                       <div key={k}>
@@ -314,13 +317,12 @@ export default function BrokerDashboard() {
                       </div>
                     ))}
                   </div>
-                  {[{ label: "Est. Close / Purchase Date", key: "close_date", type: "date" }].map(f => (
-                    <div key={f.key}>
-                      <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wide block mb-1">{f.label}</label>
-                      <input type={f.type} value={form[f.key]} onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))}
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400" />
-                    </div>
-                  ))}
+                  <div>
+                    <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wide block mb-1">Est. Close / Purchase Date</label>
+                    <input type="date" value={form.close_date} onChange={e => setForm(p => ({ ...p, close_date: e.target.value }))}
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400" />
+                  </div>
+                  <ClientAddressFields form={form} setForm={setForm} />
                   <button onClick={handleSaveClient} disabled={!canSave} className="w-full py-3.5 rounded-2xl bg-orange-500 text-white font-bold text-sm disabled:opacity-40 hover:bg-orange-600 transition-colors">Save & Continue →</button>
                 </div>
               )}
