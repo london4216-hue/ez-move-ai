@@ -8,11 +8,11 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import AgentOnboarding from './pages/AgentOnboarding';
 import Preview from './pages/Preview.jsx';
+import AgentDashboard from './pages/AgentDashboard';
 import SuperAdmin from './pages/SuperAdmin';
 import BrokerDashboard from './pages/BrokerDashboard';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import MyStuff from './pages/MyStuff';
-
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -66,6 +66,9 @@ const AuthenticatedApp = () => {
       ))}
 
       <Route path="/Preview" element={<LayoutWrapper currentPageName="Preview"><Preview /></LayoutWrapper>} />
+      <Route path="/AgentDashboard" element={<LayoutWrapper currentPageName="AgentDashboard"><AgentDashboard /></LayoutWrapper>} />
+      <Route path="/BrokerDashboard" element={<LayoutWrapper currentPageName="BrokerDashboard"><BrokerDashboard /></LayoutWrapper>} />
+      <Route path="/SuperAdmin" element={<LayoutWrapper currentPageName="SuperAdmin"><SuperAdmin /></LayoutWrapper>} />
       <Route path="/PrivacyPolicy" element={<PrivacyPolicy />} />
       <Route path="/MyStuff" element={<MyStuff />} />
       <Route path="*" element={<PageNotFound />} />

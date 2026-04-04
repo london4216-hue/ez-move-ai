@@ -46,7 +46,7 @@ const MODULES = [
     accent: "text-purple-200",
     badge: "bg-purple-700 text-purple-100",
     badgeText: "Broker Portal",
-    desc: "Portal for broker-level admins. Manage agents under your firm, add clients, track payments, and oversee all move progress.",
+    desc: "Portal for broker-level admins. Manage agents under your firm, add buyers and sellers, track payments, and oversee all move progress.",
     actions: [{ label: "Open Broker Portal", fn: () => base44.auth.redirectToLogin("/BrokerDashboard") }],
   },
   {
@@ -68,7 +68,7 @@ const MODULES = [
     accent: "text-red-200",
     badge: "bg-red-800 text-red-100",
     badgeText: "Super Admin",
-    desc: "Platform-wide control center. Oversees and controls BOTH Broker and Agent portals. Manages all accounts, clients, revenue, and system settings. Not visible to brokers or agents.",
+    desc: "Platform-wide control center. Oversees and controls BOTH Broker and Agent portals. Manages all accounts, buyers/sellers, revenue, and system settings. Not visible to brokers or agents.",
     actions: [{ label: "Open Super Admin Portal", fn: () => base44.auth.redirectToLogin("/SuperAdmin") }],
   },
   {
@@ -165,7 +165,7 @@ export default function Preview() {
                   { label: "Super Admin", color: "bg-red-900/50 border-red-700/50 text-red-300" },
                   { label: "Broker Portal", color: "bg-purple-900/50 border-purple-700/50 text-purple-300" },
                   { label: "Agent Portal", color: "bg-orange-900/50 border-orange-700/50 text-orange-300" },
-                  { label: "Clients", color: "bg-emerald-900/50 border-emerald-700/50 text-emerald-300" },
+                  { label: "Buyers/Sellers", color: "bg-emerald-900/50 border-emerald-700/50 text-emerald-300" },
                 ].map((p, i, arr) => (
                   <div key={p.label} className="flex items-center gap-2">
                     <span className={`px-3 py-1.5 rounded-lg text-xs font-bold border ${p.color}`}>{p.label}</span>
