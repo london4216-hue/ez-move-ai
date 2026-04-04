@@ -35,17 +35,24 @@ export default function Register() {
       const user = await base44.auth.me();
 
       // If there's an invite code, verify the logged-in user is the intended recipient.
-      // If someone else (e.g. the agent) is logged in, log them out and force
-      // a fresh login that returns to this same invite URL.
       if (codeFromUrl) {
         const clients = await base44.entities.Client.filter({ invitation_code: codeFromUrl }).catch(() => []);
         const clientRecord = clients[0];
-        if (clientRecord?.user_email && clientRecord.user_email !== user.email) {
-          // Wrong user is logged in — log them out and redirect back here
+
+        const wrongUser =
+          // Admin/agent is logged in — they should never go through client onboarding
+          user.role === 'admin' ||
+          // A specific client email is expected and it doesn't match the current user
+          (clientRecord?.user_email && clientRecord.user_email !== user.email);
+
+        if (wrongUser) {
+          // Log out the current user and redirect straight back to this invite URL
+          // so the correct client can log in fresh
           base44.auth.logout(window.location.href);
           return;
         }
-        // Clear stale onboarding flags so journey starts fresh
+
+        // Clear stale onboarding flags so journey starts fresh for this client
         localStorage.removeItem(`onboarding_done_${user.id}`);
         localStorage.removeItem(`onboarding_progress_${user.id}`);
         localStorage.removeItem(`week1_setup_${user.id}`);
