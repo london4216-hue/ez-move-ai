@@ -28,7 +28,7 @@ const SIZE_COLORS = {
 
 // decisions shape: { "Sofa": { choice: "move"|"donate"|"junk", size: "Medium" | null } }
 
-const STEPS = ["welcome", "moving_question", "stays_goes", "ai_insights", "estate_sale", "movers", "closing_details", "done"];
+const STEPS = ["welcome", "moving_question", "mileage_distance", "stays_goes", "ai_insights", "estate_sale", "movers", "closing_details", "done"];
 const STORAGE_KEY = (id) => `onboarding_progress_${id}`;
 
 async function findProviders(query, address) {
@@ -65,6 +65,9 @@ export default function Week1OnboardingModal({ user, onDone }) {
   const [moversSaved, setMoversSaved]   = useState(false);
   const [selectedMover, setSelectedMover] = useState(saved.selectedMover ?? null);
   const [selectedEstate, setSelectedEstate] = useState(saved.selectedEstate ?? null);  // provider name
+  const [moveDistanceMiles, setMoveDistanceMiles] = useState(saved.moveDistanceMiles ?? null);
+  const [showMileageInput, setShowMileageInput] = useState(false);
+  const [mileageInputValue, setMileageInputValue] = useState("");
   const [moverQ, setMoverQ] = useState(saved.moverQ ?? null); // mover questionnaire answers
   const [showMoverQ, setShowMoverQ] = useState(!saved.moverQ);  // show questionnaire if not answered
   const [moverQForm, setMoverQForm] = useState(saved.moverQ ?? {
@@ -87,7 +90,7 @@ export default function Week1OnboardingModal({ user, onDone }) {
   const step = STEPS[stepIdx];
 
   const persist = (patch = {}) => {
-    localStorage.setItem(savedKey, JSON.stringify({ stepIdx, decisions, needsEstate, needsMover, insights, isMoving, ...patch }));
+    localStorage.setItem(savedKey, JSON.stringify({ stepIdx, decisions, needsEstate, needsMover, insights, isMoving, moveDistanceMiles, ...patch }));
   };
 
   const goTo = (idx, patch = {}) => {
@@ -295,7 +298,7 @@ Be specific and realistic, like a professional moving company estimate.`,
       if (stuffLists[choice]) stuffLists[choice].push({ id: `seed-${name}`, name, size: size || "Medium", qty: qty || 1 });
     });
     await createDefaultAppointments();
-    base44.auth.updateMe({ stuff_lists: JSON.stringify(stuffLists), needs_mover: needsMover, needs_estate_sale: needsEstate }).catch(() => {});
+    base44.auth.updateMe({ stuff_lists: JSON.stringify(stuffLists), needs_mover: needsMover, needs_estate_sale: needsEstate, move_distance_miles: moveDistanceMiles }).catch(() => {});
 
     // Reflect onboarding progress in Week 1 checklist
     const uid = user?.id;
@@ -389,7 +392,7 @@ Be specific and realistic, like a professional moving company estimate.`,
                 ✅ Yes, I'm moving to a new place
               </button>
               <button
-                onClick={() => { setIsMoving(false); persist({ isMoving: false }); goTo(6); }}
+                onClick={() => { setIsMoving(false); persist({ isMoving: false }); goTo(7); }}
                 className="w-full py-3.5 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm">
                 ❌ No, I'm staying put
               </button>
@@ -397,11 +400,71 @@ Be specific and realistic, like a professional moving company estimate.`,
           </div>
         )}
 
+        {/* ── MILEAGE DISTANCE ── */}
+        {step === "mileage_distance" && (
+          <div className="text-center">
+            <div className="text-6xl mb-5">📍</div>
+            <h2 className="text-2xl font-black text-slate-900 mb-3">Do you know how many miles away your next home will be?</h2>
+            <p className="text-sm text-slate-500 leading-relaxed mb-8">
+              This helps us calculate accurate moving quotes.
+            </p>
+            {!showMileageInput ? (
+              <div className="space-y-3">
+                <button
+                  onClick={() => setShowMileageInput(true)}
+                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200">
+                  ✅ Yes
+                </button>
+                <button
+                  onClick={() => { setMoveDistanceMiles(null); persist({ moveDistanceMiles: null }); goTo(3); }}
+                  className="w-full py-3.5 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm">
+                  ❌ No
+                </button>
+                <button
+                  onClick={() => { setMoveDistanceMiles(null); persist({ moveDistanceMiles: null }); goTo(3); }}
+                  className="w-full py-3.5 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm">
+                  ⏭️ Skip
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="bg-orange-50 border border-orange-200 rounded-2xl px-4 py-3">
+                  <label className="text-[11px] font-bold text-orange-700 uppercase tracking-wide mb-2 block">How many miles away is your next home?</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={mileageInputValue}
+                    onChange={e => setMileageInputValue(e.target.value)}
+                    placeholder="e.g., 50"
+                    className="w-full px-4 py-3 rounded-xl border border-orange-200 text-center text-lg font-bold focus:outline-none focus:border-orange-400 bg-white"
+                  />
+                </div>
+                <button
+                  onClick={() => {
+                    const val = mileageInputValue.trim() ? parseInt(mileageInputValue) : null;
+                    setMoveDistanceMiles(val);
+                    persist({ moveDistanceMiles: val });
+                    goTo(3);
+                  }}
+                  disabled={!mileageInputValue.trim()}
+                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 disabled:opacity-40 disabled:cursor-not-allowed">
+                  Continue →
+                </button>
+                <button
+                  onClick={() => { setShowMileageInput(false); setMileageInputValue(""); }}
+                  className="w-full py-3.5 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm">
+                  Back
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* ── STAYS / GOES ── */}
         {step === "stays_goes" && (
           <div>
             <div className="flex justify-end mb-1">
-              <button onClick={() => goTo(2)} className="text-[11px] font-semibold text-slate-400 hover:text-slate-600 transition-colors px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200">
+              <button onClick={() => goTo(3)} className="text-[11px] font-semibold text-slate-400 hover:text-slate-600 transition-colors px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200">
                 Skip for now →
               </button>
             </div>
@@ -488,10 +551,10 @@ Be specific and realistic, like a professional moving company estimate.`,
 
             <p className="text-[10px] text-slate-400 text-center mb-4">You can always edit these in the "My Stuff" tab later</p>
             <div className="flex gap-3">
-              <button onClick={() => goTo(0)} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
+              <button onClick={() => goTo(1)} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <button onClick={() => goTo(2)} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
+              <button onClick={() => goTo(3)} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
                 Continue <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -714,10 +777,10 @@ Be specific and realistic, like a professional moving company estimate.`,
                 )}
 
                 <div className="flex gap-3">
-                  <button onClick={() => goTo(1)} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
+                  <button onClick={() => goTo(2)} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
                     <ChevronLeft className="w-4 h-4" />
                   </button>
-                  <button onClick={() => goTo(3)} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
+                  <button onClick={() => goTo(4)} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
                     Continue <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -796,7 +859,7 @@ Be specific and realistic, like a professional moving company estimate.`,
                   <button onClick={() => { setNeedsEstate(null); setProviders([]); }} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
                     <ChevronLeft className="w-4 h-4" />
                   </button>
-                  <button onClick={() => goTo(4)} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
+                  <button onClick={() => goTo(5)} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
                     Continue <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -879,7 +942,7 @@ Be specific and realistic, like a professional moving company estimate.`,
                   <button onClick={() => { setNeedsMover(null); setProviders([]); setMoversSaved(false); }} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
                     <ChevronLeft className="w-4 h-4" />
                   </button>
-                  <button onClick={() => goTo(5)} disabled={needsMover && providers.length > 0 && !selectedMover} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
+                  <button onClick={() => goTo(6)} disabled={needsMover && providers.length > 0 && !selectedMover} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
                     Continue <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -965,10 +1028,10 @@ Be specific and realistic, like a professional moving company estimate.`,
             </div>
 
             <div className="flex gap-3">
-              <button onClick={() => goTo(stepIdx - 1)} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
+              <button onClick={() => goTo(5)} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <button onClick={() => { persist({ closingDetails }); goTo(stepIdx + 1); }} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
+              <button onClick={() => { persist({ closingDetails }); goTo(8); }} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
                 Continue <ChevronRight className="w-4 h-4" />
               </button>
             </div>
