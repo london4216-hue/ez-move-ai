@@ -18,16 +18,24 @@ export default function Register() {
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    // Restore code from localStorage if it was lost during auth redirect
     const codeFromUrl = urlParams.get('code') || localStorage.getItem('pending_invite_code');
 
-    // If there's a code in the URL, persist it so it survives the login redirect
+    // Persist code to localStorage so it survives the login redirect
     if (urlParams.get('code')) {
       localStorage.setItem('pending_invite_code', urlParams.get('code'));
     }
 
-    base44.auth.me().then(user => {
-      // If no invite code and already registered, go to dashboard
+    base44.auth.isAuthenticated().then(async (isAuthed) => {
+      if (!isAuthed) {
+        // Not logged in — redirect to login and come BACK to this exact URL (with ?code=)
+        // This ensures the code is preserved after authentication
+        base44.auth.redirectToLogin(window.location.href);
+        return;
+      }
+
+      const user = await base44.auth.me();
+
+      // If no invite code and already fully registered, go to dashboard
       if (!codeFromUrl && user?.registration_date) {
         navigate(createPageUrl("Dashboard"));
         return;
@@ -38,7 +46,10 @@ export default function Register() {
         localStorage.removeItem(`onboarding_progress_${user.id}`);
         localStorage.removeItem(`week1_setup_${user.id}`);
       }
-    }).catch(() => {});
+    }).catch(() => {
+      // On any auth error, redirect to login preserving current URL
+      base44.auth.redirectToLogin(window.location.href);
+    });
 
     if (codeFromUrl) {
       setInviteCode(codeFromUrl);
