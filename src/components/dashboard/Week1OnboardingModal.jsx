@@ -375,7 +375,7 @@ Be specific and realistic, like a professional moving company estimate.`,
       </div>
 
       {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 max-w-md mx-auto w-full pb-24">
+      <div className="flex-1 overflow-y-auto px-4 py-6 max-w-md mx-auto w-full pb-32">
 
         {/* ── WELCOME ── */}
         {step === "welcome" && (
