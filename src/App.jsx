@@ -7,7 +7,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import AgentOnboarding from './pages/AgentOnboarding';
-import Preview from './pages/Preview';
+import Preview from './pages/Preview.jsx';
 import SuperAdmin from './pages/SuperAdmin';
 import BrokerDashboard from './pages/BrokerDashboard';
 import PrivacyPolicy from './pages/PrivacyPolicy';
