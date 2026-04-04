@@ -18,7 +18,13 @@ export default function Register() {
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const codeFromUrl = urlParams.get('code');
+    // Restore code from localStorage if it was lost during auth redirect
+    const codeFromUrl = urlParams.get('code') || localStorage.getItem('pending_invite_code');
+
+    // If there's a code in the URL, persist it so it survives the login redirect
+    if (urlParams.get('code')) {
+      localStorage.setItem('pending_invite_code', urlParams.get('code'));
+    }
 
     base44.auth.me().then(user => {
       // If no invite code and already registered, go to dashboard
@@ -106,6 +112,7 @@ export default function Register() {
         registration_date: new Date().toISOString().split("T")[0],
       });
       localStorage.removeItem('register_progress');
+      localStorage.removeItem('pending_invite_code');
       // Clear onboarding so Dashboard always shows the modal fresh
       localStorage.removeItem(`onboarding_done_${currentUser.id}`);
       localStorage.removeItem(`onboarding_progress_${currentUser.id}`);
