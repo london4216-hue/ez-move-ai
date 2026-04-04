@@ -91,6 +91,33 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Returning User Banner */}
+      <section className="max-w-5xl mx-auto w-full px-5 pb-6">
+        <div className="bg-gradient-to-r from-orange-500/20 to-purple-600/20 border border-white/10 rounded-3xl p-8 flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-orange-900/40">
+            <LogIn className="w-8 h-8 text-white" />
+          </div>
+          <div className="flex-1">
+            <p className="text-white font-black text-2xl md:text-3xl mb-1">Already have an account?</p>
+            <p className="text-slate-400 text-sm">Welcome back — click below to jump straight into your dashboard.</p>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3 flex-shrink-0">
+            <button
+              onClick={() => base44.auth.redirectToLogin("/Dashboard")}
+              className="px-6 py-3.5 rounded-2xl bg-orange-500 hover:bg-orange-400 text-white font-black text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-orange-900/30 active:scale-[0.98]"
+            >
+              Client Login <ArrowRight className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => base44.auth.redirectToLogin("/AgentDashboard")}
+              className="px-6 py-3.5 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+            >
+              Agent / Broker Login
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* Two Offer Cards */}
       <section className="max-w-5xl mx-auto w-full px-5 pb-16">
         <p className="text-center text-slate-500 text-xs font-bold uppercase tracking-widest mb-6">Choose Your Plan</p>
