@@ -28,7 +28,7 @@ const SIZE_COLORS = {
 
 // decisions shape: { "Sofa": { choice: "move"|"donate"|"junk", size: "Medium" | null } }
 
-const STEPS = ["welcome", "moving_question", "mileage_distance", "stays_goes", "ai_insights", "estate_sale", "movers", "closing_details", "done"];
+const STEPS = ["welcome", "moving_question", "mileage_distance", "home_type", "floors_stairs", "elevator_access", "parking_distance", "special_items", "packing_needs", "disassembly", "move_flexibility", "stays_goes", "ai_insights", "estate_sale", "movers", "closing_details", "done"];
 const STORAGE_KEY = (id) => `onboarding_progress_${id}`;
 
 async function findProviders(query, address) {
@@ -86,11 +86,20 @@ export default function Week1OnboardingModal({ user, onDone }) {
     closing_time: "",
     closing_location: "",
   });
+  const [homeType, setHomeType] = useState(saved.homeType ?? null);
+  const [floorsStairs, setFloorsStairs] = useState(saved.floorsStairs ?? null);
+  const [elevatorAccess, setElevatorAccess] = useState(saved.elevatorAccess ?? null);
+  const [parkingDistance, setParkingDistance] = useState(saved.parkingDistance ?? null);
+  const [specialItems, setSpecialItems] = useState(saved.specialItems ?? null);
+  const [specialItemsSelected, setSpecialItemsSelected] = useState(saved.specialItemsSelected ?? []);
+  const [packingNeeds, setPackingNeeds] = useState(saved.packingNeeds ?? null);
+  const [disassembly, setDisassembly] = useState(saved.disassembly ?? null);
+  const [moveFlexibility, setMoveFlexibility] = useState(saved.moveFlexibility ?? null);
 
   const step = STEPS[stepIdx];
 
   const persist = (patch = {}) => {
-    localStorage.setItem(savedKey, JSON.stringify({ stepIdx, decisions, needsEstate, needsMover, insights, isMoving, moveDistanceMiles, ...patch }));
+    localStorage.setItem(savedKey, JSON.stringify({ stepIdx, decisions, needsEstate, needsMover, insights, isMoving, moveDistanceMiles, homeType, floorsStairs, elevatorAccess, parkingDistance, specialItems, specialItemsSelected, packingNeeds, disassembly, moveFlexibility, ...patch }));
   };
 
   const goTo = (idx, patch = {}) => {
@@ -293,12 +302,13 @@ Be specific and realistic, like a professional moving company estimate.`,
   };
 
   const finish = async () => {
+    const dataCollected = { homeType, floorsStairs, elevatorAccess, parkingDistance, specialItems, specialItemsSelected, packingNeeds, disassembly, moveFlexibility };
     const stuffLists = { move: [], junk: [], donate: [] };
     Object.entries(decisions).forEach(([name, { choice, size, qty }]) => {
       if (stuffLists[choice]) stuffLists[choice].push({ id: `seed-${name}`, name, size: size || "Medium", qty: qty || 1 });
     });
     await createDefaultAppointments();
-    base44.auth.updateMe({ stuff_lists: JSON.stringify(stuffLists), needs_mover: needsMover, needs_estate_sale: needsEstate, move_distance_miles: moveDistanceMiles }).catch(() => {});
+    base44.auth.updateMe({ stuff_lists: JSON.stringify(stuffLists), needs_mover: needsMover, needs_estate_sale: needsEstate, move_distance_miles: moveDistanceMiles, ...dataCollected }).catch(() => {});
 
     // Reflect onboarding progress in Week 1 checklist
     const uid = user?.id;
@@ -417,7 +427,7 @@ Be specific and realistic, like a professional moving company estimate.`,
             {!showMileageInput ? (
               <NavButtons
                 onContinue={() => setShowMileageInput(true)}
-                onSkip={() => goTo(3)}
+                onSkip={() => goTo(4)}
               />
             ) : (
               <div className="space-y-3">
@@ -437,21 +447,149 @@ Be specific and realistic, like a professional moving company estimate.`,
                     const val = mileageInputValue.trim() ? parseInt(mileageInputValue) : null;
                     setMoveDistanceMiles(val);
                     persist({ moveDistanceMiles: val });
-                    goTo(3);
+                    goTo(4);
                   }}
                   disabled={!mileageInputValue.trim()}
                   className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 disabled:opacity-40 disabled:cursor-not-allowed">
                   Continue →
-                  </button>
-                  <button
+                </button>
+                <button
                   onClick={() => { setShowMileageInput(false); setMileageInputValue(""); }}
                   className="w-full py-3.5 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm">
                   Cancel
-                  </button>
+                </button>
               </div>
             )}
           </div>
         )}
+
+        {/* ── HOME TYPE ── */}
+        {step === "home_type" && (
+          <div className="text-center">
+            <div className="text-5xl mb-4">🏘️</div>
+            <h2 className="text-xl font-black text-slate-900 mb-2">What type is your home?</h2>
+            <p className="text-xs text-slate-400 mt-1">This affects logistics and cost.</p>
+            <div className="space-y-2 mt-6">
+              {["Apartment", "Condo", "Single-Family", "Townhome"].map((t) => (
+                <button key={t} onClick={() => { setHomeType(t); persist({ homeType: t }); goTo(stepIdx + 1, { homeType: t }); }} className="w-full py-3 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm hover:border-orange-400 hover:bg-orange-50 transition-all">{t}</button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── FLOORS / STAIRS ── */}
+        {step === "floors_stairs" && (
+          <div className="text-center">
+            <div className="text-5xl mb-4">🚶</div>
+            <h2 className="text-xl font-black text-slate-900 mb-2">How many floors?</h2>
+            <p className="text-xs text-slate-400 mt-1">Count stairs/landings to exit.</p>
+            <div className="space-y-2 mt-6">
+              {["0", "1", "2", "3+"].map((f) => (
+                <button key={f} onClick={() => { setFloorsStairs(f); persist({ floorsStairs: f }); goTo(stepIdx + 1, { floorsStairs: f }); }} className="w-full py-3 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm hover:border-orange-400 hover:bg-orange-50 transition-all">{f} floor{f === "1" ? "" : "s"}</button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── ELEVATOR ACCESS ── */}
+        {step === "elevator_access" && (
+          <div className="text-center">
+            <div className="text-5xl mb-4">🛗</div>
+            <h2 className="text-xl font-black text-slate-900 mb-2">Elevator access?</h2>
+            <p className="text-xs text-slate-400 mt-1">Affects packing efficiency.</p>
+            <div className="space-y-2 mt-6">
+              {["Yes", "No", "Freight Elevator", "Restrictions"].map((e) => (
+                <button key={e} onClick={() => { setElevatorAccess(e); persist({ elevatorAccess: e }); goTo(stepIdx + 1, { elevatorAccess: e }); }} className="w-full py-3 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm hover:border-orange-400 hover:bg-orange-50 transition-all">{e}</button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── PARKING DISTANCE ── */}
+        {step === "parking_distance" && (
+          <div className="text-center">
+            <div className="text-5xl mb-4">🚗</div>
+            <h2 className="text-xl font-black text-slate-900 mb-2">Truck parking distance?</h2>
+            <p className="text-xs text-slate-400 mt-1">From door to vehicle.</p>
+            <div className="space-y-2 mt-6">
+              {["0–25 ft", "25–75 ft", "75–150 ft", "150+ ft"].map((p) => (
+                <button key={p} onClick={() => { setParkingDistance(p); persist({ parkingDistance: p }); goTo(stepIdx + 1, { parkingDistance: p }); }} className="w-full py-3 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm hover:border-orange-400 hover:bg-orange-50 transition-all">{p}</button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── SPECIAL ITEMS ── */}
+        {step === "special_items" && (
+          <div className="text-center">
+            <div className="text-5xl mb-4">🎹</div>
+            <h2 className="text-xl font-black text-slate-900 mb-2">Special items?</h2>
+            <p className="text-xs text-slate-400 mt-1">Piano, safe, pool table, etc.</p>
+            {specialItems === null ? (
+              <div className="space-y-2 mt-6">
+                <button onClick={() => setSpecialItems(true)} className="w-full py-3 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200">Yes</button>
+                <button onClick={() => { setSpecialItems(false); persist({ specialItems: false }); goTo(stepIdx + 1, { specialItems: false }); }} className="w-full py-3 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm">No</button>
+                <button onClick={() => { setSpecialItems(false); persist({ specialItems: false }); goTo(stepIdx + 1, { specialItems: false }); }} className="w-full py-3 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm">Skip</button>
+              </div>
+            ) : (
+              <div>
+                <div className="space-y-2 mt-4 mb-6">
+                  {["Piano", "Safe", "Pool Table", "Peloton", "Large Sectional", "Appliances", "Fragile Items", "Oversized Furniture"].map((item) => {
+                    const isSelected = specialItemsSelected.includes(item);
+                    return (
+                      <button key={item} onClick={() => { const updated = isSelected ? specialItemsSelected.filter(i => i !== item) : [...specialItemsSelected, item]; setSpecialItemsSelected(updated); }} className={`w-full py-3 rounded-2xl font-bold text-sm border-2 transition-all ${isSelected ? "bg-orange-500 text-white border-orange-500" : "border-slate-200 text-slate-700 hover:border-orange-400"}`}>{item}</button>
+                    );
+                  })}
+                </div>
+                <button onClick={() => { persist({ specialItems: true, specialItemsSelected }); goTo(stepIdx + 1, { specialItems: true, specialItemsSelected }); }} className="w-full py-3 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200">Continue</button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── PACKING NEEDS ── */}
+        {step === "packing_needs" && (
+          <div className="text-center">
+            <div className="text-5xl mb-4">📦</div>
+            <h2 className="text-xl font-black text-slate-900 mb-2">Packing assistance?</h2>
+            <p className="text-xs text-slate-400 mt-1">Full, partial, fragile-only, or none.</p>
+            <div className="space-y-2 mt-6">
+              {["Full Pack", "Partial Pack", "Fragile-Only", "No Packing"].map((p) => (
+                <button key={p} onClick={() => { setPackingNeeds(p); persist({ packingNeeds: p }); goTo(stepIdx + 1, { packingNeeds: p }); }} className="w-full py-3 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm hover:border-orange-400 hover:bg-orange-50 transition-all">{p}</button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── DISASSEMBLY / REASSEMBLY ── */}
+        {step === "disassembly" && (
+          <div className="text-center">
+            <div className="text-5xl mb-4">🔧</div>
+            <h2 className="text-xl font-black text-slate-900 mb-2">Disassembly needed?</h2>
+            <p className="text-xs text-slate-400 mt-1">Take apart & reassemble furniture.</p>
+            <div className="space-y-2 mt-6">
+              <button onClick={() => { setDisassembly(true); persist({ disassembly: true }); goTo(stepIdx + 1, { disassembly: true }); }} className="w-full py-3 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200">Yes</button>
+              <button onClick={() => { setDisassembly(false); persist({ disassembly: false }); goTo(stepIdx + 1, { disassembly: false }); }} className="w-full py-3 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm">No</button>
+              <button onClick={() => { setDisassembly(false); persist({ disassembly: false }); goTo(stepIdx + 1, { disassembly: false }); }} className="w-full py-3 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm">Skip</button>
+            </div>
+          </div>
+        )}
+
+        {/* ── MOVE DATE FLEXIBILITY ── */}
+        {step === "move_flexibility" && (
+          <div className="text-center">
+            <div className="text-5xl mb-4">📅</div>
+            <h2 className="text-xl font-black text-slate-900 mb-2">Move date flexibility?</h2>
+            <p className="text-xs text-slate-400 mt-1">Affects availability & pricing.</p>
+            <div className="space-y-2 mt-6">
+              {["Flexible", "Semi-Flexible", "Fixed Date"].map((f) => (
+                <button key={f} onClick={() => { setMoveFlexibility(f); persist({ moveFlexibility: f }); goTo(stepIdx + 1, { moveFlexibility: f }); }} className="w-full py-3 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm hover:border-orange-400 hover:bg-orange-50 transition-all">{f}</button>
+              ))}
+            </div>
+          </div>
+        )}
+
+
 
         {/* ── STAYS / GOES ── */}
         {step === "stays_goes" && (
@@ -1039,17 +1177,17 @@ Be specific and realistic, like a professional moving company estimate.`,
               <button onClick={() => setShowMileageInput(true)} className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200">
                 ✅ Yes
               </button>
-              <button onClick={() => { setMoveDistanceMiles(null); persist({ moveDistanceMiles: null }); goTo(3); }} className="w-full py-3.5 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm">
+              <button onClick={() => { setMoveDistanceMiles(null); persist({ moveDistanceMiles: null }); goTo(4); }} className="w-full py-3.5 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm">
                 ❌ No
               </button>
-              <button onClick={() => { setMoveDistanceMiles(null); persist({ moveDistanceMiles: null }); goTo(3); }} className="w-full py-3.5 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm">
+              <button onClick={() => { setMoveDistanceMiles(null); persist({ moveDistanceMiles: null }); goTo(4); }} className="w-full py-3.5 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm">
                 ⏭️ Skip
               </button>
             </div>
           )}
           {step === "mileage_distance" && showMileageInput && (
             <div className="space-y-2">
-              <button onClick={() => { const val = mileageInputValue.trim() ? parseInt(mileageInputValue) : null; setMoveDistanceMiles(val); persist({ moveDistanceMiles: val }); goTo(3); }} disabled={!mileageInputValue.trim()} className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 disabled:opacity-40 disabled:cursor-not-allowed">
+              <button onClick={() => { const val = mileageInputValue.trim() ? parseInt(mileageInputValue) : null; setMoveDistanceMiles(val); persist({ moveDistanceMiles: val }); goTo(4); }} disabled={!mileageInputValue.trim()} className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 disabled:opacity-40 disabled:cursor-not-allowed">
                 Continue →
               </button>
               <button onClick={() => { setShowMileageInput(false); setMileageInputValue(""); }} className="w-full py-3.5 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm">
@@ -1057,28 +1195,31 @@ Be specific and realistic, like a professional moving company estimate.`,
               </button>
             </div>
           )}
+          {["home_type", "floors_stairs", "elevator_access", "parking_distance", "special_items", "packing_needs", "disassembly", "move_flexibility"].includes(step) && (
+            <div></div>
+          )}
           {step === "stays_goes" && (
             <div className="flex gap-3">
-              <button onClick={() => goTo(2)} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
+              <button onClick={() => goTo(10)} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <button onClick={() => goTo(4)} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
+              <button onClick={() => goTo(12)} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
                 Continue <ChevronRight className="w-4 h-4" />
               </button>
-              <button onClick={() => goTo(4)} className="px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm hover:bg-slate-50 transition-colors">
+              <button onClick={() => goTo(12)} className="px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm hover:bg-slate-50 transition-colors">
                 Skip
               </button>
             </div>
           )}
           {step === "ai_insights" && (
             <div className="flex gap-3">
-              <button onClick={() => goTo(2)} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
+              <button onClick={() => goTo(11)} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <button onClick={() => goTo(4)} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
+              <button onClick={() => goTo(13)} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
                 Continue <ChevronRight className="w-4 h-4" />
               </button>
-              <button onClick={() => goTo(4)} className="px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm hover:bg-slate-50 transition-colors">
+              <button onClick={() => goTo(13)} className="px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm hover:bg-slate-50 transition-colors">
                 Skip
               </button>
             </div>
@@ -1088,10 +1229,10 @@ Be specific and realistic, like a professional moving company estimate.`,
               <button onClick={() => { setNeedsEstate(null); setProviders([]); }} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <button onClick={() => goTo(5)} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
+              <button onClick={() => goTo(14)} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
                 Continue <ChevronRight className="w-4 h-4" />
               </button>
-              <button onClick={() => goTo(5)} className="px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm hover:bg-slate-50 transition-colors">
+              <button onClick={() => goTo(14)} className="px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm hover:bg-slate-50 transition-colors">
                 Skip
               </button>
             </div>
@@ -1101,20 +1242,20 @@ Be specific and realistic, like a professional moving company estimate.`,
               <button onClick={() => { setNeedsMover(null); setProviders([]); setMoversSaved(false); }} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <button onClick={() => goTo(6)} disabled={needsMover && providers.length > 0 && !selectedMover} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
+              <button onClick={() => goTo(15)} disabled={needsMover && providers.length > 0 && !selectedMover} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
                 Continue <ChevronRight className="w-4 h-4" />
               </button>
-              <button onClick={() => goTo(6)} className="px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm hover:bg-slate-50 transition-colors">
+              <button onClick={() => goTo(15)} className="px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm hover:bg-slate-50 transition-colors">
                 Skip
               </button>
             </div>
           )}
           {step === "closing_details" && (
             <div className="flex gap-3">
-              <button onClick={() => goTo(5)} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
+              <button onClick={() => goTo(14)} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <button onClick={() => { persist({ closingDetails }); goTo(8); }} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
+              <button onClick={() => { persist({ closingDetails }); goTo(16); }} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
                 Continue <ChevronRight className="w-4 h-4" />
               </button>
             </div>
