@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import DemoCarousel from "../components/DemoCarousel";
 import {
   Shield, ArrowRight, Zap, CheckCircle2,
   Users, CalendarDays, Package, Sparkles,
@@ -90,12 +89,6 @@ export default function Home() {
             </div>
           ))}
         </div>
-      </section>
-
-      {/* Demo Preview Carousel */}
-      <section className="max-w-5xl mx-auto w-full px-5 pb-8">
-        <p className="text-center text-slate-500 text-xs font-bold uppercase tracking-widest mb-4">See It In Action</p>
-        <DemoCarousel />
       </section>
 
       {/* SMS Consent Notice */}
