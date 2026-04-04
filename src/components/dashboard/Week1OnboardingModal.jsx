@@ -332,6 +332,27 @@ Be specific and realistic, like a professional moving company estimate.`,
 
   const decisionCount = Object.values(decisions).filter(v => v?.choice).length;
 
+  // Helper: standardized nav buttons (back, continue, skip)
+  const NavButtons = ({ onBack, onContinue, onSkip, backDisabled }) => (
+    <div className="flex gap-3">
+      {onBack && (
+        <button onClick={onBack} disabled={backDisabled} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm disabled:opacity-40 disabled:cursor-not-allowed">
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+      )}
+      {onContinue && (
+        <button onClick={onContinue} className={onBack || onSkip ? "flex-1" : "w-full"} style={onBack || onSkip ? {} : {}} className="py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
+          Continue <ChevronRight className="w-4 h-4" />
+        </button>
+      )}
+      {onSkip && (
+        <button onClick={onSkip} className="px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm hover:bg-slate-50 transition-colors">
+          Skip
+        </button>
+      )}
+    </div>
+  );
+
   return (
     <div className="fixed inset-0 z-50 bg-slate-50 flex flex-col">
       {/* Top bar */}
@@ -354,7 +375,7 @@ Be specific and realistic, like a professional moving company estimate.`,
       </div>
 
       {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 max-w-md mx-auto w-full">
+      <div className="flex-1 overflow-y-auto px-4 py-6 max-w-md mx-auto w-full pb-24">
 
         {/* ── WELCOME ── */}
         {step === "welcome" && (
@@ -385,18 +406,7 @@ Be specific and realistic, like a professional moving company estimate.`,
             <p className="text-sm text-slate-500 leading-relaxed mb-8">
               This helps us personalize your plan — we'll only ask moving-related questions if you're relocating.
             </p>
-            <div className="space-y-3">
-              <button
-                onClick={() => { setIsMoving(true); persist({ isMoving: true }); goTo(2); }}
-                className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200">
-                ✅ Yes, I'm moving to a new place
-              </button>
-              <button
-                onClick={() => { setIsMoving(false); persist({ isMoving: false }); goTo(7); }}
-                className="w-full py-3.5 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm">
-                ❌ No, I'm staying put
-              </button>
-            </div>
+            <NavButtons onContinue={() => { setIsMoving(true); persist({ isMoving: true }); goTo(2); }} />
           </div>
         )}
 
@@ -409,23 +419,10 @@ Be specific and realistic, like a professional moving company estimate.`,
               This helps us calculate accurate moving quotes.
             </p>
             {!showMileageInput ? (
-              <div className="space-y-3">
-                <button
-                  onClick={() => setShowMileageInput(true)}
-                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200">
-                  ✅ Yes
-                </button>
-                <button
-                  onClick={() => { setMoveDistanceMiles(null); persist({ moveDistanceMiles: null }); goTo(3); }}
-                  className="w-full py-3.5 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm">
-                  ❌ No
-                </button>
-                <button
-                  onClick={() => { setMoveDistanceMiles(null); persist({ moveDistanceMiles: null }); goTo(3); }}
-                  className="w-full py-3.5 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm">
-                  ⏭️ Skip
-                </button>
-              </div>
+              <NavButtons
+                onContinue={() => setShowMileageInput(true)}
+                onSkip={() => goTo(3)}
+              />
             ) : (
               <div className="space-y-3">
                 <div className="bg-orange-50 border border-orange-200 rounded-2xl px-4 py-3">
@@ -449,12 +446,12 @@ Be specific and realistic, like a professional moving company estimate.`,
                   disabled={!mileageInputValue.trim()}
                   className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 disabled:opacity-40 disabled:cursor-not-allowed">
                   Continue →
-                </button>
-                <button
+                  </button>
+                  <button
                   onClick={() => { setShowMileageInput(false); setMileageInputValue(""); }}
                   className="w-full py-3.5 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm">
-                  Back
-                </button>
+                  Cancel
+                  </button>
               </div>
             )}
           </div>
@@ -463,11 +460,7 @@ Be specific and realistic, like a professional moving company estimate.`,
         {/* ── STAYS / GOES ── */}
         {step === "stays_goes" && (
           <div>
-            <div className="flex justify-end mb-1">
-              <button onClick={() => goTo(3)} className="text-[11px] font-semibold text-slate-400 hover:text-slate-600 transition-colors px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200">
-                Skip for now →
-              </button>
-            </div>
+
             <div className="text-center mb-5">
               <div className="text-4xl mb-2">📦</div>
               <h2 className="text-xl font-black text-slate-900">What Stays vs. Goes?</h2>
@@ -550,14 +543,7 @@ Be specific and realistic, like a professional moving company estimate.`,
             </div>
 
             <p className="text-[10px] text-slate-400 text-center mb-4">You can always edit these in the "My Stuff" tab later</p>
-            <div className="flex gap-3">
-              <button onClick={() => goTo(1)} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button onClick={() => goTo(3)} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
-                Continue <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
+            <NavButtons onBack={() => goTo(1)} onContinue={() => goTo(3)} onSkip={() => goTo(3)} />
           </div>
         )}
 
@@ -776,14 +762,7 @@ Be specific and realistic, like a professional moving company estimate.`,
                   </div>
                 )}
 
-                <div className="flex gap-3">
-                  <button onClick={() => goTo(2)} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  <button onClick={() => goTo(4)} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
-                    Continue <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
+                <NavButtons onBack={() => goTo(2)} onContinue={() => goTo(4)} onSkip={() => goTo(4)} />
               </div>
             )}
           </div>
@@ -855,14 +834,7 @@ Be specific and realistic, like a professional moving company estimate.`,
                     <p className="text-sm font-bold text-emerald-700">Got it — we'll skip estate sale planning.</p>
                   </div>
                 )}
-                <div className="flex gap-3">
-                  <button onClick={() => { setNeedsEstate(null); setProviders([]); }} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  <button onClick={() => goTo(5)} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
-                    Continue <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
+                <NavButtons onBack={() => { setNeedsEstate(null); setProviders([]); }} onContinue={() => goTo(5)} onSkip={() => goTo(5)} />
               </div>
             )}
           </div>
@@ -938,14 +910,7 @@ Be specific and realistic, like a professional moving company estimate.`,
                     <p className="text-sm font-bold text-emerald-700">Great — we'll focus your plan on packing & logistics.</p>
                   </div>
                 )}
-                <div className="flex gap-3">
-                  <button onClick={() => { setNeedsMover(null); setProviders([]); setMoversSaved(false); }} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  <button onClick={() => goTo(6)} disabled={needsMover && providers.length > 0 && !selectedMover} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
-                    Continue <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
+                <NavButtons onBack={() => { setNeedsMover(null); setProviders([]); setMoversSaved(false); }} onContinue={() => goTo(6)} onSkip={() => goTo(6)} />
               </div>
             )}
           </div>
@@ -1063,6 +1028,117 @@ Be specific and realistic, like a professional moving company estimate.`,
           </div>
         )}
       </div>
-    </div>
-  );
-}
+
+      {/* Sticky Footer */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-4 py-4 shadow-lg flex items-center justify-center z-40 max-w-md mx-auto">
+        <div className="w-full">
+          {step === "welcome" && (
+            <button onClick={() => goTo(1)} className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-black text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
+              Let's Get Started <ChevronRight className="w-4 h-4" />
+            </button>
+          )}
+          {step === "moving_question" && (
+            <div className="space-y-2">
+              <button onClick={() => { setIsMoving(true); persist({ isMoving: true }); goTo(2); }} className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200">
+                ✅ Yes, I'm moving to a new place
+              </button>
+              <button onClick={() => { setIsMoving(false); persist({ isMoving: false }); goTo(7); }} className="w-full py-3.5 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm">
+                ❌ No, I'm staying put
+              </button>
+            </div>
+          )}
+          {step === "mileage_distance" && !showMileageInput && (
+            <div className="space-y-2">
+              <button onClick={() => setShowMileageInput(true)} className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200">
+                ✅ Yes
+              </button>
+              <button onClick={() => { setMoveDistanceMiles(null); persist({ moveDistanceMiles: null }); goTo(3); }} className="w-full py-3.5 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm">
+                ❌ No
+              </button>
+              <button onClick={() => { setMoveDistanceMiles(null); persist({ moveDistanceMiles: null }); goTo(3); }} className="w-full py-3.5 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm">
+                ⏭️ Skip
+              </button>
+            </div>
+          )}
+          {step === "mileage_distance" && showMileageInput && (
+            <div className="space-y-2">
+              <button onClick={() => { const val = mileageInputValue.trim() ? parseInt(mileageInputValue) : null; setMoveDistanceMiles(val); persist({ moveDistanceMiles: val }); goTo(3); }} disabled={!mileageInputValue.trim()} className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 disabled:opacity-40 disabled:cursor-not-allowed">
+                Continue →
+              </button>
+              <button onClick={() => { setShowMileageInput(false); setMileageInputValue(""); }} className="w-full py-3.5 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm">
+                Cancel
+              </button>
+            </div>
+          )}
+          {step === "stays_goes" && (
+            <div className="flex gap-3">
+              <button onClick={() => goTo(1)} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button onClick={() => goTo(3)} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
+                Continue <ChevronRight className="w-4 h-4" />
+              </button>
+              <button onClick={() => goTo(3)} className="px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm hover:bg-slate-50 transition-colors">
+                Skip
+              </button>
+            </div>
+          )}
+          {step === "ai_insights" && (
+            <div className="flex gap-3">
+              <button onClick={() => goTo(2)} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button onClick={() => goTo(4)} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
+                Continue <ChevronRight className="w-4 h-4" />
+              </button>
+              <button onClick={() => goTo(4)} className="px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm hover:bg-slate-50 transition-colors">
+                Skip
+              </button>
+            </div>
+          )}
+          {step === "estate_sale" && needsEstate !== null && (
+            <div className="flex gap-3">
+              <button onClick={() => { setNeedsEstate(null); setProviders([]); }} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button onClick={() => goTo(5)} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
+                Continue <ChevronRight className="w-4 h-4" />
+              </button>
+              <button onClick={() => goTo(5)} className="px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm hover:bg-slate-50 transition-colors">
+                Skip
+              </button>
+            </div>
+          )}
+          {step === "movers" && needsMover !== null && (
+            <div className="flex gap-3">
+              <button onClick={() => { setNeedsMover(null); setProviders([]); setMoversSaved(false); }} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button onClick={() => goTo(6)} disabled={needsMover && providers.length > 0 && !selectedMover} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
+                Continue <ChevronRight className="w-4 h-4" />
+              </button>
+              <button onClick={() => goTo(6)} className="px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm hover:bg-slate-50 transition-colors">
+                Skip
+              </button>
+            </div>
+          )}
+          {step === "closing_details" && (
+            <div className="flex gap-3">
+              <button onClick={() => goTo(5)} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button onClick={() => { persist({ closingDetails }); goTo(8); }} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
+                Continue <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+          {step === "done" && (
+            <button onClick={finish} className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-black text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
+              Go to My Dashboard 🎉
+            </button>
+          )}
+          </div>
+          </div>
+          </div>
+          );
+          }
