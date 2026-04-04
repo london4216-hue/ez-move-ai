@@ -18,6 +18,33 @@
       "type": "string",
       "description": "Client's phone number"
     },
+    "sms_opt_in": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether the client has opted in to SMS"
+    },
+    "last_sms_sent": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of the last SMS sent"
+    },
+    "last_sms_message": {
+      "type": "string",
+      "description": "Content of the last SMS sent"
+    },
+    "sms_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "sent",
+        "failed"
+      ],
+      "description": "Status of the last SMS"
+    },
+    "sms_reply": {
+      "type": "string",
+      "description": "Last reply received from the client via SMS"
+    },
     "home_address": {
       "type": "string",
       "description": "Property address"
