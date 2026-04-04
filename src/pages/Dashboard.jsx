@@ -30,7 +30,11 @@ export default function Dashboard() {
       setLoading(false);
       // Show onboarding for any user who hasn't completed it yet
       const alreadyDone = localStorage.getItem(`onboarding_done_${u?.id}`);
-      if (!alreadyDone) setShowOnboarding(true);
+      if (!alreadyDone) {
+        // Clear any stale mid-flow progress so modal always starts at step 0
+        localStorage.removeItem(`onboarding_progress_${u?.id}`);
+        setShowOnboarding(true);
+      }
     }).catch(() => navigate(createPageUrl("Register")));
   }, []);
 
