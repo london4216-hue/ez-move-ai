@@ -47,7 +47,15 @@
     },
     "home_address": {
       "type": "string",
-      "description": "Property address"
+      "description": "Destination property address (moving TO)"
+    },
+    "moving_from_address": {
+      "type": "string",
+      "description": "Current/origin address (moving FROM)"
+    },
+    "estimated_miles": {
+      "type": "number",
+      "description": "Estimated driving miles between origin and destination"
     },
     "close_date": {
       "type": "string",

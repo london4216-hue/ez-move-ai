@@ -18,7 +18,8 @@ export default function BrokerDashboard() {
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [addStep, setAddStep] = useState(null);
-  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", close_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], street: "", unit: "", city: "", state: "", zip: "" });
+  const [milesLoading, setMilesLoading] = useState(false);
+  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", close_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], street: "", unit: "", city: "", state: "", zip: "", from_street: "", from_city: "", from_state: "", from_zip: "" });
   const [pendingClient, setPendingClient] = useState(null);
   const [paying, setPaying] = useState(false);
   const [doneData, setDoneData] = useState(null);
@@ -53,13 +54,35 @@ export default function BrokerDashboard() {
     load();
   }, []);
 
+  const geocode = async (address) => {
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1&countrycodes=us`);
+    const data = await res.json();
+    if (!data[0]) return null;
+    return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
+  };
+
+  const haversineMiles = (a, b) => {
+    const R = 3958.8;
+    const dLat = (b.lat - a.lat) * Math.PI / 180;
+    const dLon = (b.lon - a.lon) * Math.PI / 180;
+    const x = Math.sin(dLat/2)**2 + Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLon/2)**2;
+    return Math.round(R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1-x)));
+  };
+
+  const estimateMiles = async (fromAddr, toAddr) => {
+    if (!fromAddr || !toAddr) return null;
+    const [from, to] = await Promise.all([geocode(fromAddr), geocode(toAddr)]);
+    if (!from || !to) return null;
+    return haversineMiles(from, to);
+  };
+
   const resetAdd = (deleteOrphan = false) => {
     if (deleteOrphan && pendingClient) {
       base44.entities.Client.delete(pendingClient.id).catch(() => {});
       setClients(prev => prev.filter(c => c.id !== pendingClient.id));
     }
     setAddStep(null);
-    setForm({ firstName: "", lastName: "", email: "", phone: "", close_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], street: "", unit: "", city: "", state: "", zip: "" });
+    setForm({ firstName: "", lastName: "", email: "", phone: "", close_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], street: "", unit: "", city: "", state: "", zip: "", from_street: "", from_city: "", from_state: "", from_zip: "" });
     setPendingClient(null);
     setDoneData(null);
   };
@@ -69,14 +92,20 @@ export default function BrokerDashboard() {
       const code = Math.floor(1000 + Math.random() * 9000).toString();
       const clientName = `${form.firstName} ${form.lastName}`;
       const fullAddress = buildFullAddress(form);
+      const fromAddress = [form.from_street, form.from_city, form.from_state, form.from_zip].filter(Boolean).join(", ");
+      setMilesLoading(true);
+      const miles = fromAddress ? await estimateMiles(fromAddress, fullAddress) : null;
+      setMilesLoading(false);
       const newClient = await base44.entities.Client.create({
         agent_id: agent.id, user_name: clientName, user_email: form.email, phone: form.phone,
         close_date: form.close_date, invitation_code: code, status: "invited",
         invited_date: new Date().toISOString(), billing_status: "pending",
         home_address: fullAddress,
+        moving_from_address: fromAddress || null,
+        estimated_miles: miles,
       });
-      setPendingClient({ ...newClient, invitation_code: code });
-      setClients(prev => [{ ...newClient, invitation_code: code }, ...prev]);
+      setPendingClient({ ...newClient, invitation_code: code, estimated_miles: miles });
+      setClients(prev => [{ ...newClient, invitation_code: code, estimated_miles: miles }, ...prev]);
       const appUrl = window.location.origin;
       const inviteLink = `${appUrl}/Register?code=${code}`;
       base44.integrations.Core.SendEmail({
@@ -209,6 +238,11 @@ export default function BrokerDashboard() {
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${STATUS_COLORS[client.status] || "bg-slate-50 text-slate-500 border-slate-100"}`}>{client.status}</span>
                       </div>
                       <p className="text-[11px] text-slate-400 truncate">{client.user_email}</p>
+                      {client.estimated_miles != null && (
+                        <span className="text-[10px] font-bold text-blue-500 bg-blue-50 border border-blue-100 px-1.5 py-0.5 rounded-md inline-block mt-0.5">
+                          📍 {client.estimated_miles.toLocaleString()} mi move
+                        </span>
+                      )}
                       {client.invitation_code && (
                         <button
                           onClick={() => copyInviteLink(client)}
@@ -341,8 +375,25 @@ export default function BrokerDashboard() {
                     <input type="date" value={form.close_date} onChange={e => setForm(p => ({ ...p, close_date: e.target.value }))}
                       className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400" />
                   </div>
+                  <div className="pt-2 border-t border-slate-100">
+                    <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-2">📦 Moving From (for quote estimate)</p>
+                    <div className="space-y-2">
+                      <input type="text" placeholder="Street address" value={form.from_street} onChange={e => setForm(p => ({ ...p, from_street: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400" />
+                      <div className="grid grid-cols-3 gap-2">
+                        <input type="text" placeholder="City" value={form.from_city} onChange={e => setForm(p => ({ ...p, from_city: e.target.value }))}
+                          className="col-span-1 px-3 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400" />
+                        <input type="text" placeholder="ST" maxLength={2} value={form.from_state} onChange={e => setForm(p => ({ ...p, from_state: e.target.value.toUpperCase() }))}
+                          className="px-3 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 uppercase" />
+                        <input type="text" placeholder="ZIP" value={form.from_zip} onChange={e => setForm(p => ({ ...p, from_zip: e.target.value.replace(/[^0-9-]/g,'') }))} maxLength={10}
+                          className="px-3 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400" />
+                      </div>
+                    </div>
+                  </div>
                   <ClientAddressFields form={form} setForm={setForm} />
-                  <button onClick={handleSaveClient} disabled={!canSave} className="w-full py-3.5 rounded-2xl bg-orange-500 text-white font-bold text-sm disabled:opacity-40 hover:bg-orange-600 transition-colors">Save & Continue →</button>
+                  <button onClick={handleSaveClient} disabled={!canSave || milesLoading} className="w-full py-3.5 rounded-2xl bg-orange-500 text-white font-bold text-sm disabled:opacity-40 hover:bg-orange-600 transition-colors flex items-center justify-center gap-2">
+                    {milesLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Calculating miles...</> : "Save & Continue →"}
+                  </button>
                 </div>
               )}
               {addStep === "payment" && pendingClient && (
@@ -351,6 +402,12 @@ export default function BrokerDashboard() {
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Summary</p>
                     <div className="flex justify-between"><span className="text-xs text-slate-400">Name</span><span className="text-xs font-bold text-slate-700">{pendingClient.user_name}</span></div>
                     <div className="flex justify-between"><span className="text-xs text-slate-400">Invite Code</span><span className="text-xs font-black text-orange-500 tracking-widest">{pendingClient.invitation_code}</span></div>
+                    {pendingClient.estimated_miles != null && (
+                      <div className="flex justify-between items-center pt-1 border-t border-slate-100">
+                        <span className="text-xs text-slate-400">Est. Miles</span>
+                        <span className="text-sm font-black text-blue-600">{pendingClient.estimated_miles.toLocaleString()} mi</span>
+                      </div>
+                    )}
                   </div>
                   <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4 flex items-center justify-between">
                     <div>
