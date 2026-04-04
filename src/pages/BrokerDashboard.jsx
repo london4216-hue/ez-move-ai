@@ -18,7 +18,7 @@ export default function BrokerDashboard() {
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [addStep, setAddStep] = useState(null);
-  const [form, setForm] = useState({ firstName: "", lastName: "", close_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], street: "", unit: "", city: "", state: "", zip: "" });
+  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", close_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], street: "", unit: "", city: "", state: "", zip: "" });
   const [pendingClient, setPendingClient] = useState(null);
   const [paying, setPaying] = useState(false);
   const [doneData, setDoneData] = useState(null);
@@ -53,44 +53,51 @@ export default function BrokerDashboard() {
     load();
   }, []);
 
-  const resetAdd = () => {
+  const resetAdd = (deleteOrphan = false) => {
+    if (deleteOrphan && pendingClient) {
+      base44.entities.Client.delete(pendingClient.id).catch(() => {});
+      setClients(prev => prev.filter(c => c.id !== pendingClient.id));
+    }
     setAddStep(null);
-    setForm({ firstName: "", lastName: "", close_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], street: "", unit: "", city: "", state: "", zip: "" });
+    setForm({ firstName: "", lastName: "", email: "", phone: "", close_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], street: "", unit: "", city: "", state: "", zip: "" });
     setPendingClient(null);
     setDoneData(null);
   };
 
   const handleSaveClient = async () => {
-    const code = Math.floor(1000 + Math.random() * 9000).toString();
-    const clientName = `${form.firstName} ${form.lastName}`;
-    const fullAddress = buildFullAddress(form);
-    const newClient = await base44.entities.Client.create({
-      agent_id: agent.id, user_name: clientName,
-      close_date: form.close_date, invitation_code: code, status: "invited",
-      invited_date: new Date().toISOString(), billing_status: "pending",
-      home_address: fullAddress,
-    });
-    setPendingClient({ ...newClient, invitation_code: code });
-    setClients(prev => [{ ...newClient, invitation_code: code }, ...prev]);
-    const appUrl = window.location.origin;
-    const inviteLink = `${appUrl}/Register?code=${code}`;
-    // Send invite email
-    base44.integrations.Core.SendEmail({
-      to: form.email,
-      from_name: agent?.company_name || "EZ Move AI",
-      subject: `Your EZ Move AI Invitation from ${agent?.company_name || "your agent"}`,
-      body: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
-        <div style="background:linear-gradient(135deg,#f97316,#ea580c);border-radius:16px;padding:24px;text-align:center;margin-bottom:24px">
-          <h1 style="color:white;margin:0;font-size:28px;font-weight:900">EZ Move <span style="opacity:0.85">AI</span></h1>
-          <p style="color:rgba(255,255,255,0.85);margin:8px 0 0;font-size:13px">Your personal moving assistant</p>
-        </div>
-        <h2 style="color:#1e293b;font-size:20px">Hi ${clientName},</h2>
-        <p style="color:#475569;line-height:1.6">${agent?.company_name || "Your real estate agent"} has invited you to use <strong>EZ Move AI</strong> — your step-by-step moving assistant to make your move stress-free.</p>
-        <a href="${inviteLink}" style="display:block;background:#f97316;color:white;text-decoration:none;text-align:center;padding:16px;border-radius:12px;font-weight:700;font-size:16px;margin:24px 0">Get Started →</a>
-        <p style="color:#94a3b8;font-size:12px;text-align:center">Click the link above to begin your onboarding.</p>
-      </div>`,
-    }).catch(() => {});
-    setAddStep("payment");
+    try {
+      const code = Math.floor(1000 + Math.random() * 9000).toString();
+      const clientName = `${form.firstName} ${form.lastName}`;
+      const fullAddress = buildFullAddress(form);
+      const newClient = await base44.entities.Client.create({
+        agent_id: agent.id, user_name: clientName, user_email: form.email, phone: form.phone,
+        close_date: form.close_date, invitation_code: code, status: "invited",
+        invited_date: new Date().toISOString(), billing_status: "pending",
+        home_address: fullAddress,
+      });
+      setPendingClient({ ...newClient, invitation_code: code });
+      setClients(prev => [{ ...newClient, invitation_code: code }, ...prev]);
+      const appUrl = window.location.origin;
+      const inviteLink = `${appUrl}/Register?code=${code}`;
+      base44.integrations.Core.SendEmail({
+        to: form.email,
+        from_name: agent?.company_name || "EZ Move AI",
+        subject: `Your EZ Move AI Invitation from ${agent?.company_name || "your agent"}`,
+        body: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
+          <div style="background:linear-gradient(135deg,#f97316,#ea580c);border-radius:16px;padding:24px;text-align:center;margin-bottom:24px">
+            <h1 style="color:white;margin:0;font-size:28px;font-weight:900">EZ Move <span style="opacity:0.85">AI</span></h1>
+            <p style="color:rgba(255,255,255,0.85);margin:8px 0 0;font-size:13px">Your personal moving assistant</p>
+          </div>
+          <h2 style="color:#1e293b;font-size:20px">Hi ${clientName},</h2>
+          <p style="color:#475569;line-height:1.6">${agent?.company_name || "Your real estate agent"} has invited you to use <strong>EZ Move AI</strong> — your step-by-step moving assistant to make your move stress-free.</p>
+          <a href="${inviteLink}" style="display:block;background:#f97316;color:white;text-decoration:none;text-align:center;padding:16px;border-radius:12px;font-weight:700;font-size:16px;margin:24px 0">Get Started →</a>
+          <p style="color:#94a3b8;font-size:12px;text-align:center">Click the link above to begin your onboarding.</p>
+        </div>`,
+      }).catch(() => {});
+      setAddStep("payment");
+    } catch (e) {
+      alert("Failed to save client: " + (e?.message || "Please try again."));
+    }
   };
 
   const handlePayment = async () => {
@@ -117,7 +124,7 @@ export default function BrokerDashboard() {
   };
 
 
-  const canSave = form.firstName.trim() && form.lastName.trim() && form.close_date && form.street?.trim() && form.city?.trim() && form.state && form.zip?.trim();
+  const canSave = form.firstName.trim() && form.lastName.trim() && form.email.trim() && form.close_date && form.street?.trim() && form.city?.trim() && form.state && form.zip?.trim(); && form.close_date && form.street?.trim() && form.city?.trim() && form.state && form.zip?.trim();
 
   if (loading) return (
     <div className="min-h-screen bg-blue-50 flex items-center justify-center">
@@ -153,15 +160,22 @@ export default function BrokerDashboard() {
       </div>
 
       <div className="max-w-3xl mx-auto px-6 py-6 space-y-5">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-4 gap-3">
           {[
             { label: "Total Clients", value: clients.length, Icon: Users, color: "text-blue-500", bg: "bg-blue-50", border: "border-blue-100" },
             { label: "Active", value: clients.filter(c => c.status === "active").length, Icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-100" },
+            { label: "Pending", value: clients.filter(c => c.status === "invited").length, Icon: Users, color: "text-amber-500", bg: "bg-amber-50", border: "border-amber-100" },
+            { label: "Revenue", value: `$${(agent?.total_charged || 0).toLocaleString()}`, Icon: CreditCard, color: "text-orange-500", bg: "bg-orange-50", border: "border-orange-100" },
           ].map(s => (
             <div key={s.label} className={`bg-white rounded-2xl p-4 border ${s.border} shadow-sm`}>
               <div className={`w-8 h-8 ${s.bg} rounded-xl flex items-center justify-center mb-2`}>
                 <s.Icon className={`w-4 h-4 ${s.color}`} />
               </div>
+              <p className="text-xl font-black text-slate-800">{s.value}</p>
+              <p className="text-slate-400 text-[11px] font-semibold mt-0.5">{s.label}</p>
+            </div>
+          ))}
+        </div>
               <p className="text-xl font-black text-slate-800">{s.value}</p>
               <p className="text-slate-400 text-[11px] font-semibold mt-0.5">{s.label}</p>
             </div>
@@ -221,7 +235,7 @@ export default function BrokerDashboard() {
                         </p>
                       )}
                       <div className="flex items-center gap-1.5">
-                        <button onClick={() => { setEditForm({ user_name: client.user_name, user_email: client.user_email, home_address: client.home_address, close_date: client.close_date }); setEditingId(client.id); }}
+                        <button onClick={() => { setEditForm({ user_name: client.user_name, user_email: client.user_email, phone: client.phone, home_address: client.home_address, close_date: client.close_date }); setEditingId(client.id); }}
                           className="text-[10px] text-orange-500 font-bold bg-orange-50 border border-orange-100 px-2 py-0.5 rounded-lg flex items-center gap-0.5 hover:bg-orange-100 transition-colors">
                           <Edit2 className="w-2.5 h-2.5" /> Edit
                         </button>
@@ -297,7 +311,7 @@ export default function BrokerDashboard() {
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-end md:items-center justify-center p-4 z-50">
           <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl border border-blue-100 overflow-hidden">
             <div className="px-6 pt-5 pb-4 border-b border-slate-100 flex items-center justify-between">
-              <button onClick={addStep === "payment" ? () => setAddStep("form") : resetAdd} className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center">
+              <button onClick={addStep === "payment" ? () => resetAdd(true) : resetAdd} className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center">
                 {addStep === "payment" ? <ArrowLeft className="w-4 h-4 text-slate-500" /> : <X className="w-4 h-4 text-slate-500" />}
               </button>
               <p className="font-bold text-slate-800 text-sm">
@@ -316,6 +330,16 @@ export default function BrokerDashboard() {
                           className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400" />
                       </div>
                     ))}
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wide block mb-1">Email <span className="text-orange-500">*</span></label>
+                    <input type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} placeholder="jane@example.com"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400" />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wide block mb-1">Phone <span className="text-slate-300">(for SMS)</span></label>
+                    <input type="tel" value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} placeholder="+1 (555) 000-0000"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400" />
                   </div>
                   <div>
                     <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wide block mb-1">Est. Close / Purchase Date</label>
@@ -341,10 +365,8 @@ export default function BrokerDashboard() {
                     <p className="text-2xl font-black text-orange-500">$40</p>
                   </div>
                   <button onClick={handlePayment} disabled={paying} className="w-full py-3.5 rounded-2xl bg-orange-500 text-white font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50 hover:bg-orange-600 transition-colors">
-                    {paying ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : <><CreditCard className="w-4 h-4" /> Pay $40 & Activate</>}
-                  </button>
-                  <button onClick={() => { setClients(prev => prev.map(c => c.id === pendingClient.id ? { ...c, status: "active", billing_status: "charged" } : c)); setDoneData({ name: pendingClient.user_name, code: pendingClient.invitation_code }); setAddStep("done"); }}
-                    className="w-full py-2.5 rounded-2xl border border-slate-200 text-slate-400 text-xs font-semibold hover:bg-slate-50 transition-colors">Skip Payment (Demo)</button>
+                     {paying ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : <><CreditCard className="w-4 h-4" /> Pay $40 & Activate</>}
+                   </button>
                 </div>
               )}
               {addStep === "done" && doneData && (
