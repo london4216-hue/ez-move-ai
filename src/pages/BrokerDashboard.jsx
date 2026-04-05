@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useNavigate } from "react-router-dom";
+import { getPortalRole } from "@/lib/usePortalRole";
 import { Plus, LogOut, Edit2, X, Trash2, Users, Building2, ArrowLeft, Loader2, CheckCircle2, CreditCard, Palette, Copy, Check } from "lucide-react";
 import ClientAddressFields, { buildFullAddress } from "../components/register/ClientAddressFields";
-import { format, differenceInDays, parseISO } from "date-fns";
+import { differenceInDays, parseISO } from "date-fns";
 
 const STATUS_COLORS = {
   invited: "bg-amber-50 text-amber-600 border-amber-100",
@@ -39,7 +40,8 @@ export default function BrokerDashboard() {
   useEffect(() => {
     const load = async () => {
       const user = await base44.auth.me();
-      if (user?.role !== "admin") { navigate("/"); setLoading(false); return; }
+      const portalRole = getPortalRole(user);
+      if (portalRole !== "broker" && portalRole !== "super_admin") { navigate("/"); setLoading(false); return; }
       let agents = await base44.entities.Agent.filter({ created_by: user.email });
       let agentRecord = agents.length === 0
         ? await base44.entities.Agent.create({ company_name: user.full_name || "My Brokerage" })

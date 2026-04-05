@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { getPortalRole } from "@/lib/usePortalRole";
 import { base44 } from "@/api/base44Client";
 import { useNavigate } from "react-router-dom";
-import { Plus, LogOut, Edit2, X, ArrowLeft, Loader2, Users, Trash2, CreditCard, CheckCircle2, DollarSign, Clock, Home, Copy, Check } from "lucide-react";
+import { Plus, LogOut, Edit2, X, ArrowLeft, Loader2, Users, Trash2, CreditCard, CheckCircle2, Clock, Copy, Check } from "lucide-react";
 import ClientAddressFields, { buildFullAddress } from "../components/register/ClientAddressFields";
 import { format, differenceInDays, parseISO } from "date-fns";
 
@@ -12,12 +12,6 @@ const STATUS_COLORS = {
   active: "bg-emerald-50 text-emerald-600 border-emerald-100",
   completed: "bg-slate-50 text-slate-500 border-slate-100",
 };
-
-const DEMO_CLIENTS = [
-  { user_name: "Sarah Johnson", user_email: "sarah.johnson@demo.com", close_date: "2026-04-15", invitation_code: "2201", status: "active", billing_status: "charged" },
-  { user_name: "Mike Torres", user_email: "mike.torres@demo.com", close_date: "2026-05-01", invitation_code: "3305", status: "active", billing_status: "charged" },
-  { user_name: "Carol Webb", user_email: "carol.webb@demo.com", close_date: "2026-03-28", invitation_code: "4412", status: "invited", billing_status: "pending" },
-];
 
 export default function AgentDashboard() {
   const [agent, setAgent] = useState(null);
@@ -46,17 +40,14 @@ export default function AgentDashboard() {
     const load = async () => {
       const user = await base44.auth.me();
       const role = getPortalRole(user);
-      if (role !== 'agent' && role !== 'broker' && user?.role !== 'admin') { navigate("/"); return; }
+      // Only agents (and super_admin for oversight) may access this portal
+      if (role !== 'agent' && role !== 'super_admin') { navigate("/"); return; }
       let agents = await base44.entities.Agent.filter({ created_by: user.email });
       let agentRecord = agents.length === 0
         ? await base44.entities.Agent.create({ company_name: user.full_name || "My Agency" })
         : agents[0];
       setAgent(agentRecord);
-      let clientList = await base44.entities.Client.filter({ agent_id: agentRecord.id });
-      if (clientList.length === 0) {
-        const seeded = await Promise.all(DEMO_CLIENTS.map(c => base44.entities.Client.create({ ...c, agent_id: agentRecord.id, invited_date: new Date().toISOString() })));
-        clientList = seeded;
-      }
+      const clientList = await base44.entities.Client.filter({ agent_id: agentRecord.id });
       setClients(clientList.sort((a, b) => new Date(b.invited_date || 0) - new Date(a.invited_date || 0)));
       setLoading(false);
     };
