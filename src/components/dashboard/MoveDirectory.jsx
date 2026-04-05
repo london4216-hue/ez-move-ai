@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Phone, Mail, Plus, X, Check, ChevronDown, ChevronUp, Trash2, CalendarDays, DollarSign, FileText, Info } from "lucide-react";
+import { Phone, Mail, Plus, X, Check, ChevronDown, ChevronUp, Trash2, CalendarDays, DollarSign, FileText, Info, AlertTriangle } from "lucide-react";
 
 export default function MoveDirectory({ user, contacts: externalContacts, onContactsChange }) {
   const [contacts, setContacts] = useState([]);
@@ -94,13 +94,16 @@ export default function MoveDirectory({ user, contacts: externalContacts, onCont
       <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
         {/* Missing Contacts Warning */}
         {missingContacts.length > 0 && !expanded && (
-          <div className="px-4 py-2 bg-amber-50 border-b border-amber-100">
-            <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wide mb-1">⚠️ {missingContacts.length} Missing Critical Contact{missingContacts.length > 1 ? 's' : ''}</p>
-            <div className="flex flex-wrap gap-1">
-              {missingContacts.slice(0, 3).map(rc => (
-                <span key={rc.label} className="text-[9px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-semibold">{rc.emoji} {rc.label}</span>
-              ))}
-              {missingContacts.length > 3 && <span className="text-[9px] text-amber-600 px-1">+{missingContacts.length - 3} more</span>}
+          <div className="px-4 py-2.5 border-b flex items-start gap-2" style={{background: "#FFF8E1", borderColor: "#F2D98A"}}>
+            <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" style={{color: "#8A6D00"}} />
+            <div className="flex-1">
+              <p className="text-[10px] font-bold uppercase tracking-wide mb-1" style={{color: "#8A6D00"}}>{missingContacts.length} Missing Critical Contact{missingContacts.length > 1 ? 's' : ''}</p>
+              <div className="flex flex-wrap gap-1">
+                {missingContacts.slice(0, 3).map(rc => (
+                  <span key={rc.label} className="text-[9px] px-2 py-0.5 rounded font-semibold" style={{background: "#F2D98A", color: "#8A6D00"}}>{rc.emoji} {rc.label}</span>
+                ))}
+                {missingContacts.length > 3 && <span className="text-[9px] px-1" style={{color: "#8A6D00"}}>+{missingContacts.length - 3} more</span>}
+              </div>
             </div>
           </div>
         )}
