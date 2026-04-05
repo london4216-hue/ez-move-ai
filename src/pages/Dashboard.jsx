@@ -97,7 +97,7 @@ export default function Dashboard() {
                 EZ Move <span className="text-orange-500">AI</span>
               </p>
               {user?.full_name && (
-                <p className="text-slate-400 text-[10px] leading-tight">Hi, {user.full_name.split(" ")[0]}</p>
+                <p className="text-[11px] leading-tight font-medium" style={{color: "#6B6B6B"}}>Hi, {user.full_name.split(" ")[0]}</p>
               )}
             </div>
           </div>
@@ -121,7 +121,7 @@ export default function Dashboard() {
                 {daysToClose !== null && daysToClose > 0 ? `${daysToClose} days to close` : daysToClose === 0 ? "Closing today!" : "Closed!"}
               </span>
             </div>
-            <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+            <div className="bg-slate-100 overflow-hidden" style={{height: "6px", borderRadius: "4px"}}>
               <div
                 className="h-full bg-gradient-to-r from-orange-500 to-orange-400 rounded-full transition-all duration-700"
                 style={{

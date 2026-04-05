@@ -341,7 +341,7 @@ Be specific and realistic, like a professional moving company estimate.`,
         </button>
       )}
       {onContinue && (
-        <button onClick={onContinue} className={onBack || onSkip ? "flex-1" : "w-full"} style={onBack || onSkip ? {} : {}} className="py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
+        <button onClick={onContinue} className={`${onBack || onSkip ? "flex-1" : "w-full"} py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2`}>
           Continue <ChevronRight className="w-4 h-4" />
         </button>
       )}
@@ -370,7 +370,7 @@ Be specific and realistic, like a professional moving company estimate.`,
       </div>
 
       {/* Progress bar */}
-      <div className="h-1 bg-slate-100 flex-shrink-0">
+      <div className="h-1 bg-slate-100 flex-shrink-0" dir="ltr">
         <div className="h-full bg-gradient-to-r from-orange-500 to-orange-400 transition-all duration-500" style={{ width: `${((stepIdx + 1) / STEPS.length) * 100}%` }} />
       </div>
 
@@ -800,6 +800,14 @@ Be specific and realistic, like a professional moving company estimate.`,
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1">
                             <p className="font-bold text-slate-800 text-sm">{p.name}</p>
+                            {p.rating && (
+                              <div className="flex items-center gap-1 mt-0.5">
+                                {[1,2,3,4,5].map(star => (
+                                  <span key={star} className={`text-xs ${star <= Math.round(parseFloat(p.rating)) ? 'text-amber-400' : 'text-slate-200'}`}>★</span>
+                                ))}
+                                <span className="text-[10px] text-slate-400 font-semibold ml-0.5">{p.rating}</span>
+                              </div>
+                            )}
                             {p.description && <p className="text-xs text-slate-500 mt-0.5">{p.description}</p>}
                             {p.phone && <a href={`tel:${p.phone}`} className="text-xs font-bold text-orange-500 flex items-center gap-1 mt-1"><Phone className="w-3 h-3" />{p.phone}</a>}
                           </div>
@@ -872,6 +880,14 @@ Be specific and realistic, like a professional moving company estimate.`,
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1">
                             <p className="font-bold text-slate-800 text-sm">{p.name}</p>
+                            {p.rating && (
+                              <div className="flex items-center gap-1 mt-0.5">
+                                {[1,2,3,4,5].map(star => (
+                                  <span key={star} className={`text-xs ${star <= Math.round(parseFloat(p.rating)) ? 'text-amber-400' : 'text-slate-200'}`}>★</span>
+                                ))}
+                                <span className="text-[10px] text-slate-400 font-semibold ml-0.5">{p.rating}</span>
+                              </div>
+                            )}
                             {p.description && <p className="text-xs text-slate-500 mt-0.5">{p.description}</p>}
                             {p.phone && <a href={`tel:${p.phone}`} className="text-xs font-bold text-orange-500 flex items-center gap-1 mt-1"><Phone className="w-3 h-3" />{p.phone}</a>}
                           </div>
@@ -1072,20 +1088,7 @@ Be specific and realistic, like a professional moving company estimate.`,
           )}
           {step === "ai_insights" && (
             <div className="flex gap-3">
-              <button onClick={() => goTo(2)} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button onClick={() => goTo(4)} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
-                Continue <ChevronRight className="w-4 h-4" />
-              </button>
-              <button onClick={() => goTo(4)} className="px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm hover:bg-slate-50 transition-colors">
-                Skip
-              </button>
-            </div>
-          )}
-          {step === "estate_sale" && needsEstate !== null && (
-            <div className="flex gap-3">
-              <button onClick={() => { setNeedsEstate(null); setProviders([]); }} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
+              <button onClick={() => goTo(3)} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button onClick={() => goTo(5)} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
@@ -1096,15 +1099,28 @@ Be specific and realistic, like a professional moving company estimate.`,
               </button>
             </div>
           )}
+          {step === "estate_sale" && needsEstate !== null && (
+            <div className="flex gap-3">
+              <button onClick={() => { setNeedsEstate(null); setProviders([]); }} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button onClick={() => goTo(6)} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
+                Continue <ChevronRight className="w-4 h-4" />
+              </button>
+              <button onClick={() => goTo(6)} className="px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm hover:bg-slate-50 transition-colors">
+                Skip
+              </button>
+            </div>
+          )}
           {step === "movers" && needsMover !== null && (
             <div className="flex gap-3">
               <button onClick={() => { setNeedsMover(null); setProviders([]); setMoversSaved(false); }} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <button onClick={() => goTo(6)} disabled={needsMover && providers.length > 0 && !selectedMover} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
+              <button onClick={() => goTo(7)} disabled={needsMover && providers.length > 0 && !selectedMover} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
                 Continue <ChevronRight className="w-4 h-4" />
               </button>
-              <button onClick={() => goTo(6)} className="px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm hover:bg-slate-50 transition-colors">
+              <button onClick={() => goTo(7)} className="px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm hover:bg-slate-50 transition-colors">
                 Skip
               </button>
             </div>

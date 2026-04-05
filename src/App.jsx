@@ -12,6 +12,8 @@ import SuperAdmin from './pages/SuperAdmin';
 import BrokerDashboard from './pages/BrokerDashboard';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import MyStuff from './pages/MyStuff';
+import RoleRouter from './pages/RoleRouter';
+import AgentDashboard from './pages/AgentDashboard';
 
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -48,7 +50,8 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
-      <Route path="/" element={<Preview />} />
+      <Route path="/" element={<RoleRouter />} />
+      <Route path="/AgentDashboard" element={<AgentDashboard />} />
       <Route path="/Home" element={
         <LayoutWrapper currentPageName={mainPageKey}>
           <MainPage />
@@ -66,7 +69,6 @@ const AuthenticatedApp = () => {
         />
       ))}
 
-      <Route path="/Preview" element={<LayoutWrapper currentPageName="Preview"><Preview /></LayoutWrapper>} />
       <Route path="/PrivacyPolicy" element={<PrivacyPolicy />} />
       <Route path="/MyStuff" element={<MyStuff />} />
       <Route path="*" element={<PageNotFound />} />

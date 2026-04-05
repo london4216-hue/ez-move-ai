@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, ExternalLink, Globe, Briefcase, LayoutDashboard, Shield, UserCheck, MapPin, Calendar, User, Phone, Mail, Home, Truck, CheckCircle2, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, ExternalLink, Globe, Briefcase, LayoutDashboard, Shield, UserCheck, MapPin, Calendar, User, Phone, Mail, Home, Truck, CheckCircle2, X, Layers } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-// ─── Non-client screens ───────────────────────────────────────────────────────
+// ─── Platform screens ─────────────────────────────────────────────────────────
 const PLATFORM_SCREENS = [
   {
     icon: Globe,
@@ -46,13 +46,13 @@ const CLIENT_STEPS = [
     title: "Agent Sends Invite",
     desc: "The agent fills out the client form in their portal. All property details are pre-filled — the client never has to enter them.",
     demoData: [
-      { icon: User,     label: "Client",       value: "Sarah Johnson" },
-      { icon: Mail,     label: "Email",        value: "sarah.j@gmail.com" },
-      { icon: Phone,    label: "Phone",        value: "(617) 555-0182" },
-      { icon: Home,     label: "Moving TO",    value: "47 Maple Dr, Newton, MA 02458" },
-      { icon: Truck,    label: "Moving FROM",  value: "12 Elm St, Boston, MA 02115" },
-      { icon: Calendar, label: "Close Date",   value: "June 27, 2026" },
-      { icon: MapPin,   label: "Est. Miles",   value: "~11 miles" },
+      { icon: User,     label: "Client",      value: "Sarah Johnson" },
+      { icon: Mail,     label: "Email",       value: "sarah.j@gmail.com" },
+      { icon: Phone,    label: "Phone",       value: "(617) 555-0182" },
+      { icon: Home,     label: "Moving TO",   value: "47 Maple Dr, Newton, MA 02458" },
+      { icon: Truck,    label: "Moving FROM", value: "12 Elm St, Boston, MA 02115" },
+      { icon: Calendar, label: "Close Date",  value: "June 27, 2026" },
+      { icon: MapPin,   label: "Est. Miles",  value: "~11 miles" },
     ],
     color: "from-purple-700 to-purple-900",
     badgeColor: "bg-purple-600",
@@ -66,9 +66,9 @@ const CLIENT_STEPS = [
     title: "Client Gets Invite Email",
     desc: "Sarah receives a branded email with a personalized invite link. One click opens her registration — address & close date already filled in.",
     demoData: [
-      { icon: Mail,     label: "From",         value: "Prestige Realty (via EZ Move AI)" },
-      { icon: User,     label: "To",           value: "sarah.j@gmail.com" },
-      { icon: CheckCircle2, label: "Pre-filled",value: "Address · Close date · Miles" },
+      { icon: Mail,         label: "From",      value: "Prestige Realty (via EZ Move AI)" },
+      { icon: User,         label: "To",        value: "sarah.j@gmail.com" },
+      { icon: CheckCircle2, label: "Pre-filled", value: "Address · Close date · Miles" },
     ],
     preview: `Hi Sarah,\n\nPrestige Realty has invited you to EZ Move AI — your personal step-by-step moving assistant.\n\nYour property at 47 Maple Dr, Newton is already set up. Just tap below to get started!\n\n[Get Started →]`,
     color: "from-orange-600 to-orange-800",
@@ -84,16 +84,14 @@ const CLIENT_STEPS = [
     title: "Client Registers (30 seconds)",
     desc: "Sarah opens her invite link. Her address and close date are already filled in by her agent. She just confirms her name and phone.",
     demoData: [
-      { icon: Home,     label: "New Address",  value: "47 Maple Dr, Newton, MA 02458  ✅" },
-      { icon: Calendar, label: "Close Date",   value: "June 27, 2026  ✅" },
-      { icon: User,     label: "Name",         value: "Sarah Johnson  ✅" },
-      { icon: Phone,    label: "Phone",        value: "(617) 555-0182 — SMS opt-in" },
+      { icon: Home,     label: "New Address", value: "47 Maple Dr, Newton, MA 02458  ✅" },
+      { icon: Calendar, label: "Close Date",  value: "June 27, 2026  ✅" },
+      { icon: User,     label: "Name",        value: "Sarah Johnson  ✅" },
+      { icon: Phone,    label: "Phone",       value: "(617) 555-0182 — SMS opt-in" },
     ],
     color: "from-emerald-600 to-emerald-900",
     badgeColor: "bg-emerald-600",
     badge: "Step 3",
-    url: "/Register?code=DEMO",
-    urlLabel: "Try Registration Demo →",
     requiresAuth: true,
   },
   {
@@ -110,8 +108,6 @@ const CLIENT_STEPS = [
     color: "from-amber-600 to-amber-800",
     badgeColor: "bg-amber-500",
     badge: "Step 4",
-    url: "/Dashboard",
-    urlLabel: "Open Dashboard →",
     requiresAuth: true,
   },
   {
@@ -136,6 +132,22 @@ const CLIENT_STEPS = [
   },
 ];
 
+const NAV_ITEMS = [
+  ...PLATFORM_SCREENS.map(s => ({ type: "platform", data: s })),
+  ...CLIENT_STEPS.map(s => ({ type: "client", data: s })),
+];
+
+// ─── Overview modules ─────────────────────────────────────────────────────────
+const OVERVIEW_MODULES = [
+  { icon: Globe,           label: "Sales Website",        desc: "Public marketing landing page",                badge: "Marketing", color: "bg-slate-700",   url: "/Home" },
+  { icon: LayoutDashboard, label: "Demo Experience",       desc: "Full 5-step client move flow walkthrough",     badge: "Demo",      color: "bg-orange-600",  action: "demo" },
+  { icon: UserCheck,       label: "Agent Portal",          desc: "Invite clients, track billing & move progress", badge: "Agent",     color: "bg-blue-600",    url: "/AgentDashboard",  requiresAuth: true },
+  { icon: Briefcase,       label: "Broker Portal",         desc: "Firm-wide agent & client management",          badge: "Broker",    color: "bg-purple-600",  url: "/BrokerDashboard", requiresAuth: true },
+  { icon: Shield,          label: "Super Admin Portal",    desc: "Platform-level control & reporting",           badge: "Admin",     color: "bg-red-600",     url: "/SuperAdmin",      requiresAuth: true },
+  { icon: Home,            label: "Buyer/Seller Dashboard", desc: "Client move plan, AI tools & task checklist",  badge: "Client",    color: "bg-emerald-600", url: "/Dashboard",       requiresAuth: true },
+];
+
+// ─── Helper components ────────────────────────────────────────────────────────
 const DataRow = ({ icon: Icon, label, value }) => (
   <div className="flex items-center gap-3 py-2 border-b border-white/10 last:border-0">
     <Icon className="w-4 h-4 text-white/50 flex-shrink-0" />
@@ -144,9 +156,58 @@ const DataRow = ({ icon: Icon, label, value }) => (
   </div>
 );
 
-function PlatformCard({ screen, onOpen }) {
+function SummaryOverview({ onStartDemo }) {
+  return (
+    <div className="flex-1 overflow-y-auto px-4 pt-5 pb-8 max-w-lg mx-auto w-full">
+      <div className="w-full bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-6 border border-white/10 shadow-2xl mb-4">
+        <div className="flex items-center gap-2 mb-1">
+          <Layers className="w-5 h-5 text-orange-400" />
+          <h2 className="font-black text-white text-xl">All Modules</h2>
+        </div>
+        <p className="text-slate-400 text-xs mb-5">Every section of EZ Move AI — tap Open to visit or Start to walk through the demo.</p>
+        <div className="space-y-3">
+          {OVERVIEW_MODULES.map(m => {
+            const Icon = m.icon;
+            return (
+              <div key={m.label} className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl px-4 py-3">
+                <div className={`w-10 h-10 ${m.color} rounded-xl flex items-center justify-center flex-shrink-0`}>
+                  <Icon className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-bold text-white text-sm">{m.label}</p>
+                    <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full text-white ${m.color}`}>{m.badge}</span>
+                    {m.requiresAuth && <span className="text-[9px] text-slate-500">🔒 login required</span>}
+                  </div>
+                  <p className="text-slate-400 text-xs leading-tight">{m.desc}</p>
+                </div>
+                {m.action === "demo" ? (
+                  <button onClick={onStartDemo}
+                    className="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold transition-all">
+                    Start <ChevronRight className="w-3 h-3" />
+                  </button>
+                ) : m.url ? (
+                  <a href={m.url} target="_blank" rel="noreferrer"
+                    className="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all border border-white/10">
+                    Open <ExternalLink className="w-3 h-3" />
+                  </a>
+                ) : null}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <button onClick={onStartDemo}
+        className="w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-orange-900/40">
+        Start Demo Experience <ChevronRight className="w-5 h-5" />
+      </button>
+    </div>
+  );
+}
+
+function PlatformCard({ screen }) {
   const Icon = screen.icon;
-  const actions = screen.actions || (screen.url ? [{ label: screen.urlLabel || `Open →`, url: screen.url }] : []);
+  const actions = screen.actions || (screen.url ? [{ label: screen.urlLabel || "Open →", url: screen.url }] : []);
   return (
     <div className={`w-full bg-gradient-to-br ${screen.color} rounded-3xl p-7 border border-white/10 shadow-2xl`}>
       <div className="flex items-center gap-3 mb-4">
@@ -162,7 +223,7 @@ function PlatformCard({ screen, onOpen }) {
       {screen.requiresAuth && (
         <div className="flex items-center gap-2 bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 mb-4">
           <span className="text-lg">🔒</span>
-          <p className="text-white/70 text-xs"><span className="text-white font-bold">Login required</span> to open this page — use <span className="text-white font-bold">Next →</span> below to keep browsing the preview.</p>
+          <p className="text-white/70 text-xs"><span className="text-white font-bold">Login required</span> to open this page.</p>
         </div>
       )}
       <div className="flex flex-wrap gap-2">
@@ -177,7 +238,7 @@ function PlatformCard({ screen, onOpen }) {
   );
 }
 
-function ClientStepCard({ step }) {
+function ClientStepCard({ step, onNext }) {
   return (
     <div className={`w-full bg-gradient-to-br ${step.color} rounded-3xl p-7 border border-white/10 shadow-2xl ${step.highlight ? "ring-2 ring-blue-400/40" : ""}`}>
       <div className="flex items-center gap-3 mb-1">
@@ -189,21 +250,16 @@ function ClientStepCard({ step }) {
       </div>
       <p className="text-white/70 text-sm leading-relaxed mt-3 mb-4">{step.desc}</p>
 
-      {/* Data rows */}
       {step.demoData && (
         <div className="bg-white/10 rounded-2xl px-4 py-1 mb-4 border border-white/10">
           {step.demoData.map((row, i) => <DataRow key={i} {...row} />)}
         </div>
       )}
-
-      {/* Email preview */}
       {step.preview && (
         <div className="bg-white/10 rounded-2xl px-4 py-3 mb-4 border border-white/10">
           <pre className="text-white/80 text-xs leading-relaxed whitespace-pre-wrap font-sans">{step.preview}</pre>
         </div>
       )}
-
-      {/* Bullet points */}
       {step.bullets && (
         <div className="space-y-1.5 mb-4">
           {step.bullets.map((b, i) => (
@@ -215,38 +271,34 @@ function ClientStepCard({ step }) {
         </div>
       )}
 
-      {step.requiresAuth && (
-        <div className="flex items-center gap-2 bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 mb-3">
-          <span className="text-lg">🔒</span>
-          <p className="text-white/70 text-xs"><span className="text-white font-bold">Login required</span> to open this live page — use <span className="text-white font-bold">Next →</span> below to continue the preview without signing in.</p>
+      {step.requiresAuth ? (
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 bg-white/10 border border-white/20 rounded-xl px-4 py-2.5">
+            <span className="text-lg">🔒</span>
+            <p className="text-white/70 text-xs"><span className="text-white font-bold">Login required</span> to open this live page.</p>
+          </div>
+          <button onClick={onNext}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/25 hover:bg-white/35 text-white font-bold text-sm transition-all border border-white/30">
+            Skip this step <ChevronRight className="w-3.5 h-3.5" />
+          </button>
         </div>
-      )}
-      {step.url && (
+      ) : step.url ? (
         <a href={step.url} target="_blank" rel="noreferrer"
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/20 hover:bg-white/30 text-white font-bold text-sm transition-all border border-white/20">
           {step.urlLabel || "Open →"} <ExternalLink className="w-3.5 h-3.5" />
         </a>
-      )}
+      ) : null}
     </div>
   );
 }
 
-// Combined ordered list: platform screens first, then client flow
-const ALL_SECTIONS = [
-  { type: "header", label: "Platform Screens" },
-  ...PLATFORM_SCREENS.map(s => ({ type: "platform", data: s })),
-  { type: "header", label: "Client Demo Flow (5 steps)" },
-  ...CLIENT_STEPS.map(s => ({ type: "client", data: s })),
-];
-
-// Filter out header items for navigation
-const NAV_ITEMS = ALL_SECTIONS.filter(s => s.type !== "header");
-
+// ─── Main component ───────────────────────────────────────────────────────────
 export default function Preview() {
+  const [showOverview, setShowOverview] = useState(true);
   const [idx, setIdx] = useState(0);
-  const current = NAV_ITEMS[idx];
   const navigate = useNavigate();
 
+  const current = NAV_ITEMS[idx];
   const isClientSection = idx >= PLATFORM_SCREENS.length;
 
   return (
@@ -259,58 +311,69 @@ export default function Preview() {
           </div>
           <p className="font-black text-white text-lg">EZ Move AI <span className="text-slate-400 font-normal text-sm">· App Preview</span></p>
         </div>
-        <p className="text-slate-500 text-xs">Flip through platform screens + full client demo flow</p>
+        <p className="text-slate-500 text-xs">
+          {showOverview ? "All platform modules at a glance" : "Flip through platform screens + full client demo flow"}
+        </p>
         <button onClick={() => navigate("/Home")} className="absolute right-4 top-4 w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all" title="Exit Preview">
           <X className="w-4 h-4 text-slate-400" />
         </button>
       </div>
 
-      {/* Section tabs */}
-      <div className="flex border-b border-white/10 flex-shrink-0">
-        <button onClick={() => setIdx(0)}
-          className={`flex-1 py-2.5 text-xs font-bold transition-all ${!isClientSection ? "text-orange-400 border-b-2 border-orange-400" : "text-slate-500 hover:text-slate-300"}`}>
-          Platform Screens
-        </button>
-        <button onClick={() => setIdx(PLATFORM_SCREENS.length)}
-          className={`flex-1 py-2.5 text-xs font-bold transition-all ${isClientSection ? "text-orange-400 border-b-2 border-orange-400" : "text-slate-500 hover:text-slate-300"}`}>
-          Client Demo (5 steps)
-        </button>
-      </div>
+      {/* Overview — default/first screen */}
+      {showOverview ? (
+        <SummaryOverview onStartDemo={() => { setIdx(0); setShowOverview(false); }} />
+      ) : (
+        <>
+          {/* Section tabs */}
+          <div className="flex border-b border-white/10 flex-shrink-0">
+            <button onClick={() => setIdx(0)}
+              className={`flex-1 py-2.5 text-xs font-bold transition-all ${!isClientSection ? "text-orange-400 border-b-2 border-orange-400" : "text-slate-500 hover:text-slate-300"}`}>
+              Platform Screens
+            </button>
+            <button onClick={() => setIdx(PLATFORM_SCREENS.length)}
+              className={`flex-1 py-2.5 text-xs font-bold transition-all ${isClientSection ? "text-orange-400 border-b-2 border-orange-400" : "text-slate-500 hover:text-slate-300"}`}>
+              Client Demo (5 steps)
+            </button>
+          </div>
 
-      {/* Card */}
-      <div className="flex-1 flex flex-col items-center justify-start px-4 pt-5 pb-4 max-w-lg mx-auto w-full">
-        {current.type === "platform"
-          ? <PlatformCard screen={current.data} />
-          : <ClientStepCard step={current.data} />
-        }
+          {/* Card area */}
+          <div className="flex-1 flex flex-col items-center justify-start px-4 pt-4 pb-4 max-w-lg mx-auto w-full">
+            <button onClick={() => setShowOverview(true)}
+              className="self-start mb-3 flex items-center gap-1 text-slate-400 hover:text-white text-xs font-bold transition-colors">
+              <ChevronLeft className="w-3.5 h-3.5" /> All Modules
+            </button>
 
-        {/* Counter */}
-        <p className="text-slate-500 text-xs mt-4 font-semibold">
-          {isClientSection
-            ? `Client step ${idx - PLATFORM_SCREENS.length + 1} of ${CLIENT_STEPS.length}`
-            : `Platform screen ${idx + 1} of ${PLATFORM_SCREENS.length}`}
-        </p>
+            {current.type === "platform"
+              ? <PlatformCard screen={current.data} />
+              : <ClientStepCard step={current.data} onNext={() => setIdx(i => Math.min(NAV_ITEMS.length - 1, i + 1))} />
+            }
 
-        {/* Dots */}
-        <div className="flex justify-center gap-1.5 mt-3 mb-4">
-          {NAV_ITEMS.map((_, i) => (
-            <button key={i} onClick={() => setIdx(i)}
-              className={`h-2 rounded-full transition-all ${i === idx ? "bg-orange-500 w-5" : "bg-slate-700 hover:bg-slate-500 w-2"}`} />
-          ))}
-        </div>
+            <p className="text-slate-500 text-xs mt-4 font-semibold">
+              {isClientSection
+                ? `Client step ${idx - PLATFORM_SCREENS.length + 1} of ${CLIENT_STEPS.length}`
+                : `Platform screen ${idx + 1} of ${PLATFORM_SCREENS.length}`}
+            </p>
 
-        {/* Prev / Next */}
-        <div className="flex gap-3">
-          <button onClick={() => setIdx(i => Math.max(0, i - 1))} disabled={idx === 0}
-            className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-sm disabled:opacity-25 disabled:cursor-not-allowed transition-all border border-white/10">
-            <ChevronLeft className="w-5 h-5" /> Back
-          </button>
-          <button onClick={() => setIdx(i => Math.min(NAV_ITEMS.length - 1, i + 1))} disabled={idx === NAV_ITEMS.length - 1}
-            className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm disabled:opacity-25 disabled:cursor-not-allowed transition-all shadow-lg shadow-orange-900/40">
-            Next <ChevronRight className="w-5 h-5" />
-          </button>
-        </div>
-      </div>
+            <div className="flex justify-center gap-1.5 mt-3 mb-4">
+              {NAV_ITEMS.map((_, i) => (
+                <button key={i} onClick={() => setIdx(i)}
+                  className={`h-2 rounded-full transition-all ${i === idx ? "bg-orange-500 w-5" : "bg-slate-700 hover:bg-slate-500 w-2"}`} />
+              ))}
+            </div>
+
+            <div className="flex gap-3">
+              <button onClick={() => setIdx(i => Math.max(0, i - 1))} disabled={idx === 0}
+                className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-sm disabled:opacity-25 disabled:cursor-not-allowed transition-all border border-white/10">
+                <ChevronLeft className="w-5 h-5" /> Back
+              </button>
+              <button onClick={() => setIdx(i => Math.min(NAV_ITEMS.length - 1, i + 1))} disabled={idx === NAV_ITEMS.length - 1}
+                className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm disabled:opacity-25 disabled:cursor-not-allowed transition-all shadow-lg shadow-orange-900/40">
+                Next <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

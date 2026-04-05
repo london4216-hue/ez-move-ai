@@ -105,53 +105,58 @@ export default function UpcomingEvents({ user }) {
 
   return (
     <>
-      {/* Red Alert Banner */}
-      <div className="mb-4 bg-red-50 border-2 border-red-300 rounded-2xl p-3 flex items-start gap-2.5">
-        <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${events.length > 0 ? "bg-red-500 animate-pulse" : "bg-red-300"}`} />
-        <div className="flex-1">
-          <p className="text-xs font-black text-red-700 uppercase tracking-wide">🚨 Upcoming Events</p>
-          <p className="text-[10px] text-red-600 font-semibold mt-0.5">
+      {/* Upcoming Events Card */}
+      <div className="mb-4 bg-white rounded-xl border border-slate-100 overflow-hidden" style={{boxShadow: "0px 2px 6px rgba(0,0,0,0.08)"}}>
+        <div className="px-4 pt-4 pb-3 border-b border-slate-50">
+          <p className="text-base font-bold" style={{color: "#1A1A1A"}}>Upcoming Events</p>
+          <p className="text-[12px] mt-0.5" style={{color: "#6B6B6B"}}>
             {events.length === 0 ? "No scheduled events yet" : `${events.length} scheduled event${events.length !== 1 ? 's' : ''} — tap to review details`}
           </p>
         </div>
+
+        {events.length > 0 && (
+          <div className="divide-y divide-slate-50">
+            {events.map(ev => {
+              const daysAway = differenceInDays(parseISO(ev.date), new Date());
+              const icon = getIcon(ev.title, ev.provider);
+              return (
+                <button
+                  key={`${ev.type}-${ev.id}`}
+                  onClick={() => setSelected(ev)}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-left transition-all hover:bg-slate-50 active:bg-slate-100"
+                >
+                  {/* Left: urgency pill */}
+                  <div className="flex-shrink-0">
+                    <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${
+                      daysAway === 0 ? "bg-red-100 text-red-700" :
+                      daysAway <= 3 ? "bg-orange-100 text-orange-700" :
+                      daysAway <= 7 ? "bg-amber-100 text-amber-700" :
+                      "bg-slate-100 text-slate-600"
+                    }`}>
+                      {urgencyLabel(daysAway)}
+                    </span>
+                  </div>
+                  {/* Middle: title, provider, date */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold leading-tight truncate" style={{color: "#1A1A1A"}}>{ev.title}</p>
+                    {ev.provider && ev.provider !== ev.title && (
+                      <p className="text-[11px] truncate mt-0.5" style={{color: "#6B6B6B"}}>{ev.provider}</p>
+                    )}
+                    <p className="text-[11px] mt-0.5" style={{color: "#6B6B6B"}}>
+                      {format(parseISO(ev.date), "MMM d")}{ev.time ? ` · ${ev.time}` : ""}
+                    </p>
+                  </div>
+                  {/* Right: icon in circular bg */}
+                  <div className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-lg" style={{background: "#F5F5F5"}}>
+                    {icon}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
-      {events.length > 0 && (
-      <div className="mb-4">
-
-
-        <div className="flex gap-2.5 overflow-x-auto pb-1 no-scrollbar">
-          {events.map(ev => {
-            const daysAway = differenceInDays(parseISO(ev.date), new Date());
-            const colors = urgencyColor(daysAway);
-            const icon = getIcon(ev.title, ev.provider);
-            return (
-              <button
-                key={`${ev.type}-${ev.id}`}
-                onClick={() => setSelected(ev)}
-                className={`flex-shrink-0 w-36 rounded-2xl border px-3 py-2.5 text-left transition-all active:scale-95 ${colors}`}
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-lg">{icon}</span>
-                  <span className={`text-[9px] font-black uppercase tracking-wide px-1.5 py-0.5 rounded-full ${daysAway === 0 ? "bg-red-500 text-white" : daysAway <= 3 ? "bg-orange-500 text-white" : "bg-white/60 text-current"}`}>
-                    {urgencyLabel(daysAway)}
-                  </span>
-                </div>
-                <p className="text-[11px] font-bold leading-tight truncate">{ev.title}</p>
-                {ev.provider && ev.provider !== ev.title && (
-                  <p className="text-[10px] opacity-70 truncate mt-0.5">{ev.provider}</p>
-                )}
-                <p className="text-[10px] font-semibold mt-1 opacity-80">
-                  {format(parseISO(ev.date), "MMM d")}{ev.time ? ` · ${ev.time}` : ""}
-                </p>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-      )}
-
-      {/* Detail Modal */}
       {selected && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end justify-center">
           <div className="w-full max-w-md bg-white rounded-t-3xl shadow-2xl pb-8">
