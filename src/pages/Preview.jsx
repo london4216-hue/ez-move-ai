@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, ExternalLink, Globe, Briefcase, LayoutDashboard, Shield, UserCheck, MapPin, Calendar, User, Phone, Mail, Home, Truck, CheckCircle2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, ExternalLink, Globe, Briefcase, LayoutDashboard, Shield, UserCheck, MapPin, Calendar, User, Phone, Mail, Home, Truck, CheckCircle2, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 // ─── Non-client screens ───────────────────────────────────────────────────────
 const PLATFORM_SCREENS = [
@@ -244,6 +245,7 @@ const NAV_ITEMS = ALL_SECTIONS.filter(s => s.type !== "header");
 export default function Preview() {
   const [idx, setIdx] = useState(0);
   const current = NAV_ITEMS[idx];
+  const navigate = useNavigate();
 
   const isClientSection = idx >= PLATFORM_SCREENS.length;
 
@@ -258,6 +260,9 @@ export default function Preview() {
           <p className="font-black text-white text-lg">EZ Move AI <span className="text-slate-400 font-normal text-sm">· App Preview</span></p>
         </div>
         <p className="text-slate-500 text-xs">Flip through platform screens + full client demo flow</p>
+        <button onClick={() => navigate("/Home")} className="absolute right-4 top-4 w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all" title="Exit Preview">
+          <X className="w-4 h-4 text-slate-400" />
+        </button>
       </div>
 
       {/* Section tabs */}
