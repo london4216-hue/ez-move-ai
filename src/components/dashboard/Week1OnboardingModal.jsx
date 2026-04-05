@@ -341,7 +341,7 @@ Be specific and realistic, like a professional moving company estimate.`,
         </button>
       )}
       {onContinue && (
-        <button onClick={onContinue} className={onBack || onSkip ? "flex-1" : "w-full"} style={onBack || onSkip ? {} : {}} className="py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
+        <button onClick={onContinue} className={`${onBack || onSkip ? "flex-1" : "w-full"} py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2`}>
           Continue <ChevronRight className="w-4 h-4" />
         </button>
       )}
