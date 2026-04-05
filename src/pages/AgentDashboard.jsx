@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { getPortalRole } from "@/lib/usePortalRole";
 import { base44 } from "@/api/base44Client";
 import { useNavigate } from "react-router-dom";
-import { Plus, LogOut, Edit2, X, ArrowLeft, Loader2, Users, Trash2, CreditCard, CheckCircle2, Clock, Copy, Check } from "lucide-react";
+import { Plus, LogOut, Edit2, X, ArrowLeft, Loader2, Users, Trash2, CreditCard, CheckCircle2, Clock, Copy, Check, Sparkles } from "lucide-react";
+import ClientInsightsPanel from "../components/ai/ClientInsightsPanel";
 import ClientAddressFields, { buildFullAddress } from "../components/register/ClientAddressFields";
 import { format, differenceInDays, parseISO } from "date-fns";
 
@@ -27,6 +28,7 @@ export default function AgentDashboard() {
   const [resendingId, setResendingId] = useState(null);
   const [resentId, setResentId] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
+  const [insightsClient, setInsightsClient] = useState(null);
 
   const copyInviteLink = (client) => {
     const link = `${window.location.origin}/Register?code=${client.invitation_code}`;
@@ -233,6 +235,10 @@ export default function AgentDashboard() {
                         </div>
                       )}
                       <div className="flex items-center gap-1.5">
+                        <button onClick={() => setInsightsClient(client)}
+                          className="text-[10px] text-purple-600 font-bold flex items-center gap-0.5 bg-purple-50 border border-purple-100 px-2 py-0.5 rounded-lg hover:bg-purple-100 transition-colors">
+                          <Sparkles className="w-2.5 h-2.5" /> AI
+                        </button>
                         <button onClick={() => { setEditForm({ user_name: client.user_name, user_email: client.user_email, home_address: client.home_address, close_date: client.close_date }); setEditingId(client.id); }}
                           className="text-[10px] text-orange-500 font-bold flex items-center gap-0.5 bg-orange-50 border border-orange-100 px-2 py-0.5 rounded-lg hover:bg-orange-100 transition-colors">
                           <Edit2 className="w-2.5 h-2.5" /> Edit
@@ -253,6 +259,14 @@ export default function AgentDashboard() {
           )}
         </div>
       </div>
+
+      {insightsClient && (
+        <ClientInsightsPanel
+          client={insightsClient}
+          agentName={agent?.company_name}
+          onClose={() => setInsightsClient(null)}
+        />
+      )}
 
       {/* Edit Modal */}
       {editingId && (
