@@ -237,69 +237,6 @@ function ClientStepCard({ step, onNext }) {
   );
 }
 
-const SYSTEM_SUMMARY = [
-  {
-    step: "1",
-    emoji: "🏢",
-    title: "Agent / Broker Signs Up",
-    desc: "A real estate agent or broker firm registers on EZ Move AI. They set up their profile, company name, and license number. Broker firms can manage multiple agents under one account.",
-  },
-  {
-    step: "2",
-    emoji: "📤",
-    title: "Agent Invites a Client",
-    desc: "The agent fills out a simple client form: name, email, phone, moving FROM & TO addresses, and estimated closing date. The system calculates mileage automatically. A $40 per-client fee is charged.",
-  },
-  {
-    step: "3",
-    emoji: "📧",
-    title: "Client Gets a Branded Invite Email",
-    desc: "The client receives a personalized email from their agent's brokerage. Their property address and closing date are already pre-filled. One tap opens the registration page.",
-  },
-  {
-    step: "4",
-    emoji: "📝",
-    title: "Client Registers in 30 Seconds",
-    desc: "The client confirms their name and phone number — everything else is pre-loaded. They opt into SMS reminders and are instantly redirected to their personalized dashboard.",
-  },
-  {
-    step: "5",
-    emoji: "🧙",
-    title: "Week 1 Setup Wizard (3 Minutes)",
-    desc: "A guided onboarding flow walks the client through: sorting every item in their home (move / donate / junk), answering mover questions (floors, stairs, distance), getting an AI-generated cost estimate, finding local estate sale companies and movers, and adding closing & walkthrough details.",
-  },
-  {
-    step: "6",
-    emoji: "📱",
-    title: "Client's Personalized Move Dashboard",
-    desc: "The client's command center — week-by-week task checklist auto-generated from their closing date, My Stuff inventory (sorted into Move / Donate / Junk lists), an AI Assist tab for neighborhood research, food finder, and quote generator, a Move Directory for all key contacts (lawyer, mover, inspector, etc.), upcoming appointments & calendar, and a countdown timer to closing day.",
-  },
-  {
-    step: "7",
-    emoji: "🤖",
-    title: "AI Tools Throughout the Process",
-    desc: "Clients can search for local movers, cleaners, painters, and estate sale companies — AI finds real businesses near their address with phone numbers and ratings. They can generate packing supply estimates, get neighborhood insights on their new area, and receive a full moving cost breakdown.",
-  },
-  {
-    step: "8",
-    emoji: "📊",
-    title: "Agent & Broker Track Everything",
-    desc: "Agents see all their clients in one dashboard — move progress, invite status, and billing. Broker firms see all agents under their firm. A Super Admin panel gives platform-level visibility across all agents, clients, and revenue.",
-  },
-  {
-    step: "9",
-    emoji: "💬",
-    title: "SMS Reminders (Twilio)",
-    desc: "Clients who opt in receive automated SMS reminders for upcoming appointments. The system tracks delivery status and reply messages — keeping clients on track without any manual follow-up from the agent.",
-  },
-  {
-    step: "10",
-    emoji: "🏠",
-    title: "Move Complete",
-    desc: "Once the client closes, their dashboard reflects the completed status. The agent's billing is finalized, and the client retains access to their move history, contacts, and saved providers.",
-  },
-];
-
 // Combined ordered list: platform screens first, then client flow
 const ALL_SECTIONS = [
   { type: "header", label: "Platform Screens" },
@@ -379,33 +316,6 @@ export default function Preview() {
             Next <ChevronRight className="w-5 h-5" />
           </button>
         </div>
-      </div>
-
-      {/* ── System Summary ── */}
-      <div className="w-full max-w-lg mx-auto px-4 pb-12">
-        <div className="border-t border-white/10 pt-10 mb-6 text-center">
-          <p className="text-white font-black text-xl">How It Works — End to End</p>
-          <p className="text-slate-400 text-xs mt-1">Complete system overview for EZ Move AI</p>
-        </div>
-        <div className="space-y-4">
-          {SYSTEM_SUMMARY.map((item) => (
-            <div key={item.step} className="bg-white/5 border border-white/10 rounded-2xl p-5 flex gap-4">
-              <div className="flex-shrink-0">
-                <div className="w-9 h-9 rounded-xl bg-orange-500/20 border border-orange-500/30 flex items-center justify-center">
-                  <span className="text-orange-400 font-black text-sm">{item.step}</span>
-                </div>
-              </div>
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-lg">{item.emoji}</span>
-                  <p className="text-white font-bold text-sm">{item.title}</p>
-                </div>
-                <p className="text-slate-400 text-xs leading-relaxed">{item.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-        <p className="text-center text-slate-600 text-[10px] mt-8 font-semibold">EZ Move AI · Built on Base44 · Powered by AI</p>
       </div>
     </div>
   );
