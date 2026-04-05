@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { getPortalRole } from "@/lib/usePortalRole";
 import { base44 } from "@/api/base44Client";
-import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
 import { Plus, LogOut, Edit2, X, ArrowLeft, Loader2, Users, Trash2, CreditCard, CheckCircle2, DollarSign, Clock, Home, Copy, Check } from "lucide-react";
 import ClientAddressFields, { buildFullAddress } from "../components/register/ClientAddressFields";
@@ -136,21 +135,29 @@ export default function AgentDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
+      {/* Portal identity bar */}
+      <div className="bg-blue-600 px-6 py-2 flex items-center gap-2">
+        <div className="w-5 h-5 rounded bg-white/20 flex items-center justify-center">
+          <span className="text-white font-black text-[9px]">EZ</span>
+        </div>
+        <span className="text-white text-[10px] font-black uppercase tracking-widest">Agent Portal</span>
+        <span className="text-blue-200 text-[10px]">{agent?.company_name && `· ${agent.company_name}`}</span>
+      </div>
       {/* Header */}
-      <div className="bg-white border-b border-blue-100 shadow-sm px-6 py-4">
+      <div className="bg-white border-b border-slate-200 shadow-sm px-6 py-4">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-md shadow-orange-200">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-md shadow-blue-200">
               <span className="text-white font-black text-sm">EZ</span>
             </div>
             <div>
-              <p className="font-black text-slate-800 text-sm leading-tight">EZ Move <span className="text-orange-500">AI</span></p>
-              <p className="text-slate-400 text-[10px] font-semibold">Agent Portal · {agent?.company_name}</p>
+              <p className="font-black text-slate-800 text-sm leading-tight">EZ Move <span className="text-blue-500">AI</span></p>
+              <p className="text-blue-500 text-[10px] font-semibold">Agent Portal · {agent?.company_name}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <button onClick={() => setAddStep("form")}
-              className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs px-4 py-2 rounded-xl transition-colors shadow-md shadow-orange-200">
+              className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition-colors shadow-md shadow-blue-200">
               <Plus className="w-3.5 h-3.5" /> Add Client
             </button>
             <button onClick={() => base44.auth.logout("/")} className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors">
