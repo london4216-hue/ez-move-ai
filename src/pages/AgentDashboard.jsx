@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { getPortalRole } from "@/lib/usePortalRole";
 import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
@@ -45,7 +46,8 @@ export default function AgentDashboard() {
   useEffect(() => {
     const load = async () => {
       const user = await base44.auth.me();
-      if (user?.role !== "admin") { navigate("/"); return; }
+      const role = getPortalRole(user);
+      if (role !== 'agent' && role !== 'broker' && user?.role !== 'admin') { navigate("/"); return; }
       let agents = await base44.entities.Agent.filter({ created_by: user.email });
       let agentRecord = agents.length === 0
         ? await base44.entities.Agent.create({ company_name: user.full_name || "My Agency" })

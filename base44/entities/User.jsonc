@@ -6,11 +6,13 @@
       "type": "string",
       "enum": [
         "super_admin",
+        "broker",
+        "agent",
         "admin",
         "user"
       ],
       "default": "user",
-      "description": "super_admin = EZ Move AI platform staff, admin = Agent or Broker, user = Buyer/Seller client"
+      "description": "super_admin = EZ Move AI platform staff, broker = broker firm account, agent = individual agent, admin = legacy admin (agent/broker), user = buyer/seller"
     },
     "account_type": {
       "type": "string",
@@ -19,6 +21,10 @@
         "broker"
       ],
       "description": "For admin users: individual agent or broker firm"
+    },
+    "broker_id": {
+      "type": "string",
+      "description": "For agent role users: the Agent entity ID of their broker"
     },
     "home_address": {
       "type": "string"

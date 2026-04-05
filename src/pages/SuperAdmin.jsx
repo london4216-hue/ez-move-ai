@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { getPortalRole } from "@/lib/usePortalRole";
 import { base44 } from "@/api/base44Client";
 import { useNavigate } from "react-router-dom";
 import {
@@ -25,7 +26,8 @@ export default function SuperAdmin() {
   useEffect(() => {
     const load = async () => {
       const me = await base44.auth.me();
-      if (me?.role !== "super_admin") { navigate("/"); return; }
+      const portalRole = getPortalRole(me);
+      if (portalRole !== "super_admin") { navigate("/"); return; }
       const [agentList, clientList] = await Promise.all([
         base44.entities.Agent.list(),
         base44.entities.Client.list(),
