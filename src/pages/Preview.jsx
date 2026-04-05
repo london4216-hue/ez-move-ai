@@ -23,6 +23,7 @@ const PLATFORM_SCREENS = [
       { label: "Agent Portal", url: "/AgentDashboard" },
       { label: "Broker Portal", url: "/BrokerDashboard" },
     ],
+    requiresAuth: true,
   },
   {
     icon: Shield,
@@ -32,6 +33,7 @@ const PLATFORM_SCREENS = [
     title: "Super Admin",
     desc: "Platform-level admin view — manage all agents, clients, billing status, and platform-wide settings.",
     url: "/SuperAdmin",
+    requiresAuth: true,
   },
 ];
 
@@ -73,6 +75,7 @@ const CLIENT_STEPS = [
     badge: "Step 2",
     url: "/Register?code=DEMO",
     urlLabel: "See Registration Page →",
+    requiresAuth: true,
   },
   {
     step: 3,
@@ -90,6 +93,7 @@ const CLIENT_STEPS = [
     badge: "Step 3",
     url: "/Register?code=DEMO",
     urlLabel: "Try Registration Demo →",
+    requiresAuth: true,
   },
   {
     step: 4,
@@ -107,6 +111,7 @@ const CLIENT_STEPS = [
     badge: "Step 4",
     url: "/Dashboard",
     urlLabel: "Open Dashboard →",
+    requiresAuth: true,
   },
   {
     step: 5,
@@ -126,6 +131,7 @@ const CLIENT_STEPS = [
     url: "/Dashboard",
     urlLabel: "Open Live Dashboard →",
     highlight: true,
+    requiresAuth: true,
   },
 ];
 
@@ -152,6 +158,12 @@ function PlatformCard({ screen, onOpen }) {
         </div>
       </div>
       <p className="text-white/70 text-sm leading-relaxed mb-5">{screen.desc}</p>
+      {screen.requiresAuth && (
+        <div className="flex items-center gap-2 bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 mb-4">
+          <span className="text-lg">🔒</span>
+          <p className="text-white/70 text-xs"><span className="text-white font-bold">Login required</span> to open this page — use <span className="text-white font-bold">Next →</span> below to keep browsing the preview.</p>
+        </div>
+      )}
       <div className="flex flex-wrap gap-2">
         {actions.map((a, i) => (
           <a key={i} href={a.url} target="_blank" rel="noreferrer"
@@ -202,6 +214,12 @@ function ClientStepCard({ step }) {
         </div>
       )}
 
+      {step.requiresAuth && (
+        <div className="flex items-center gap-2 bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 mb-3">
+          <span className="text-lg">🔒</span>
+          <p className="text-white/70 text-xs"><span className="text-white font-bold">Login required</span> to open this live page — use <span className="text-white font-bold">Next →</span> below to continue the preview without signing in.</p>
+        </div>
+      )}
       {step.url && (
         <a href={step.url} target="_blank" rel="noreferrer"
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/20 hover:bg-white/30 text-white font-bold text-sm transition-all border border-white/20">
