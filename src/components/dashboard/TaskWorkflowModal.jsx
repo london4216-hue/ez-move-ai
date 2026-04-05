@@ -2,19 +2,6 @@ import { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { X, Phone, Check, Package, DollarSign, ClipboardList } from "lucide-react";
 
-const StarRating = ({ rating }) => {
-  if (!rating) return null;
-  const num = parseFloat(rating);
-  return (
-    <div className="flex items-center gap-0.5">
-      {[1,2,3,4,5].map(star => (
-        <span key={star} className={`text-xs ${star <= Math.round(num) ? 'text-amber-400' : 'text-slate-200'}`}>★</span>
-      ))}
-      <span className="text-[10px] text-slate-400 font-semibold ml-0.5">{rating}</span>
-    </div>
-  );
-};
-
 export default function TaskWorkflowModal({ task, user, onClose, onComplete }) {
   const [step, setStep] = useState("provider_search");
   const [providers, setProviders] = useState([]);
@@ -156,7 +143,7 @@ export default function TaskWorkflowModal({ task, user, onClose, onComplete }) {
                           )}
                         </div>
                         <div className="flex flex-col items-end gap-2">
-                          <StarRating rating={p.rating} />
+                          <span className="text-xs text-amber-600 font-semibold">⭐ {p.rating}</span>
                           <div className="flex gap-2">
                             <button
                               onClick={async () => {

@@ -1,19 +1,6 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Phone, UserPlus, Check, ShoppingCart, ClipboardList, Eye } from "lucide-react";
-
-const StarRating = ({ rating }) => {
-  if (!rating) return null;
-  const num = parseFloat(rating);
-  return (
-    <div className="flex items-center gap-0.5">
-      {[1,2,3,4,5].map(star => (
-        <span key={star} className={`text-xs ${star <= Math.round(num) ? 'text-amber-400' : 'text-slate-200'}`}>★</span>
-      ))}
-      <span className="text-[10px] text-slate-400 font-semibold ml-0.5">{rating}</span>
-    </div>
-  );
-};
 import RoomSetupWizard from "./RoomSetupWizard";
 import ProviderAppointmentModal from "./ProviderAppointmentModal";
 import TaskWorkflowModal from "./TaskWorkflowModal";
@@ -219,7 +206,7 @@ export default function ChecklistItemCard({ item, completed, skipped, onComplete
                       )}
                     </div>
                     <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                      <StarRating rating={r.rating} />
+                      <span className="text-[10px] text-[#D97706] font-semibold">⭐ {r.rating}</span>
                       <button
                         onClick={() => handleSelectProvider(r, i)}
                         disabled={savedIdx !== null}
