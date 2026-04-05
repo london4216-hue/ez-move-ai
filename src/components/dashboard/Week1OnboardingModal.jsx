@@ -1117,10 +1117,10 @@ Be specific and realistic, like a professional moving company estimate.`,
               <button onClick={() => { setNeedsMover(null); setProviders([]); setMoversSaved(false); }} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <button onClick={() => goTo(6)} disabled={needsMover && providers.length > 0 && !selectedMover} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
+              <button onClick={() => goTo(7)} disabled={needsMover && providers.length > 0 && !selectedMover} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
                 Continue <ChevronRight className="w-4 h-4" />
               </button>
-              <button onClick={() => goTo(6)} className="px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm hover:bg-slate-50 transition-colors">
+              <button onClick={() => goTo(7)} className="px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm hover:bg-slate-50 transition-colors">
                 Skip
               </button>
             </div>
