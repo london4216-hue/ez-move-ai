@@ -4,6 +4,11 @@
 export function getPortalRole(user) {
   if (!user) return null;
 
+  // Check nested data.user_type first (takes precedence)
+  if (user.data?.user_type === "seller") return "user"; // client/buyer
+  if (user.data?.user_type === "agent") return "agent";
+  if (user.data?.user_type === "broker") return "broker";
+
   // New explicit roles
   if (user.role === "super_admin") return "super_admin";
   if (user.role === "broker") return "broker";
