@@ -52,6 +52,7 @@ const AuthenticatedApp = () => {
     <Routes>
       <Route path="/" element={<RoleRouter />} />
       <Route path="/AgentDashboard" element={<AgentDashboard />} />
+      <Route path="/SuperAdmin" element={<SuperAdmin />} />
       <Route path="/Home" element={
         <LayoutWrapper currentPageName={mainPageKey}>
           <MainPage />
