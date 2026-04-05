@@ -108,12 +108,14 @@ const CLIENT_STEPS = [
     color: "from-amber-600 to-amber-800",
     badgeColor: "bg-amber-500",
     badge: "Step 4",
-    requiresAuth: true,
+    requiresAuth: false,
+    url: "/OnboardingPreview",
+    urlLabel: "Test Wizard →",
   },
   {
     step: 5,
-    emoji: "📱",
-    title: "Sarah's Move Dashboard",
+    emoji: "🏠",
+    title: "Week 1 Setup Complete",
     desc: "Her personalized command center. Week-by-week task checklist, AI assistant, inventory tracker, contacts & calendar — all in one place.",
     bullets: [
       "83 days until closing — countdown ticker",

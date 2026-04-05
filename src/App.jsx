@@ -8,6 +8,7 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import AgentOnboarding from './pages/AgentOnboarding';
 import Preview from './pages/Preview';
+import OnboardingPreview from './pages/OnboardingPreview';
 import SuperAdmin from './pages/SuperAdmin';
 import BrokerDashboard from './pages/BrokerDashboard';
 import PrivacyPolicy from './pages/PrivacyPolicy';
@@ -52,6 +53,7 @@ const AuthenticatedApp = () => {
     <Routes>
       <Route path="/" element={<RoleRouter />} />
       <Route path="/Preview" element={<Preview />} />
+      <Route path="/OnboardingPreview" element={<OnboardingPreview />} />
       <Route path="/AgentDashboard" element={<AgentDashboard />} />
       <Route path="/SuperAdmin" element={<SuperAdmin />} />
       <Route path="/Home" element={
