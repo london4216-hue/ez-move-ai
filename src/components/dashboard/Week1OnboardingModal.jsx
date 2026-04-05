@@ -1072,13 +1072,13 @@ Be specific and realistic, like a professional moving company estimate.`,
           )}
           {step === "ai_insights" && (
             <div className="flex gap-3">
-              <button onClick={() => goTo(2)} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
+              <button onClick={() => goTo(3)} className="flex items-center gap-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm">
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <button onClick={() => goTo(4)} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
+              <button onClick={() => goTo(5)} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
                 Continue <ChevronRight className="w-4 h-4" />
               </button>
-              <button onClick={() => goTo(4)} className="px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm hover:bg-slate-50 transition-colors">
+              <button onClick={() => goTo(5)} className="px-4 py-3 rounded-xl border border-slate-200 text-slate-500 font-bold text-sm hover:bg-slate-50 transition-colors">
                 Skip
               </button>
             </div>
