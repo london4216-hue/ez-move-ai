@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, ExternalLink, Globe, Briefcase, LayoutDashboard, Shield, UserCheck, MapPin, Calendar, User, Phone, Mail, Home, Truck, CheckCircle2, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, ExternalLink, Globe, Briefcase, LayoutDashboard, Shield, UserCheck, MapPin, Calendar, User, Phone, Mail, Home, Truck, CheckCircle2, X, Layers } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 // ─── Non-client screens ───────────────────────────────────────────────────────
@@ -248,8 +248,66 @@ const ALL_SECTIONS = [
 // Filter out header items for navigation
 const NAV_ITEMS = ALL_SECTIONS.filter(s => s.type !== "header");
 
+// ─── Summary Overview Card ────────────────────────────────────────────────────
+const OVERVIEW_MODULES = [
+  { icon: Globe,        label: "Sales Website",   desc: "Public marketing landing page",          badge: "Marketing",  color: "bg-slate-700",   url: "/Home" },
+  { icon: LayoutDashboard, label: "Demo Experience", desc: "Full client move flow walkthrough",     badge: "Demo",       color: "bg-orange-600",  url: null, action: "demo" },
+  { icon: UserCheck,   label: "Agent Portal",    desc: "Manage clients & invite links",          badge: "Agent",     color: "bg-blue-600",    url: "/AgentDashboard" },
+  { icon: Briefcase,   label: "Broker Portal",   desc: "Firm-wide agent & client management",    badge: "Broker",    color: "bg-purple-600",  url: "/BrokerDashboard" },
+  { icon: Shield,      label: "Super Admin",     desc: "Platform-level control & reporting",     badge: "Admin",     color: "bg-red-600",     url: "/SuperAdmin" },
+];
+
+function SummaryOverview({ onStartDemo }) {
+  return (
+    <div className="flex-1 flex flex-col items-center justify-start px-4 pt-5 pb-6 max-w-lg mx-auto w-full">
+      <div className="w-full bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-6 border border-white/10 shadow-2xl mb-4">
+        <div className="flex items-center gap-2 mb-1">
+          <Layers className="w-5 h-5 text-orange-400" />
+          <h2 className="font-black text-white text-xl">Platform Overview</h2>
+        </div>
+        <p className="text-slate-400 text-xs mb-5">All modules in EZ Move AI — tap any card to open it.</p>
+        <div className="space-y-3">
+          {OVERVIEW_MODULES.map(m => {
+            const Icon = m.icon;
+            return (
+              <div key={m.label} className="flex items-center gap-4 bg-white/5 border border-white/10 rounded-2xl px-4 py-3">
+                <div className={`w-10 h-10 ${m.color} rounded-xl flex items-center justify-center flex-shrink-0`}>
+                  <Icon className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="font-bold text-white text-sm">{m.label}</p>
+                    <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full text-white ${m.color}`}>{m.badge}</span>
+                  </div>
+                  <p className="text-slate-400 text-xs">{m.desc}</p>
+                </div>
+                {m.action === "demo" ? (
+                  <button onClick={onStartDemo}
+                    className="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold transition-all">
+                    Start <ChevronRight className="w-3 h-3" />
+                  </button>
+                ) : m.url ? (
+                  <a href={m.url} target="_blank" rel="noreferrer"
+                    className="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all border border-white/10">
+                    Open <ExternalLink className="w-3 h-3" />
+                  </a>
+                ) : null}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <button onClick={onStartDemo}
+        className="w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-orange-900/40">
+        Start Demo Experience <ChevronRight className="w-5 h-5" />
+      </button>
+    </div>
+  );
+}
+
 export default function Preview() {
   const [idx, setIdx] = useState(0);
+  const [showOverview, setShowOverview] = useState(true);
   const current = NAV_ITEMS[idx];
   const navigate = useNavigate();
 
@@ -265,13 +323,75 @@ export default function Preview() {
           </div>
           <p className="font-black text-white text-lg">EZ Move AI <span className="text-slate-400 font-normal text-sm">· App Preview</span></p>
         </div>
-        <p className="text-slate-500 text-xs">Flip through platform screens + full client demo flow</p>
+        <p className="text-slate-500 text-xs">
+          {showOverview ? "All platform modules at a glance" : "Flip through platform screens + full client demo flow"}
+        </p>
         <button onClick={() => navigate("/Home")} className="absolute right-4 top-4 w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all" title="Exit Preview">
           <X className="w-4 h-4 text-slate-400" />
         </button>
       </div>
 
-      {/* Section tabs */}
+      {/* Overview screen */}
+      {showOverview ? (
+        <SummaryOverview onStartDemo={() => { setIdx(0); setShowOverview(false); }} />
+      ) : (
+        <>
+          {/* Section tabs */}
+          <div className="flex border-b border-white/10 flex-shrink-0">
+            <button onClick={() => setIdx(0)}
+              className={`flex-1 py-2.5 text-xs font-bold transition-all ${!isClientSection ? "text-orange-400 border-b-2 border-orange-400" : "text-slate-500 hover:text-slate-300"}`}>
+              Platform Screens
+            </button>
+            <button onClick={() => setIdx(PLATFORM_SCREENS.length)}
+              className={`flex-1 py-2.5 text-xs font-bold transition-all ${isClientSection ? "text-orange-400 border-b-2 border-orange-400" : "text-slate-500 hover:text-slate-300"}`}>
+              Client Demo (5 steps)
+            </button>
+          </div>
+
+          {/* Card */}
+          <div className="flex-1 flex flex-col items-center justify-start px-4 pt-5 pb-4 max-w-lg mx-auto w-full">
+            <button onClick={() => setShowOverview(true)}
+              className="self-start mb-3 flex items-center gap-1 text-slate-400 hover:text-white text-xs font-bold transition-colors">
+              <ChevronLeft className="w-3.5 h-3.5" /> Overview
+            </button>
+
+            {current.type === "platform"
+              ? <PlatformCard screen={current.data} />
+              : <ClientStepCard step={current.data} onNext={() => setIdx(i => Math.min(NAV_ITEMS.length - 1, i + 1))} />
+            }
+
+            {/* Counter */}
+            <p className="text-slate-500 text-xs mt-4 font-semibold">
+              {isClientSection
+                ? `Client step ${idx - PLATFORM_SCREENS.length + 1} of ${CLIENT_STEPS.length}`
+                : `Platform screen ${idx + 1} of ${PLATFORM_SCREENS.length}`}
+            </p>
+
+            {/* Dots */}
+            <div className="flex justify-center gap-1.5 mt-3 mb-4">
+              {NAV_ITEMS.map((_, i) => (
+                <button key={i} onClick={() => setIdx(i)}
+                  className={`h-2 rounded-full transition-all ${i === idx ? "bg-orange-500 w-5" : "bg-slate-700 hover:bg-slate-500 w-2"}`} />
+              ))}
+            </div>
+
+            {/* Prev / Next */}
+            <div className="flex gap-3">
+              <button onClick={() => setIdx(i => Math.max(0, i - 1))} disabled={idx === 0}
+                className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-sm disabled:opacity-25 disabled:cursor-not-allowed transition-all border border-white/10">
+                <ChevronLeft className="w-5 h-5" /> Back
+              </button>
+              <button onClick={() => setIdx(i => Math.min(NAV_ITEMS.length - 1, i + 1))} disabled={idx === NAV_ITEMS.length - 1}
+                className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm disabled:opacity-25 disabled:cursor-not-allowed transition-all shadow-lg shadow-orange-900/40">
+                Next <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
       <div className="flex border-b border-white/10 flex-shrink-0">
         <button onClick={() => setIdx(0)}
           className={`flex-1 py-2.5 text-xs font-bold transition-all ${!isClientSection ? "text-orange-400 border-b-2 border-orange-400" : "text-slate-500 hover:text-slate-300"}`}>
@@ -283,31 +403,18 @@ export default function Preview() {
         </button>
       </div>
 
-      {/* Card */}
+      {/* Overview or Demo */}
+      {showOverview ? (
+        <SummaryOverview onStartDemo={() => { setIdx(0); setShowOverview(false); }} />
+      ) : (
       <div className="flex-1 flex flex-col items-center justify-start px-4 pt-5 pb-4 max-w-lg mx-auto w-full">
-        {current.type === "platform"
-          ? <PlatformCard screen={current.data} />
-          : <ClientStepCard step={current.data} onNext={() => setIdx(i => Math.min(NAV_ITEMS.length - 1, i + 1))} />
-        }
-
-        {/* Counter */}
-        <p className="text-slate-500 text-xs mt-4 font-semibold">
-          {isClientSection
-            ? `Client step ${idx - PLATFORM_SCREENS.length + 1} of ${CLIENT_STEPS.length}`
-            : `Platform screen ${idx + 1} of ${PLATFORM_SCREENS.length}`}
-        </p>
-
-        {/* Dots */}
-        <div className="flex justify-center gap-1.5 mt-3 mb-4">
-          {NAV_ITEMS.map((_, i) => (
-            <button key={i} onClick={() => setIdx(i)}
-              className={`h-2 rounded-full transition-all ${i === idx ? "bg-orange-500 w-5" : "bg-slate-700 hover:bg-slate-500 w-2"}`} />
-          ))}
-        </div>
+        <button onClick={() => setShowOverview(true)}
+          className="self-start mb-3 flex items-center gap-1 text-slate-400 hover:text-white text-xs font-bold transition-colors">
+          <ChevronLeft className="w-3.5 h-3.5" /> Back to Overview
+        </button>
 
         {/* Prev / Next */}
         <div className="flex gap-3">
-          <button onClick={() => setIdx(i => Math.max(0, i - 1))} disabled={idx === 0}
             className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-sm disabled:opacity-25 disabled:cursor-not-allowed transition-all border border-white/10">
             <ChevronLeft className="w-5 h-5" /> Back
           </button>
