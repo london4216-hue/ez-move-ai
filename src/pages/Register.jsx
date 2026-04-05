@@ -42,11 +42,6 @@ export default function Register() {
         const wrongUser =
           // Admin/agent is logged in — they should never go through client onboarding
           user.role === 'admin' ||
-          user.role === 'agent' ||
-          user.role === 'broker' ||
-          user.data?.user_type === 'agent' ||
-          user.data?.user_type === 'broker' ||
-          user.data?.user_type === 'admin' ||
           // A specific client email is expected and it doesn't match the current user
           (clientRecord?.user_email && clientRecord.user_email !== user.email);
 

@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
-import { getPortalRole } from "@/lib/usePortalRole";
 import { base44 } from "@/api/base44Client";
+import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
-import { Plus, LogOut, Edit2, X, ArrowLeft, Loader2, Users, Trash2, CreditCard, CheckCircle2, Clock, Copy, Check, Sparkles, Truck } from "lucide-react";
-import ClientInsightsPanel from "../components/ai/ClientInsightsPanel";
-import MoveQuoteCalculator from "../components/ai/MoveQuoteCalculator";
+import { Plus, LogOut, Edit2, X, ArrowLeft, Loader2, Users, Trash2, CreditCard, CheckCircle2, DollarSign, Clock, Home, Copy, Check } from "lucide-react";
 import ClientAddressFields, { buildFullAddress } from "../components/register/ClientAddressFields";
 import { format, differenceInDays, parseISO } from "date-fns";
 
@@ -14,6 +12,12 @@ const STATUS_COLORS = {
   active: "bg-emerald-50 text-emerald-600 border-emerald-100",
   completed: "bg-slate-50 text-slate-500 border-slate-100",
 };
+
+const DEMO_CLIENTS = [
+  { user_name: "Sarah Johnson", user_email: "sarah.johnson@demo.com", close_date: "2026-04-15", invitation_code: "2201", status: "active", billing_status: "charged" },
+  { user_name: "Mike Torres", user_email: "mike.torres@demo.com", close_date: "2026-05-01", invitation_code: "3305", status: "active", billing_status: "charged" },
+  { user_name: "Carol Webb", user_email: "carol.webb@demo.com", close_date: "2026-03-28", invitation_code: "4412", status: "invited", billing_status: "pending" },
+];
 
 export default function AgentDashboard() {
   const [agent, setAgent] = useState(null);
@@ -29,8 +33,6 @@ export default function AgentDashboard() {
   const [resendingId, setResendingId] = useState(null);
   const [resentId, setResentId] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
-  const [insightsClient, setInsightsClient] = useState(null);
-  const [quoteClient, setQuoteClient] = useState(null);
 
   const copyInviteLink = (client) => {
     const link = `${window.location.origin}/Register?code=${client.invitation_code}`;
@@ -43,15 +45,17 @@ export default function AgentDashboard() {
   useEffect(() => {
     const load = async () => {
       const user = await base44.auth.me();
-      const role = getPortalRole(user);
-      // Only agents (and super_admin for oversight) may access this portal
-      if (role !== 'agent' && role !== 'super_admin') { navigate("/"); return; }
+      if (user?.role !== "admin") { navigate("/"); return; }
       let agents = await base44.entities.Agent.filter({ created_by: user.email });
       let agentRecord = agents.length === 0
         ? await base44.entities.Agent.create({ company_name: user.full_name || "My Agency" })
         : agents[0];
       setAgent(agentRecord);
-      const clientList = await base44.entities.Client.filter({ agent_id: agentRecord.id });
+      let clientList = await base44.entities.Client.filter({ agent_id: agentRecord.id });
+      if (clientList.length === 0) {
+        const seeded = await Promise.all(DEMO_CLIENTS.map(c => base44.entities.Client.create({ ...c, agent_id: agentRecord.id, invited_date: new Date().toISOString() })));
+        clientList = seeded;
+      }
       setClients(clientList.sort((a, b) => new Date(b.invited_date || 0) - new Date(a.invited_date || 0)));
       setLoading(false);
     };
@@ -130,29 +134,21 @@ export default function AgentDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
-      {/* Portal identity bar */}
-      <div className="bg-blue-600 px-6 py-2 flex items-center gap-2">
-        <div className="w-5 h-5 rounded bg-white/20 flex items-center justify-center">
-          <span className="text-white font-black text-[9px]">EZ</span>
-        </div>
-        <span className="text-white text-[10px] font-black uppercase tracking-widest">Agent Portal</span>
-        <span className="text-blue-200 text-[10px]">{agent?.company_name && `· ${agent.company_name}`}</span>
-      </div>
       {/* Header */}
-      <div className="bg-white border-b border-slate-200 shadow-sm px-6 py-4">
+      <div className="bg-white border-b border-blue-100 shadow-sm px-6 py-4">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-md shadow-blue-200">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-md shadow-orange-200">
               <span className="text-white font-black text-sm">EZ</span>
             </div>
             <div>
-              <p className="font-black text-slate-800 text-sm leading-tight">EZ Move <span className="text-blue-500">AI</span></p>
-              <p className="text-blue-500 text-[10px] font-semibold">Agent Portal · {agent?.company_name}</p>
+              <p className="font-black text-slate-800 text-sm leading-tight">EZ Move <span className="text-orange-500">AI</span></p>
+              <p className="text-slate-400 text-[10px] font-semibold">Agent Portal · {agent?.company_name}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <button onClick={() => setAddStep("form")}
-              className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition-colors shadow-md shadow-blue-200">
+              className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs px-4 py-2 rounded-xl transition-colors shadow-md shadow-orange-200">
               <Plus className="w-3.5 h-3.5" /> Add Client
             </button>
             <button onClick={() => base44.auth.logout("/")} className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors">
@@ -237,14 +233,6 @@ export default function AgentDashboard() {
                         </div>
                       )}
                       <div className="flex items-center gap-1.5">
-                        <button onClick={() => setInsightsClient(client)}
-                          className="text-[10px] text-purple-600 font-bold flex items-center gap-0.5 bg-purple-50 border border-purple-100 px-2 py-0.5 rounded-lg hover:bg-purple-100 transition-colors">
-                          <Sparkles className="w-2.5 h-2.5" /> AI
-                        </button>
-                        <button onClick={() => setQuoteClient(client)}
-                          className="text-[10px] text-blue-600 font-bold flex items-center gap-0.5 bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-lg hover:bg-blue-100 transition-colors">
-                          <Truck className="w-2.5 h-2.5" /> Quote
-                        </button>
                         <button onClick={() => { setEditForm({ user_name: client.user_name, user_email: client.user_email, home_address: client.home_address, close_date: client.close_date }); setEditingId(client.id); }}
                           className="text-[10px] text-orange-500 font-bold flex items-center gap-0.5 bg-orange-50 border border-orange-100 px-2 py-0.5 rounded-lg hover:bg-orange-100 transition-colors">
                           <Edit2 className="w-2.5 h-2.5" /> Edit
@@ -265,21 +253,6 @@ export default function AgentDashboard() {
           )}
         </div>
       </div>
-
-      {quoteClient && (
-        <MoveQuoteCalculator
-          client={quoteClient}
-          onClose={() => setQuoteClient(null)}
-        />
-      )}
-
-      {insightsClient && (
-        <ClientInsightsPanel
-          client={insightsClient}
-          agentName={agent?.company_name}
-          onClose={() => setInsightsClient(null)}
-        />
-      )}
 
       {/* Edit Modal */}
       {editingId && (

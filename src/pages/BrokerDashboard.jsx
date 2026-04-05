@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useNavigate } from "react-router-dom";
-import { getPortalRole } from "@/lib/usePortalRole";
+import { createPageUrl } from "@/utils";
 import { Plus, LogOut, Edit2, X, Trash2, Users, Building2, ArrowLeft, Loader2, CheckCircle2, CreditCard, Palette, Copy, Check } from "lucide-react";
 import ClientAddressFields, { buildFullAddress } from "../components/register/ClientAddressFields";
-import { differenceInDays, parseISO } from "date-fns";
+import { format, differenceInDays, parseISO } from "date-fns";
 
 const STATUS_COLORS = {
   invited: "bg-amber-50 text-amber-600 border-amber-100",
@@ -40,8 +40,7 @@ export default function BrokerDashboard() {
   useEffect(() => {
     const load = async () => {
       const user = await base44.auth.me();
-      const portalRole = getPortalRole(user);
-      if (portalRole !== "broker" && portalRole !== "super_admin") { navigate("/"); setLoading(false); return; }
+      if (user?.role !== "admin") { navigate("/"); setLoading(false); return; }
       let agents = await base44.entities.Agent.filter({ created_by: user.email });
       let agentRecord = agents.length === 0
         ? await base44.entities.Agent.create({ company_name: user.full_name || "My Brokerage" })
@@ -164,30 +163,22 @@ export default function BrokerDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
-      {/* Portal identity bar */}
-      <div className="bg-purple-700 px-6 py-2 flex items-center gap-2">
-        <div className="w-5 h-5 rounded bg-white/20 flex items-center justify-center">
-          <Building2 className="w-3 h-3 text-white" />
-        </div>
-        <span className="text-white text-[10px] font-black uppercase tracking-widest">Broker Portal</span>
-        <span className="text-purple-300 text-[10px]">{agent?.company_name && `· ${agent.company_name}`}</span>
-      </div>
-      <div className="bg-white border-b border-slate-200 shadow-sm px-6 py-4">
+      <div className="bg-white border-b border-blue-100 shadow-sm px-6 py-4">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-600 to-purple-700 flex items-center justify-center shadow-md shadow-purple-200">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-md shadow-orange-200">
               <Building2 className="w-5 h-5 text-white" />
             </div>
             <div>
               <p className="font-black text-slate-800 text-sm leading-tight">{agent?.company_name}</p>
-              <p className="text-purple-500 text-[10px] font-semibold">Broker Portal · EZ Move AI</p>
+              <p className="text-slate-400 text-[10px] font-semibold">Broker Portal · EZ Move AI</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <button onClick={() => setShowBranding(true)} className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors" title="Branding">
               <Palette className="w-4 h-4 text-slate-500" />
             </button>
-            <button onClick={() => setAddStep("form")} className="flex items-center gap-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition-colors shadow-md shadow-purple-200">
+            <button onClick={() => setAddStep("form")} className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs px-4 py-2 rounded-xl transition-colors shadow-md shadow-orange-200">
               <Plus className="w-3.5 h-3.5" /> Add Client
             </button>
             <button onClick={() => base44.auth.logout("/")} className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors">
