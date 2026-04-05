@@ -111,7 +111,7 @@ const CLIENT_STEPS = [
     badgeColor: "bg-amber-500",
     badge: "Step 4",
     url: "/Dashboard",
-    urlLabel: "Open Dashboard →",
+    urlLabel: "Walkthrough Questions →",
     requiresAuth: true,
   },
   {
