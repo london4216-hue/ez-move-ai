@@ -177,7 +177,7 @@ function PlatformCard({ screen, onOpen }) {
   );
 }
 
-function ClientStepCard({ step }) {
+function ClientStepCard({ step, onNext }) {
   return (
     <div className={`w-full bg-gradient-to-br ${step.color} rounded-3xl p-7 border border-white/10 shadow-2xl ${step.highlight ? "ring-2 ring-blue-400/40" : ""}`}>
       <div className="flex items-center gap-3 mb-1">
@@ -215,18 +215,24 @@ function ClientStepCard({ step }) {
         </div>
       )}
 
-      {step.requiresAuth && (
-        <div className="flex items-center gap-2 bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 mb-3">
-          <span className="text-lg">🔒</span>
-          <p className="text-white/70 text-xs"><span className="text-white font-bold">Login required</span> to open this live page — use <span className="text-white font-bold">Next →</span> below to continue the preview without signing in.</p>
+      {step.requiresAuth ? (
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 bg-white/10 border border-white/20 rounded-xl px-4 py-2.5">
+            <span className="text-lg">🔒</span>
+            <p className="text-white/70 text-xs"><span className="text-white font-bold">Login required</span> to open this live page.</p>
+          </div>
+          <button
+            onClick={onNext}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/25 hover:bg-white/35 text-white font-bold text-sm transition-all border border-white/30">
+            Skip this step <ChevronRight className="w-3.5 h-3.5" />
+          </button>
         </div>
-      )}
-      {step.url && (
+      ) : step.url ? (
         <a href={step.url} target="_blank" rel="noreferrer"
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/20 hover:bg-white/30 text-white font-bold text-sm transition-all border border-white/20">
           {step.urlLabel || "Open →"} <ExternalLink className="w-3.5 h-3.5" />
         </a>
-      )}
+      ) : null}
     </div>
   );
 }
@@ -281,7 +287,7 @@ export default function Preview() {
       <div className="flex-1 flex flex-col items-center justify-start px-4 pt-5 pb-4 max-w-lg mx-auto w-full">
         {current.type === "platform"
           ? <PlatformCard screen={current.data} />
-          : <ClientStepCard step={current.data} />
+          : <ClientStepCard step={current.data} onNext={() => setIdx(i => Math.min(NAV_ITEMS.length - 1, i + 1))} />
         }
 
         {/* Counter */}
