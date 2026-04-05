@@ -51,6 +51,7 @@ const AuthenticatedApp = () => {
   return (
     <Routes>
       <Route path="/" element={<RoleRouter />} />
+      <Route path="/Preview" element={<Preview />} />
       <Route path="/AgentDashboard" element={<AgentDashboard />} />
       <Route path="/SuperAdmin" element={<SuperAdmin />} />
       <Route path="/Home" element={
