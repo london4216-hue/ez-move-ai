@@ -51,7 +51,6 @@ const AuthenticatedApp = () => {
   return (
     <Routes>
       <Route path="/" element={<RoleRouter />} />
-      <Route path="/Preview" element={<Preview />} />
       <Route path="/AgentDashboard" element={<AgentDashboard />} />
       <Route path="/Home" element={
         <LayoutWrapper currentPageName={mainPageKey}>
@@ -70,7 +69,6 @@ const AuthenticatedApp = () => {
         />
       ))}
 
-      <Route path="/Preview" element={<LayoutWrapper currentPageName="Preview"><Preview /></LayoutWrapper>} />
       <Route path="/PrivacyPolicy" element={<PrivacyPolicy />} />
       <Route path="/MyStuff" element={<MyStuff />} />
       <Route path="*" element={<PageNotFound />} />
