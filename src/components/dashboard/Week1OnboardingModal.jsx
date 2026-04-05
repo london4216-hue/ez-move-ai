@@ -800,6 +800,14 @@ Be specific and realistic, like a professional moving company estimate.`,
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1">
                             <p className="font-bold text-slate-800 text-sm">{p.name}</p>
+                            {p.rating && (
+                              <div className="flex items-center gap-1 mt-0.5">
+                                {[1,2,3,4,5].map(star => (
+                                  <span key={star} className={`text-xs ${star <= Math.round(parseFloat(p.rating)) ? 'text-amber-400' : 'text-slate-200'}`}>★</span>
+                                ))}
+                                <span className="text-[10px] text-slate-400 font-semibold ml-0.5">{p.rating}</span>
+                              </div>
+                            )}
                             {p.description && <p className="text-xs text-slate-500 mt-0.5">{p.description}</p>}
                             {p.phone && <a href={`tel:${p.phone}`} className="text-xs font-bold text-orange-500 flex items-center gap-1 mt-1"><Phone className="w-3 h-3" />{p.phone}</a>}
                           </div>
@@ -872,6 +880,14 @@ Be specific and realistic, like a professional moving company estimate.`,
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1">
                             <p className="font-bold text-slate-800 text-sm">{p.name}</p>
+                            {p.rating && (
+                              <div className="flex items-center gap-1 mt-0.5">
+                                {[1,2,3,4,5].map(star => (
+                                  <span key={star} className={`text-xs ${star <= Math.round(parseFloat(p.rating)) ? 'text-amber-400' : 'text-slate-200'}`}>★</span>
+                                ))}
+                                <span className="text-[10px] text-slate-400 font-semibold ml-0.5">{p.rating}</span>
+                              </div>
+                            )}
                             {p.description && <p className="text-xs text-slate-500 mt-0.5">{p.description}</p>}
                             {p.phone && <a href={`tel:${p.phone}`} className="text-xs font-bold text-orange-500 flex items-center gap-1 mt-1"><Phone className="w-3 h-3" />{p.phone}</a>}
                           </div>
