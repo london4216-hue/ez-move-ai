@@ -14,6 +14,7 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import MyStuff from './pages/MyStuff';
 import RoleRouter from './pages/RoleRouter';
 import AgentDashboard from './pages/AgentDashboard';
+import DemoFlow from './pages/DemoFlow';
 
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -72,6 +73,7 @@ const AuthenticatedApp = () => {
       <Route path="/PrivacyPolicy" element={<PrivacyPolicy />} />
       <Route path="/MyStuff" element={<MyStuff />} />
       <Route path="/Preview" element={<Preview />} />
+      <Route path="/Demo" element={<DemoFlow />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
