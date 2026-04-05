@@ -252,7 +252,7 @@ export default function Preview() {
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-white/10 flex-shrink-0 text-center">
+      <div className="relative px-6 py-4 border-b border-white/10 flex-shrink-0 text-center">
         <div className="flex items-center justify-center gap-2 mb-0.5">
           <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
             <span className="text-white font-black text-xs">EZ</span>
