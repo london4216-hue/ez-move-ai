@@ -370,7 +370,7 @@ Be specific and realistic, like a professional moving company estimate.`,
       </div>
 
       {/* Progress bar */}
-      <div className="h-1 bg-slate-100 flex-shrink-0">
+      <div className="h-1 bg-slate-100 flex-shrink-0" dir="ltr">
         <div className="h-full bg-gradient-to-r from-orange-500 to-orange-400 transition-all duration-500" style={{ width: `${((stepIdx + 1) / STEPS.length) * 100}%` }} />
       </div>
 
