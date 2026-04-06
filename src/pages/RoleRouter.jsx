@@ -1,25 +1,18 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getPortalPath } from "@/lib/usePortalRole";
-import { SAFE_EDIT_MODE } from "@/lib/safeEditMode";
-import { useUserContext } from "@/lib/useUserContext";
+import { getSession, ROLE_PATHS } from "@/lib/internalAuth";
 
-// Auto-redirects logged-in users to their portal.
-// Non-authenticated users see the Preview/landing page.
 export default function RoleRouter() {
   const navigate = useNavigate();
-  const { authStatus, user, isLoading } = useUserContext();
 
   useEffect(() => {
-    if (SAFE_EDIT_MODE) return;
-    if (isLoading) return;
-
-    if (authStatus !== "authenticated" || !user) {
-      navigate("/Preview", { replace: true });
-      return;
+    const session = getSession();
+    if (!session) {
+      navigate("/SignIn", { replace: true });
+    } else {
+      navigate(ROLE_PATHS[session.role] || "/SignIn", { replace: true });
     }
-    navigate(getPortalPath(user), { replace: true });
-  }, [isLoading, authStatus, user]);
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-100 flex items-center justify-center">

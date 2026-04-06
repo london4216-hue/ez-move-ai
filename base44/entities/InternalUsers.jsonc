@@ -1,0 +1,30 @@
+{
+  "name": "InternalUsers",
+  "type": "object",
+  "properties": {
+    "email": {
+      "type": "string",
+      "description": "User email (unique login identifier)"
+    },
+    "password": {
+      "type": "string",
+      "description": "Plain-text password for demo purposes"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "agent",
+        "broker",
+        "buyer",
+        "seller",
+        "superadmin"
+      ],
+      "description": "Portal role"
+    }
+  },
+  "required": [
+    "email",
+    "password",
+    "role"
+  ]
+}
