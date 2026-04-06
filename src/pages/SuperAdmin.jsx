@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useNavigate } from "react-router-dom";
 import { getPortalRole } from "@/lib/usePortalRole";
-import { clearSession } from "@/lib/internalAuth";
+
 import {
   Users, DollarSign, Building2, User, LogOut, Trash2, TrendingUp,
   Plus, CheckCircle, Shield, Key, X, ChevronRight, UserCheck, Briefcase,
@@ -62,7 +62,7 @@ function Sidebar({ active, onSelect, onLogout, collapsed, onToggle }) {
           <Menu className="w-4 h-4 flex-shrink-0" />
           {!collapsed && <span>Collapse</span>}
         </button>
-        <button onClick={() => { clearSession(); window.location.href = "/SignIn"; }}
+        <button onClick={onLogout}
           className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-slate-500 hover:text-red-400 hover:bg-red-400/10 text-sm font-semibold transition-all min-h-[44px]">
           <LogOut className="w-4 h-4 flex-shrink-0" />
           {!collapsed && <span>Sign Out</span>}

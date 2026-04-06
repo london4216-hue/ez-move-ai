@@ -40,7 +40,7 @@ export default function BrokerDashboard() {
   useEffect(() => {
     const load = async () => {
       const user = await base44.auth.me().catch(() => null);
-      if (!user) return;
+      if (!user) { base44.auth.redirectToLogin(window.location.pathname); return; }
       let agents = await base44.entities.Agent.filter({ created_by: user.email });
       let agentRecord = agents.length === 0
         ? await base44.entities.Agent.create({ company_name: user.full_name || "My Brokerage" })
