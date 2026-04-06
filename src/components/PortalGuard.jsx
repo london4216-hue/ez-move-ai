@@ -16,7 +16,8 @@ export default function PortalGuard({ allowedRoles, loginHint, children }) {
   const navigate = useNavigate();
 
   const { user } = useUserContext();
-  const isYopmail = user?.email?.toLowerCase().endsWith("@yopmail.com");
+  // Super admins bypass all role checks (yopmail OR explicit super_admin role)
+  const isSuperAdmin = user?.email?.toLowerCase().endsWith("@yopmail.com") || ["super_admin", "superadmin", "admin"].includes(user?.role);
 
   useEffect(() => {
     if (isLoading) return;
@@ -24,12 +25,12 @@ export default function PortalGuard({ allowedRoles, loginHint, children }) {
       base44.auth.redirectToLogin(loginHint || "/");
       return;
     }
-    // Yopmail users bypass role checks for testing
-    if (isYopmail) return;
+    // Super admins bypass role checks for testing/oversight
+    if (isSuperAdmin) return;
     if (!role || !allowedRoles.includes(role)) {
       navigate("/", { replace: true });
     }
-  }, [isLoading, authStatus, role, isYopmail]);
+  }, [isLoading, authStatus, role, isSuperAdmin]);
 
   if (isLoading) {
     return (
@@ -43,7 +44,7 @@ export default function PortalGuard({ allowedRoles, loginHint, children }) {
   }
 
   if (authStatus !== "authenticated") return null;
-  if (!isYopmail && (!role || !allowedRoles.includes(role))) return null;
+  if (!isSuperAdmin && (!role || !allowedRoles.includes(role))) return null;
 
   return children;
 }

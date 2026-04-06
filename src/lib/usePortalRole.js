@@ -7,11 +7,11 @@ export function getPortalRole(user) {
   // Yopmail users get super_admin access for testing
   if (user.email?.toLowerCase().endsWith("@yopmail.com")) return "super_admin";
 
-  // New explicit roles
-  if (user.role === "super_admin") return "super_admin";
+  // Explicit roles (including aliases)
+  if (user.role === "super_admin" || user.role === "superadmin") return "super_admin";
   if (user.role === "broker") return "broker";
   if (user.role === "agent") return "agent";
-  if (user.role === "user") return "user";
+  if (user.role === "buyer" || user.role === "seller" || user.role === "user") return "user";
 
   // Legacy: admin role → super_admin (platform owner / builder account)
   if (user.role === "admin") return "super_admin";
