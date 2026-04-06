@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useNavigate } from "react-router-dom";
-import PortalGuard from "../components/PortalGuard";
+
 import { Plus, LogOut, Edit2, X, Trash2, Users, Building2, ArrowLeft, Loader2, CheckCircle2, CreditCard, Palette, Copy, Check, Shield } from "lucide-react";
 
 import { differenceInDays, parseISO } from "date-fns";
@@ -145,7 +145,6 @@ export default function BrokerDashboard() {
   );
 
   return (
-    <PortalGuard allowedRoles={["broker", "super_admin"]} loginHint="/BrokerDashboard">
     <div className="min-h-screen bg-slate-50">
       {/* Portal identity bar */}
       <div className="bg-purple-800 px-4 sm:px-6 py-2.5 flex items-center gap-2">
@@ -434,6 +433,5 @@ export default function BrokerDashboard() {
         </div>
       )}
     </div>
-    </PortalGuard>
   );
 }

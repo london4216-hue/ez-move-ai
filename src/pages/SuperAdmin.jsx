@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useNavigate } from "react-router-dom";
-import { getSession, clearSession } from "@/lib/internalAuth";
+import { getPortalRole } from "@/lib/usePortalRole";
+import { clearSession } from "@/lib/internalAuth";
 import {
   Users, DollarSign, Building2, User, LogOut, Trash2, TrendingUp,
   Plus, CheckCircle, Shield, Key, X, ChevronRight, UserCheck, Briefcase,
@@ -410,8 +411,8 @@ export default function SuperAdmin() {
 
   useEffect(() => {
     const load = async () => {
-      const session = getSession();
-      if (!session || session.role !== "superadmin") { navigate("/SignIn", { replace: true }); return; }
+      const me = await base44.auth.me();
+      if (getPortalRole(me) !== "super_admin") { navigate("/"); return; }
       const [agentList, clientList] = await Promise.all([
         base44.entities.Agent.list(),
         base44.entities.Client.list(),
@@ -464,7 +465,7 @@ export default function SuperAdmin() {
       <Sidebar
         active={activeNav}
         onSelect={setActiveNav}
-        onLogout={() => { clearSession(); window.location.href = "/SignIn"; }}
+        onLogout={() => base44.auth.logout("/")}
         collapsed={sidebarCollapsed}
         onToggle={() => setSidebarCollapsed(c => !c)}
       />

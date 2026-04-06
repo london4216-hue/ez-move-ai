@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useNavigate } from "react-router-dom";
-import PortalGuard from "../components/PortalGuard";
+
 import { Plus, LogOut, Edit2, X, ArrowLeft, Loader2, Users, Trash2, CreditCard, CheckCircle2, Clock, Copy, Check, Sparkles, Shield } from "lucide-react";
 import ClientInsightsPanel from "../components/ai/ClientInsightsPanel";
 
@@ -123,7 +123,6 @@ export default function AgentDashboard() {
   );
 
   return (
-    <PortalGuard allowedRoles={["agent", "super_admin"]} loginHint="/AgentDashboard">
     <div className="min-h-screen bg-slate-50">
       {/* Portal identity bar */}
       <div className="bg-blue-700 px-4 sm:px-6 py-2.5 flex items-center gap-2">
@@ -374,6 +373,5 @@ export default function AgentDashboard() {
         </div>
       )}
     </div>
-    </PortalGuard>
   );
 }
