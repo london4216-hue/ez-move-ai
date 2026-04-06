@@ -158,8 +158,8 @@ export default function AgentDashboard() {
                 <Plus className="w-3.5 h-3.5" /> Add Client
               </button>
             )}
-            <a href="/SuperAdmin" className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-red-50 border border-slate-200 hover:border-red-200 text-slate-500 hover:text-red-500 text-xs font-bold transition-colors" title="Super Admin Portal">
-              <Shield className="w-3.5 h-3.5" /> Admin
+            <a href="/SuperAdmin" className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-red-50 border border-slate-200 hover:border-red-200 text-slate-500 hover:text-red-500 text-xs font-bold transition-colors" title="Super Admin Portal">
+              <Shield className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Admin</span>
             </a>
             <button onClick={() => base44.auth.logout("/")} className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors">
               <LogOut className="w-4 h-4 text-slate-500" />

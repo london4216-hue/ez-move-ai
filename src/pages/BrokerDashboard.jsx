@@ -193,8 +193,8 @@ export default function BrokerDashboard() {
             <button onClick={() => setAddStep("form")} className="flex items-center gap-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition-colors shadow-md shadow-purple-200">
               <Plus className="w-3.5 h-3.5" /> Add Client
             </button>
-            <a href="/SuperAdmin" className="hidden sm:flex items-center gap-1.5 w-9 h-9 rounded-xl bg-slate-100 hover:bg-red-50 border border-slate-200 hover:border-red-200 text-slate-500 hover:text-red-500 justify-center transition-colors" title="Super Admin Portal">
-              <Shield className="w-4 h-4" />
+            <a href="/SuperAdmin" className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-red-50 border border-slate-200 hover:border-red-200 text-slate-500 hover:text-red-500 text-xs font-bold transition-colors" title="Super Admin Portal">
+              <Shield className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Admin</span>
             </a>
             <button onClick={() => base44.auth.logout("/")} className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors">
               <LogOut className="w-4 h-4 text-slate-500" />
@@ -433,9 +433,13 @@ export default function BrokerDashboard() {
                   </div>
                   <button onClick={handlePayment} disabled={paying} className="w-full py-3.5 rounded-2xl bg-orange-500 text-white font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50 hover:bg-orange-600 transition-colors">
                      {paying ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : <><CreditCard className="w-4 h-4" /> Pay $40 & Activate</>}
-                   </button>
-                </div>
-              )}
+                     </button>
+                     <button onClick={() => { setClients(prev => prev.map(c => c.id === pendingClient.id ? { ...c, status: "active", billing_status: "charged" } : c)); setDoneData({ name: pendingClient.user_name, code: pendingClient.invitation_code }); setAddStep("done"); }}
+                     className="w-full py-2.5 rounded-2xl border border-slate-200 text-slate-400 text-xs font-semibold hover:bg-slate-50 transition-colors">
+                     Skip Payment (Demo)
+                     </button>
+                     </div>
+                     )}
               {addStep === "done" && doneData && (
                 <div className="text-center py-4">
                   <CheckCircle2 className="w-14 h-14 text-emerald-500 mx-auto mb-4" />
