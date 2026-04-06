@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { ENABLE_REGISTRATION } from "@/lib/featureFlags";
+import { featureFlags } from "@/lib/featureFlags";
+const { ENABLE_REGISTRATION } = featureFlags;
 import {
   Shield, ArrowRight, Zap, CheckCircle2,
   Users, CalendarDays, Package, Sparkles,
