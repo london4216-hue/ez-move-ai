@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { ENABLE_REGISTRATION } from "@/lib/featureFlags";
 import { useNavigate } from "react-router-dom";
 import { ChevronRight, ChevronLeft, Check, Users, CalendarDays, Bot, DollarSign, Send, Star } from "lucide-react";
 
@@ -111,6 +112,24 @@ export default function AgentOnboarding() {
   };
 
   const feature = FEATURES[tutorialIdx];
+
+  if (!ENABLE_REGISTRATION) {
+    return (
+      <div className="min-h-screen bg-[#0F172A] flex flex-col items-center justify-center p-5">
+        <div className="w-full max-w-sm bg-[#1E293B] rounded-3xl p-8 shadow-2xl border border-slate-700/50 text-center">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center mx-auto mb-5">
+            <span className="text-white font-black text-sm">EZ</span>
+          </div>
+          <h1 className="text-xl font-black text-white mb-2">Account creation is not available yet</h1>
+          <p className="text-slate-400 text-sm mb-6 leading-relaxed">New agent registration is currently closed. If you already have an account, sign in to access your dashboard.</p>
+          <button onClick={() => base44.auth.redirectToLogin("/AgentDashboard")}
+            className="w-full py-3.5 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm transition-colors">
+            Sign In
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0F172A] flex flex-col items-center justify-center p-5">

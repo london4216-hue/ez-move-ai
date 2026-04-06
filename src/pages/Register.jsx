@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { ENABLE_REGISTRATION } from "@/lib/featureFlags";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
 import { Loader2, LogOut } from "lucide-react";
@@ -149,6 +150,25 @@ export default function Register() {
       setLoading(false);
     }
   };
+
+  if (!ENABLE_REGISTRATION) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
+        <div className="w-full max-w-sm bg-white rounded-3xl p-8 shadow-xl border border-slate-100 text-center">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center mx-auto mb-5">
+            <span className="text-white font-black text-sm">EZ</span>
+          </div>
+          <h1 className="text-xl font-black text-slate-800 mb-2">Account creation is not available yet</h1>
+          <p className="text-slate-500 text-sm mb-6 leading-relaxed">New account registration is currently closed. If you already have an account, please sign in below.</p>
+          <button onClick={() => base44.auth.redirectToLogin("/Dashboard")}
+            className="w-full py-3.5 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm transition-colors">
+            Sign In
+          </button>
+          <p className="text-slate-400 text-xs mt-4">Need help? Contact support.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 sm:p-8">

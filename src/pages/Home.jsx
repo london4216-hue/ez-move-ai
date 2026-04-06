@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { ENABLE_REGISTRATION } from "@/lib/featureFlags";
 import {
   Shield, ArrowRight, Zap, CheckCircle2,
   Users, CalendarDays, Package, Sparkles,
@@ -166,11 +167,20 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            <button onClick={() => base44.auth.redirectToLogin("/AgentOnboarding")}
-              className="w-full py-3.5 rounded-xl bg-white text-orange-600 font-black text-sm flex items-center justify-center gap-2 hover:bg-orange-50 transition-all shadow-md active:scale-[0.98]">
-              Sign Up as Agent <ArrowRight className="w-4 h-4" />
-            </button>
-            <p className="text-center text-orange-200 text-[11px] mt-2.5">Already registered? <button onClick={() => base44.auth.redirectToLogin("/AgentDashboard")} className="underline font-bold">Log in</button></p>
+            {ENABLE_REGISTRATION ? (
+              <button onClick={() => base44.auth.redirectToLogin("/AgentOnboarding")}
+                className="w-full py-3.5 rounded-xl bg-white text-orange-600 font-black text-sm flex items-center justify-center gap-2 hover:bg-orange-50 transition-all shadow-md active:scale-[0.98]">
+                Sign Up as Agent <ArrowRight className="w-4 h-4" />
+              </button>
+            ) : (
+              <button onClick={() => base44.auth.redirectToLogin("/AgentDashboard")}
+                className="w-full py-3.5 rounded-xl bg-white text-orange-600 font-black text-sm flex items-center justify-center gap-2 hover:bg-orange-50 transition-all shadow-md active:scale-[0.98]">
+                Agent Login <ArrowRight className="w-4 h-4" />
+              </button>
+            )}
+            {ENABLE_REGISTRATION && (
+              <p className="text-center text-orange-200 text-[11px] mt-2.5">Already registered? <button onClick={() => base44.auth.redirectToLogin("/AgentDashboard")} className="underline font-bold">Log in</button></p>
+            )}
           </div>
 
           {/* For Brokers */}
@@ -208,9 +218,11 @@ export default function Home() {
             </div>
             <button onClick={() => base44.auth.redirectToLogin("/BrokerDashboard")}
               className="w-full py-3.5 rounded-xl bg-white text-purple-700 font-black text-sm flex items-center justify-center gap-2 hover:bg-purple-50 transition-all shadow-md active:scale-[0.98]">
-              Sign Up as Broker <ArrowRight className="w-4 h-4" />
+              {ENABLE_REGISTRATION ? "Sign Up as Broker" : "Broker Login"} <ArrowRight className="w-4 h-4" />
             </button>
-            <p className="text-center text-purple-200 text-[11px] mt-2.5">Already registered? <button onClick={() => base44.auth.redirectToLogin("/BrokerDashboard")} className="underline font-bold">Log in</button></p>
+            {ENABLE_REGISTRATION && (
+              <p className="text-center text-purple-200 text-[11px] mt-2.5">Already registered? <button onClick={() => base44.auth.redirectToLogin("/BrokerDashboard")} className="underline font-bold">Log in</button></p>
+            )}
           </div>
         </div>
       </section>
