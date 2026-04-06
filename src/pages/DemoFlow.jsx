@@ -8,11 +8,6 @@ const DEMO_SCREENS = [
     component: 'DemoHome',
   },
   {
-    id: 'registration',
-    title: 'Registration',
-    component: 'DemoRegistration',
-  },
-  {
     id: 'onboarding',
     title: '7-Step Onboarding',
     component: 'DemoOnboarding',
