@@ -59,24 +59,6 @@ const CLIENT_STEPS = [
   },
   {
     step: 2,
-    emoji: "📧",
-    title: "Client Gets Invite Email",
-    desc: "Sarah receives a branded email with a personalized invite link. One click opens her registration — address & close date already filled in.",
-    demoData: [
-      { icon: Mail,         label: "From",      value: "Prestige Realty (via EZ Move AI)" },
-      { icon: User,         label: "To",        value: "sarah.j@gmail.com" },
-      { icon: CheckCircle2, label: "Pre-filled", value: "Address · Close date · Miles" },
-    ],
-    preview: `Hi Sarah,\n\nPrestige Realty has invited you to EZ Move AI — your personal step-by-step moving assistant.\n\nYour property at 47 Maple Dr, Newton is already set up. Just tap below to get started!\n\n[Get Started →]`,
-    color: "from-orange-600 to-orange-800",
-    badgeColor: "bg-orange-500",
-    badge: "Step 2",
-    url: "/Register?code=DEMO",
-    urlLabel: "See Registration Page →",
-    requiresAuth: true,
-  },
-  {
-    step: 3,
     emoji: "📝",
     title: "Client Registers (30 seconds)",
     desc: "Sarah opens her invite link. Her address and close date are already filled in by her agent. She just confirms her name and phone.",
@@ -88,11 +70,11 @@ const CLIENT_STEPS = [
     ],
     color: "from-emerald-600 to-emerald-900",
     badgeColor: "bg-emerald-600",
-    badge: "Step 3",
+    badge: "Step 2",
     requiresAuth: true,
   },
   {
-    step: 4,
+    step: 3,
     emoji: "🏠",
     title: "Week 1 Setup Wizard",
     desc: "After registering, Sarah goes through a guided 3-minute onboarding — she sorts her stuff, answers mover questions, and gets an AI move estimate.",
@@ -104,11 +86,11 @@ const CLIENT_STEPS = [
     ],
     color: "from-amber-600 to-amber-800",
     badgeColor: "bg-amber-500",
-    badge: "Step 4",
+    badge: "Step 3",
     requiresAuth: true,
   },
   {
-    step: 5,
+    step: 4,
     emoji: "📱",
     title: "Sarah's Move Dashboard",
     desc: "Her personalized command center. Week-by-week task checklist, AI assistant, inventory tracker, contacts & calendar — all in one place.",
@@ -121,7 +103,7 @@ const CLIENT_STEPS = [
     ],
     color: "from-blue-600 to-blue-900",
     badgeColor: "bg-blue-600",
-    badge: "Step 5",
+    badge: "Step 4",
     url: "/Dashboard",
     urlLabel: "Open Live Dashboard →",
     highlight: true,
@@ -325,7 +307,7 @@ export default function Preview() {
             </button>
             <button onClick={() => setIdx(PLATFORM_SCREENS.length)}
               className={`flex-1 py-2.5 text-xs font-bold transition-all ${isClientSection ? "text-orange-400 border-b-2 border-orange-400" : "text-slate-500 hover:text-slate-300"}`}>
-              Buyer/Seller Demo (5 steps)
+              Buyer/Seller Demo (4 steps)
             </button>
           </div>
 
