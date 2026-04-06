@@ -58,7 +58,12 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
-      <Route path="/" element={<PreviewHub />} />
+      <Route path="/" element={<Home />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/signup" element={<Home />} />
+      <Route path="/sign-up" element={<Home />} />
+      <Route path="/agent-signup" element={<Home />} />
+      <Route path="/broker-signup" element={<Home />} />
       <Route path="/AgentDashboard" element={<AgentDashboard />} />
       <Route path="/Home" element={
         <LayoutWrapper currentPageName={mainPageKey}>
@@ -82,7 +87,6 @@ const AuthenticatedApp = () => {
       <Route path="/Preview" element={<Preview />} />
       <Route path="/Demo" element={<DemoFlow />} />
       <Route path="/DemoLogin" element={<DemoLogin />} />
-
       <Route path="/BuyerExperience" element={<BuyerExperience />} />
       <Route path="/SellerExperience" element={<SellerExperience />} />
       <Route path="*" element={<PageNotFound />} />

@@ -5,7 +5,7 @@ const { ENABLE_REGISTRATION } = featureFlags;
 import {
   Shield, ArrowRight, Zap, CheckCircle2,
   Users, CalendarDays, Package, Sparkles,
-  Briefcase, UserCheck, LogIn
+  Briefcase, UserCheck, LogIn, Home as HomeIcon, Truck
 } from "lucide-react";
 
 function getPricing(count) {
@@ -228,10 +228,146 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Portals & Workflows Section */}
+      <section className="max-w-5xl mx-auto w-full px-5 py-12 border-t border-white/[0.07]">
+        <div className="text-center mb-10">
+          <p className="text-slate-600 text-[10px] font-bold uppercase tracking-widest mb-2">Explore</p>
+          <h2 className="text-3xl font-black text-white mb-3">All Portals & Workflows</h2>
+          <p className="text-slate-400 text-sm max-w-xl mx-auto">Access agent & broker management tools, or walk through the complete buyer/seller moving experience.</p>
+        </div>
+
+        {/* Portals Grid */}
+        <div className="mb-12">
+          <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-4">Professional Portals</p>
+          <div className="grid md:grid-cols-3 gap-4">
+            {[
+              { icon: UserCheck, label: "Agent Portal", desc: "Manage clients, track billing & move progress", color: "from-blue-600 to-blue-700", url: "/AgentDashboard" },
+              { icon: Briefcase, label: "Broker Portal", desc: "Firm-wide client management & reporting", color: "from-purple-600 to-purple-700", url: "/BrokerDashboard" },
+              { icon: Shield, label: "Super Admin", desc: "Platform-level control & monitoring", color: "from-red-600 to-red-700", url: "/SuperAdmin" },
+            ].map(portal => (
+              <a key={portal.label} href={portal.url} target="_blank" rel="noreferrer"
+                className={`bg-gradient-to-br ${portal.color} rounded-2xl p-6 border border-white/[0.1] hover:border-white/[0.2] transition-all shadow-lg flex flex-col`}>
+                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mb-3 flex-shrink-0">
+                  <portal.icon className="w-5 h-5 text-white" />
+                </div>
+                <h3 className="font-bold text-white text-sm mb-1">{portal.label}</h3>
+                <p className="text-white/70 text-xs leading-relaxed flex-1">{portal.desc}</p>
+                <div className="mt-3 flex items-center text-white text-xs font-bold gap-1">
+                  Open <ArrowRight className="w-3 h-3" />
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+
+        {/* Buyer/Seller Workflows */}
+        <div>
+          <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-4">Buyer & Seller Workflows</p>
+          <div className="grid md:grid-cols-2 gap-4">
+            {[
+              {
+                icon: HomeIcon,
+                label: "Buyer Experience",
+                desc: "Complete walkthrough: home search, offer, inspection, closing, and move-in planning with AI assistance.",
+                color: "from-emerald-600 to-emerald-700",
+                url: "/BuyerExperience"
+              },
+              {
+                icon: Truck,
+                label: "Seller Experience",
+                desc: "Full seller flow: listing prep, offers, negotiations, closing, and move-out coordination with checklist & services.",
+                color: "from-amber-600 to-amber-700",
+                url: "/SellerExperience"
+              },
+            ].map(workflow => (
+              <a key={workflow.label} href={workflow.url} target="_blank" rel="noreferrer"
+                className={`bg-gradient-to-br ${workflow.color} rounded-2xl p-6 border border-white/[0.1] hover:border-white/[0.2] transition-all shadow-lg flex flex-col`}>
+                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mb-3 flex-shrink-0">
+                  <workflow.icon className="w-5 h-5 text-white" />
+                </div>
+                <h3 className="font-bold text-white text-sm mb-1">{workflow.label}</h3>
+                <p className="text-white/70 text-xs leading-relaxed flex-1">{workflow.desc}</p>
+                <div className="mt-3 flex items-center text-white text-xs font-bold gap-1">
+                  Demo <ArrowRight className="w-3 h-3" />
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Portals & Workflows Section */}
+      <section className="max-w-5xl mx-auto w-full px-5 py-12 border-t border-white/[0.07]">
+        <div className="text-center mb-10">
+          <p className="text-slate-600 text-[10px] font-bold uppercase tracking-widest mb-2">Explore</p>
+          <h2 className="text-3xl font-black text-white mb-3">All Portals & Workflows</h2>
+          <p className="text-slate-400 text-sm max-w-xl mx-auto">Access agent & broker management tools, or walk through the complete buyer/seller moving experience.</p>
+        </div>
+
+        {/* Portals Grid */}
+        <div className="mb-12">
+          <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-4">Professional Portals</p>
+          <div className="grid md:grid-cols-3 gap-4">
+            {[
+              { icon: UserCheck, label: "Agent Portal", desc: "Manage clients, track billing & move progress", color: "from-blue-600 to-blue-700", url: "/AgentDashboard" },
+              { icon: Briefcase, label: "Broker Portal", desc: "Firm-wide client management & reporting", color: "from-purple-600 to-purple-700", url: "/BrokerDashboard" },
+              { icon: Shield, label: "Super Admin", desc: "Platform-level control & monitoring", color: "from-red-600 to-red-700", url: "/SuperAdmin" },
+            ].map(portal => (
+              <a key={portal.label} href={portal.url} target="_blank" rel="noreferrer"
+                className={`bg-gradient-to-br ${portal.color} rounded-2xl p-6 border border-white/[0.1] hover:border-white/[0.2] transition-all shadow-lg flex flex-col`}>
+                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mb-3 flex-shrink-0">
+                  <portal.icon className="w-5 h-5 text-white" />
+                </div>
+                <h3 className="font-bold text-white text-sm mb-1">{portal.label}</h3>
+                <p className="text-white/70 text-xs leading-relaxed flex-1">{portal.desc}</p>
+                <div className="mt-3 flex items-center text-white text-xs font-bold gap-1">
+                  Open <ArrowRight className="w-3 h-3" />
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+
+        {/* Buyer/Seller Workflows */}
+        <div>
+          <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-4">Buyer & Seller Workflows</p>
+          <div className="grid md:grid-cols-2 gap-4">
+            {[
+              {
+                icon: HomeIcon,
+                label: "Buyer Experience",
+                desc: "Complete walkthrough: home search, offer, inspection, closing, and move-in planning with AI assistance.",
+                color: "from-emerald-600 to-emerald-700",
+                url: "/BuyerExperience"
+              },
+              {
+                icon: Truck,
+                label: "Seller Experience",
+                desc: "Full seller flow: listing prep, offers, negotiations, closing, and move-out coordination with checklist & services.",
+                color: "from-amber-600 to-amber-700",
+                url: "/SellerExperience"
+              },
+            ].map(workflow => (
+              <a key={workflow.label} href={workflow.url} target="_blank" rel="noreferrer"
+                className={`bg-gradient-to-br ${workflow.color} rounded-2xl p-6 border border-white/[0.1] hover:border-white/[0.2] transition-all shadow-lg flex flex-col`}>
+                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mb-3 flex-shrink-0">
+                  <workflow.icon className="w-5 h-5 text-white" />
+                </div>
+                <h3 className="font-bold text-white text-sm mb-1">{workflow.label}</h3>
+                <p className="text-white/70 text-xs leading-relaxed flex-1">{workflow.desc}</p>
+                <div className="mt-3 flex items-center text-white text-xs font-bold gap-1">
+                  Demo <ArrowRight className="w-3 h-3" />
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="py-8 text-center border-t border-white/[0.07] mt-auto">
         <p className="text-slate-600 text-[11px]">© 2026 EZ Move AI · All Rights Reserved</p>
       </footer>
-    </div>
-  );
-}
+      </div>
+      );
+      }
