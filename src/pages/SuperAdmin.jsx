@@ -93,7 +93,7 @@ function DashboardScreen({ agents, clients, onNav }) {
   const totalRevenue = clients.filter(c => c.billing_status === "charged").length * 40;
 
   const recentActivity = [
-    ...clients.slice(0, 3).map(c => ({ text: `New client: ${c.user_name || c.user_email || "Unknown"}`, type: "client", time: c.created_date })),
+    ...clients.slice(0, 3).map(c => ({ text: `New buyer/seller: ${c.user_name || c.user_email || "Unknown"}`, type: "client", time: c.created_date })),
     ...agents.slice(0, 2).map(a => ({ text: `Account enrolled: ${a.company_name}`, type: "account", time: a.created_date })),
   ].sort((a, b) => new Date(b.time) - new Date(a.time)).slice(0, 5);
 

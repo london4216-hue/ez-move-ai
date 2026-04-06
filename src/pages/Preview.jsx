@@ -32,7 +32,7 @@ const PLATFORM_SCREENS = [
     badgeColor: "bg-red-600",
     color: "from-red-700 to-red-900",
     title: "Super Admin",
-    desc: "Platform-level admin view — manage all agents, clients, billing status, and platform-wide settings.",
+    desc: "Platform-level admin view — manage all agents, buyers/sellers, billing status, and platform-wide settings.",
     url: "/SuperAdmin",
     requiresAuth: true,
   },
@@ -44,15 +44,12 @@ const CLIENT_STEPS = [
     step: 1,
     emoji: "📤",
     title: "Agent Sends Invite",
-    desc: "The agent fills out the client form in their portal. All property details are pre-filled — the client never has to enter them.",
+    desc: "The agent adds a buyer or seller in their portal — just name, email, phone, and role. No move details needed at this stage.",
     demoData: [
-      { icon: User,     label: "Client",      value: "Sarah Johnson" },
-      { icon: Mail,     label: "Email",       value: "sarah.j@gmail.com" },
-      { icon: Phone,    label: "Phone",       value: "(617) 555-0182" },
-      { icon: Home,     label: "Moving TO",   value: "47 Maple Dr, Newton, MA 02458" },
-      { icon: Truck,    label: "Moving FROM", value: "12 Elm St, Boston, MA 02115" },
-      { icon: Calendar, label: "Close Date",  value: "June 27, 2026" },
-      { icon: MapPin,   label: "Est. Miles",  value: "~11 miles" },
+      { icon: User,     label: "Name",   value: "Sarah Johnson" },
+      { icon: Mail,     label: "Email",  value: "sarah.j@gmail.com" },
+      { icon: Phone,    label: "Phone",  value: "(617) 555-0182" },
+      { icon: Home,     label: "Role",   value: "Buyer" },
     ],
     color: "from-purple-700 to-purple-900",
     badgeColor: "bg-purple-600",
@@ -140,11 +137,11 @@ const NAV_ITEMS = [
 // ─── Overview modules ─────────────────────────────────────────────────────────
 const OVERVIEW_MODULES = [
   { icon: Globe,           label: "Sales Website",        desc: "Public marketing landing page",                badge: "Marketing", color: "bg-slate-700",   url: "/Home" },
-  { icon: LayoutDashboard, label: "Demo Experience",       desc: "Full 5-step client move flow walkthrough",     badge: "Demo",      color: "bg-orange-600",  action: "demo" },
-  { icon: UserCheck,       label: "Agent Portal",          desc: "Invite clients, track billing & move progress", badge: "Agent",     color: "bg-blue-600",    url: "/AgentDashboard",  requiresAuth: true },
-  { icon: Briefcase,       label: "Broker Portal",         desc: "Firm-wide agent & client management",          badge: "Broker",    color: "bg-purple-600",  url: "/BrokerDashboard", requiresAuth: true },
-  { icon: Shield,          label: "Super Admin Portal",    desc: "Platform-level control & reporting",           badge: "Admin",     color: "bg-red-600",     url: "/SuperAdmin",      requiresAuth: true },
-  { icon: Home,            label: "Buyer/Seller Dashboard", desc: "Client move plan, AI tools & task checklist",  badge: "Client",    color: "bg-emerald-600", url: "/Dashboard",       requiresAuth: true },
+  { icon: LayoutDashboard, label: "Demo Experience",         desc: "Full 5-step buyer/seller move flow walkthrough",   badge: "Demo",      color: "bg-orange-600",  action: "demo" },
+  { icon: UserCheck,       label: "Agent Portal",           desc: "Add buyers/sellers, track billing & move progress", badge: "Agent",     color: "bg-blue-600",    url: "/AgentDashboard",  requiresAuth: true },
+  { icon: Briefcase,       label: "Broker Portal",          desc: "Firm-wide buyer/seller management",                badge: "Broker",    color: "bg-purple-600",  url: "/BrokerDashboard", requiresAuth: true },
+  { icon: Shield,          label: "Super Admin Portal",     desc: "Platform-level control & reporting",               badge: "Admin",     color: "bg-red-600",     url: "/SuperAdmin",      requiresAuth: true },
+  { icon: Home,            label: "Buyer/Seller Dashboard", desc: "Buyer/Seller move plan, AI tools & task checklist", badge: "Buyer/Seller", color: "bg-emerald-600", url: "/Dashboard", requiresAuth: true },
 ];
 
 // ─── Helper components ────────────────────────────────────────────────────────
@@ -245,7 +242,7 @@ function ClientStepCard({ step, onNext }) {
       <div className="flex items-center gap-3 mb-1">
         <span className="text-3xl">{step.emoji}</span>
         <div>
-          <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full text-white ${step.badgeColor}`}>{step.badge} — Client Flow</span>
+          <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full text-white ${step.badgeColor}`}>{step.badge} — Buyer/Seller Flow</span>
           <h2 className="font-black text-white text-xl mt-0.5">{step.title}</h2>
         </div>
       </div>
@@ -328,7 +325,7 @@ export default function Preview() {
             </button>
             <button onClick={() => setIdx(PLATFORM_SCREENS.length)}
               className={`flex-1 py-2.5 text-xs font-bold transition-all ${isClientSection ? "text-orange-400 border-b-2 border-orange-400" : "text-slate-500 hover:text-slate-300"}`}>
-              Client Demo (5 steps)
+              Buyer/Seller Demo (5 steps)
             </button>
           </div>
 

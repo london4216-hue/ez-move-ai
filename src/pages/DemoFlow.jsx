@@ -19,7 +19,7 @@ const DEMO_SCREENS = [
   },
   {
     id: 'dashboard',
-    title: 'Client Dashboard',
+    title: 'Buyer/Seller Dashboard',
     component: 'DemoDashboard',
   },
   {
@@ -48,7 +48,7 @@ function DemoHome() {
         <ul className="space-y-2 text-sm text-slate-700">
           <li>✓ Zero-login registration</li>
           <li>✓ 7-step interactive onboarding</li>
-          <li>✓ Complete client dashboard</li>
+          <li>✓ Complete buyer/seller dashboard</li>
           <li>✓ AI-powered recommendations</li>
           <li>✓ Move timeline & summary</li>
         </ul>
@@ -148,7 +148,7 @@ function DemoDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-slate-900">Your Move Dashboard</h2>
+        <h2 className="text-2xl font-bold text-slate-900">Buyer/Seller Move Dashboard</h2>
         <p className="text-slate-600 text-sm">83 days until closing</p>
       </div>
 

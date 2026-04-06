@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useNavigate } from "react-router-dom";
 import { getPortalRole } from "@/lib/usePortalRole";
 import { Plus, LogOut, Edit2, X, Trash2, Users, Building2, ArrowLeft, Loader2, CheckCircle2, CreditCard, Palette, Copy, Check, Shield } from "lucide-react";
-import ClientAddressFields, { buildFullAddress } from "../components/register/ClientAddressFields";
+
 import { differenceInDays, parseISO } from "date-fns";
 
 const STATUS_COLORS = {
@@ -18,8 +18,8 @@ export default function BrokerDashboard() {
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [addStep, setAddStep] = useState(null);
-  const [milesLoading, setMilesLoading] = useState(false);
-  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", close_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], street: "", unit: "", city: "", state: "", zip: "", from_street: "", from_city: "", from_state: "", from_zip: "" });
+
+  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", role: "buyer" });
   const [pendingClient, setPendingClient] = useState(null);
   const [paying, setPaying] = useState(false);
   const [doneData, setDoneData] = useState(null);
@@ -83,7 +83,7 @@ export default function BrokerDashboard() {
       setClients(prev => prev.filter(c => c.id !== pendingClient.id));
     }
     setAddStep(null);
-    setForm({ firstName: "", lastName: "", email: "", phone: "", close_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], street: "", unit: "", city: "", state: "", zip: "", from_street: "", from_city: "", from_state: "", from_zip: "" });
+    setForm({ firstName: "", lastName: "", email: "", phone: "", role: "buyer" });
     setPendingClient(null);
     setDoneData(null);
   };
@@ -92,41 +92,24 @@ export default function BrokerDashboard() {
     try {
       const code = Math.floor(1000 + Math.random() * 9000).toString();
       const clientName = `${form.firstName} ${form.lastName}`;
-      const fullAddress = buildFullAddress(form);
-      const fromAddress = [form.from_street, form.from_city, form.from_state, form.from_zip].filter(Boolean).join(", ");
-      setMilesLoading(true);
-      const miles = fromAddress ? await estimateMiles(fromAddress, fullAddress) : null;
-      setMilesLoading(false);
       const newClient = await base44.entities.Client.create({
         agent_id: agent.id, user_name: clientName, user_email: form.email, phone: form.phone,
-        close_date: form.close_date, invitation_code: code, status: "invited",
+        invitation_code: code, status: "invited",
         invited_date: new Date().toISOString(), billing_status: "pending",
-        home_address: fullAddress,
-        moving_from_address: fromAddress || null,
-        estimated_miles: miles,
       });
-      setPendingClient({ ...newClient, invitation_code: code, estimated_miles: miles });
-      setClients(prev => [{ ...newClient, invitation_code: code, estimated_miles: miles }, ...prev]);
+      setPendingClient({ ...newClient, invitation_code: code });
+      setClients(prev => [{ ...newClient, invitation_code: code }, ...prev]);
       const appUrl = window.location.origin;
       const inviteLink = `${appUrl}/Register?code=${code}`;
       base44.integrations.Core.SendEmail({
         to: form.email,
         from_name: agent?.company_name || "EZ Move AI",
         subject: `Your EZ Move AI Invitation from ${agent?.company_name || "your agent"}`,
-        body: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
-          <div style="background:linear-gradient(135deg,#f97316,#ea580c);border-radius:16px;padding:24px;text-align:center;margin-bottom:24px">
-            <h1 style="color:white;margin:0;font-size:28px;font-weight:900">EZ Move <span style="opacity:0.85">AI</span></h1>
-            <p style="color:rgba(255,255,255,0.85);margin:8px 0 0;font-size:13px">Your personal moving assistant</p>
-          </div>
-          <h2 style="color:#1e293b;font-size:20px">Hi ${clientName},</h2>
-          <p style="color:#475569;line-height:1.6">${agent?.company_name || "Your real estate agent"} has invited you to use <strong>EZ Move AI</strong> — your step-by-step moving assistant to make your move stress-free.</p>
-          <a href="${inviteLink}" style="display:block;background:#f97316;color:white;text-decoration:none;text-align:center;padding:16px;border-radius:12px;font-weight:700;font-size:16px;margin:24px 0">Get Started →</a>
-          <p style="color:#94a3b8;font-size:12px;text-align:center">Click the link above to begin your onboarding.</p>
-        </div>`,
+        body: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px"><div style="background:linear-gradient(135deg,#f97316,#ea580c);border-radius:16px;padding:24px;text-align:center;margin-bottom:24px"><h1 style="color:white;margin:0;font-size:28px;font-weight:900">EZ Move AI</h1></div><h2 style="color:#1e293b">Hi ${clientName},</h2><p style="color:#475569;line-height:1.6">${agent?.company_name || "Your real estate agent"} has invited you to EZ Move AI.</p><a href="${inviteLink}" style="display:block;background:#f97316;color:white;text-decoration:none;text-align:center;padding:16px;border-radius:12px;font-weight:700;font-size:16px;margin:24px 0">Get Started →</a></div>`,
       }).catch(() => {});
       setAddStep("payment");
     } catch (e) {
-      alert("Failed to save client: " + (e?.message || "Please try again."));
+      alert("Failed to save: " + (e?.message || "Please try again."));
     }
   };
 
@@ -154,7 +137,7 @@ export default function BrokerDashboard() {
   };
 
 
-  const canSave = form.firstName.trim() && form.lastName.trim() && form.email.trim() && form.close_date && form.street?.trim() && form.city?.trim() && form.state && form.zip?.trim();
+  const canSave = form.firstName.trim() && form.lastName.trim() && form.email.trim();
 
   if (loading) return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -191,7 +174,7 @@ export default function BrokerDashboard() {
               <Palette className="w-4 h-4 text-slate-500" />
             </button>
             <button onClick={() => setAddStep("form")} className="flex items-center gap-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition-colors shadow-md shadow-purple-200">
-              <Plus className="w-3.5 h-3.5" /> Add Client
+              <Plus className="w-3.5 h-3.5" /> Add Buyer / Seller
             </button>
             <a href="/SuperAdmin" className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-red-50 border border-slate-200 hover:border-red-200 text-slate-500 hover:text-red-500 text-xs font-bold transition-colors" title="Super Admin Portal">
               <Shield className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Admin</span>
@@ -206,7 +189,7 @@ export default function BrokerDashboard() {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-5">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { label: "Total Clients", value: clients.length, Icon: Users, color: "text-blue-500", bg: "bg-blue-50", border: "border-blue-100" },
+            { label: "Total Buyers/Sellers", value: clients.length, Icon: Users, color: "text-blue-500", bg: "bg-blue-50", border: "border-blue-100" },
             { label: "Active", value: clients.filter(c => c.status === "active").length, Icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-100" },
             { label: "Pending", value: clients.filter(c => c.status === "invited").length, Icon: Users, color: "text-amber-500", bg: "bg-amber-50", border: "border-amber-100" },
             { label: "Revenue", value: `$${(agent?.total_charged || 0).toLocaleString()}`, Icon: CreditCard, color: "text-orange-500", bg: "bg-orange-50", border: "border-orange-100" },
@@ -225,7 +208,7 @@ export default function BrokerDashboard() {
           <div className="px-5 py-3.5 border-b border-blue-50 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4 text-orange-500" />
-              <p className="font-bold text-slate-800 text-sm">Clients</p>
+              <p className="font-bold text-slate-800 text-sm">Buyers & Sellers</p>
             </div>
             <button onClick={() => setAddStep("form")} className="text-orange-500 text-xs font-bold flex items-center gap-1 hover:text-orange-600">
               <Plus className="w-3.5 h-3.5" /> Add
@@ -235,8 +218,8 @@ export default function BrokerDashboard() {
           {clients.length === 0 ? (
             <div className="py-14 text-center">
               <div className="text-4xl mb-3">👥</div>
-              <p className="text-slate-500 font-semibold mb-1">No clients yet</p>
-              <button onClick={() => setAddStep("form")} className="text-orange-500 font-bold text-sm">+ Add your first client</button>
+              <p className="text-slate-500 font-semibold mb-1">No buyers or sellers yet</p>
+              <button onClick={() => setAddStep("form")} className="text-orange-500 font-bold text-sm">+ Add your first buyer or seller</button>
             </div>
           ) : (
             <div className="divide-y divide-slate-50">
@@ -332,7 +315,7 @@ export default function BrokerDashboard() {
           <div className="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-md shadow-2xl border border-blue-100 overflow-hidden">
             <div className="px-6 pt-5 pb-4 border-b border-slate-100 flex items-center justify-between">
               <button onClick={() => setEditingId(null)} className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center"><X className="w-4 h-4 text-slate-500" /></button>
-              <p className="font-bold text-slate-800 text-sm">Edit Client</p>
+              <p className="font-bold text-slate-800 text-sm">Edit Buyer / Seller</p>
               <div className="w-8" />
             </div>
             <div className="px-6 py-5 space-y-3">
@@ -359,7 +342,7 @@ export default function BrokerDashboard() {
                 {addStep === "payment" ? <ArrowLeft className="w-4 h-4 text-slate-500" /> : <X className="w-4 h-4 text-slate-500" />}
               </button>
               <p className="font-bold text-slate-800 text-sm">
-                {addStep === "form" ? "New Client" : addStep === "payment" ? "Confirm & Pay" : "Client Added! 🎉"}
+                {addStep === "form" ? "New Buyer / Seller" : addStep === "payment" ? "Confirm & Pay" : "Buyer/Seller Added! 🎉"}
               </p>
               <div className="w-8" />
             </div>
@@ -386,28 +369,18 @@ export default function BrokerDashboard() {
                       className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400" />
                   </div>
                   <div>
-                    <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wide block mb-1">Est. Close / Purchase Date</label>
-                    <input type="date" value={form.close_date} onChange={e => setForm(p => ({ ...p, close_date: e.target.value }))}
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400" />
-                  </div>
-                  <div className="pt-2 border-t border-slate-100">
-                    <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-2">📦 Moving From (for quote estimate)</p>
-                    <div className="space-y-2">
-                      <input type="text" placeholder="Street address" value={form.from_street} onChange={e => setForm(p => ({ ...p, from_street: e.target.value }))}
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400" />
-                      <div className="grid grid-cols-3 gap-2">
-                        <input type="text" placeholder="City" value={form.from_city} onChange={e => setForm(p => ({ ...p, from_city: e.target.value }))}
-                          className="col-span-1 px-3 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400" />
-                        <input type="text" placeholder="ST" maxLength={2} value={form.from_state} onChange={e => setForm(p => ({ ...p, from_state: e.target.value.toUpperCase() }))}
-                          className="px-3 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 uppercase" />
-                        <input type="text" placeholder="ZIP" value={form.from_zip} onChange={e => setForm(p => ({ ...p, from_zip: e.target.value.replace(/[^0-9-]/g,'') }))} maxLength={10}
-                          className="px-3 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400" />
-                      </div>
+                    <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wide block mb-1">Role</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {["buyer", "seller"].map(r => (
+                        <button key={r} type="button" onClick={() => setForm(p => ({ ...p, role: r }))}
+                          className={`py-3 rounded-xl border font-bold text-sm transition-all ${form.role === r ? "bg-orange-500 border-orange-500 text-white" : "border-slate-200 text-slate-600 hover:border-orange-300"}`}>
+                          {r === "buyer" ? "🏠 Buyer" : "🏷️ Seller"}
+                        </button>
+                      ))}
                     </div>
                   </div>
-                  <ClientAddressFields form={form} setForm={setForm} />
-                  <button onClick={handleSaveClient} disabled={!canSave || milesLoading} className="w-full py-3.5 rounded-2xl bg-orange-500 text-white font-bold text-sm disabled:opacity-40 hover:bg-orange-600 transition-colors flex items-center justify-center gap-2">
-                    {milesLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Calculating miles...</> : "Save & Continue →"}
+                  <button onClick={handleSaveClient} disabled={!canSave} className="w-full py-3.5 rounded-2xl bg-orange-500 text-white font-bold text-sm disabled:opacity-40 hover:bg-orange-600 transition-colors flex items-center justify-center gap-2">
+                    Save & Continue →
                   </button>
                 </div>
               )}
@@ -426,7 +399,7 @@ export default function BrokerDashboard() {
                   </div>
                   <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4 flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-black text-slate-800">EZ Move AI — 1 Client</p>
+                      <p className="text-sm font-black text-slate-800">EZ Move AI — 1 Buyer/Seller</p>
                       <p className="text-xs text-slate-500">Full moving assistant access</p>
                     </div>
                     <p className="text-2xl font-black text-orange-500">$40</p>
@@ -446,7 +419,7 @@ export default function BrokerDashboard() {
                   <p className="text-xl font-bold text-slate-800 mb-1">All Set!</p>
                   <p className="text-sm text-slate-500 mb-5">{doneData.name} is now active.</p>
                   <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 mb-5 text-left">
-                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-2">📎 Send this link to your client</p>
+                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-2">📎 Send this link to your buyer/seller</p>
                     <p className="text-xs text-slate-600 break-all font-mono mb-3">{`${window.location.origin}/Register?code=${doneData.code}`}</p>
                     <button
                       onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/Register?code=${doneData.code}`); }}
