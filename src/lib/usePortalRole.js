@@ -1,8 +1,20 @@
 // Determines which portal a user belongs to
 // Supports both new explicit roles and legacy admin+account_type pattern
 
+const DEMO_ACCOUNTS = {
+  "agent@ezmoveai.com":      "agent",
+  "broker@ezmoveai.com":     "broker",
+  "buyer@moveezai.com":      "user",
+  "seller@moveezai.com":     "user",
+  "superadmin@ezmoveai.com": "super_admin",
+};
+
 export function getPortalRole(user) {
   if (!user) return null;
+
+  // Demo accounts always get their designated role
+  const demoRole = DEMO_ACCOUNTS[user.email?.toLowerCase()];
+  if (demoRole) return demoRole;
 
   // Yopmail users get super_admin access for testing
   if (user.email?.toLowerCase().endsWith("@yopmail.com")) return "super_admin";
