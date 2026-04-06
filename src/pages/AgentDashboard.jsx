@@ -40,10 +40,15 @@ export default function AgentDashboard() {
 
   useEffect(() => {
     const load = async () => {
-      const user = await base44.auth.me();
+      const authed = await base44.auth.isAuthenticated();
+      if (!authed) {
+        base44.auth.redirectToLogin("/AgentDashboard");
+        return;
+      }
+      const user = await base44.auth.me().catch(() => null);
+      if (!user) { base44.auth.redirectToLogin("/AgentDashboard"); return; }
       const role = getPortalRole(user);
-      // Only agents (and super_admin for oversight) may access this portal
-      if (role !== 'agent' && role !== 'super_admin') { navigate("/"); return; }
+      if (role !== 'agent' && role !== 'super_admin') { navigate("/", { replace: true }); return; }
       let agents = await base44.entities.Agent.filter({ created_by: user.email });
       let agentRecord = agents.length === 0
         ? await base44.entities.Agent.create({ company_name: user.full_name || "My Agency" })
