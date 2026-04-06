@@ -15,19 +15,21 @@ export default function PortalGuard({ allowedRoles, loginHint, children }) {
   const { authStatus, role, isLoading } = useUserContext();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (isLoading) return; // wait for auth to resolve
+  const { user } = useUserContext();
+  const isYopmail = user?.email?.toLowerCase().endsWith("@yopmail.com");
 
+  useEffect(() => {
+    if (isLoading) return;
     if (authStatus !== "authenticated") {
       base44.auth.redirectToLogin(loginHint || "/");
       return;
     }
-
+    // Yopmail users bypass role checks for testing
+    if (isYopmail) return;
     if (!role || !allowedRoles.includes(role)) {
-      // Authenticated but wrong role — send to root so RoleRouter can redirect
       navigate("/", { replace: true });
     }
-  }, [isLoading, authStatus, role]);
+  }, [isLoading, authStatus, role, isYopmail]);
 
   if (isLoading) {
     return (
@@ -40,10 +42,8 @@ export default function PortalGuard({ allowedRoles, loginHint, children }) {
     );
   }
 
-  if (authStatus !== "authenticated" || !role || !allowedRoles.includes(role)) {
-    // Guard is redirecting — render nothing
-    return null;
-  }
+  if (authStatus !== "authenticated") return null;
+  if (!isYopmail && (!role || !allowedRoles.includes(role))) return null;
 
   return children;
 }

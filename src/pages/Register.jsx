@@ -39,9 +39,9 @@ export default function Register() {
         const clients = await base44.entities.Client.filter({ invitation_code: codeFromUrl }).catch(() => []);
         const clientRecord = clients[0];
 
-        // Only block agents/admins from going through buyer/seller onboarding.
-        // Do NOT block on email mismatch — this allows yopmail and other demo emails.
-        const wrongUser = user.role === 'admin' || user.role === 'agent' || user.role === 'broker';
+        // Yopmail users bypass all role blocks for testing.
+        const isYopmail = user.email?.toLowerCase().endsWith("@yopmail.com");
+        const wrongUser = !isYopmail && (user.role === 'admin' || user.role === 'agent' || user.role === 'broker');
 
         if (wrongUser) {
           base44.auth.logout(window.location.href);
