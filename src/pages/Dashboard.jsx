@@ -146,7 +146,7 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Content */
+      {/* Content */}
       <div className="flex-1 overflow-y-auto px-4 pt-4 pb-28">
         {activeTab === "plan" && <ChecklistPanel user={user} />}
         {activeTab === "inventory" && <MyStuffTab user={user} onNavigate={setActiveTab} onStartOnboarding={() => setShowOnboarding(true)} />}

@@ -78,7 +78,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SMS Consent Notice */
+      {/* SMS Consent Notice */}
       <section className="max-w-3xl mx-auto w-full px-5 pb-5">
         <div className="bg-white/[0.04] border border-white/[0.07] rounded-2xl px-5 py-4 text-center">
           <p className="text-slate-500 text-[11px] leading-relaxed">
