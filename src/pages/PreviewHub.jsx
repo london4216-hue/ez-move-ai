@@ -61,19 +61,8 @@ export default function PreviewHub() {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleModuleClick = async (path) => {
-    // If not authenticated, create demo session
-    if (!user) {
-      try {
-        // For now, just navigate to the module
-        // Modules should handle guest/demo mode
-        navigate(path);
-      } catch (err) {
-        navigate(path);
-      }
-    } else {
-      navigate(path);
-    }
+  const handleModuleClick = (path) => {
+    navigate(path);
   };
 
   const handleLogout = async () => {
