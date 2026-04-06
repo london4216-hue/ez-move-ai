@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { ENABLE_REGISTRATION } from "@/lib/featureFlags";
+import { featureFlags } from "@/lib/featureFlags";
+const { ENABLE_REGISTRATION } = featureFlags;
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
 import { Loader2, LogOut } from "lucide-react";
