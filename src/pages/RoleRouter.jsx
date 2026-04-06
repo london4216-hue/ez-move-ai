@@ -1,17 +1,17 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getSession, ROLE_PATHS } from "@/lib/internalAuth";
+import { base44 } from "@/api/base44Client";
+import { getPortalPath } from "@/lib/usePortalRole";
 
 export default function RoleRouter() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const session = getSession();
-    if (!session) {
-      navigate("/SignIn", { replace: true });
-    } else {
-      navigate(ROLE_PATHS[session.role] || "/SignIn", { replace: true });
-    }
+    base44.auth.me().then(user => {
+      navigate(getPortalPath(user), { replace: true });
+    }).catch(() => {
+      navigate("/AgentDashboard", { replace: true });
+    });
   }, []);
 
   return (
