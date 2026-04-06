@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { appParams } from '@/lib/app-params';
+import { PUBLIC_DEMO_MODE } from '@/lib/featureFlags';
 import { createAxiosClient } from '@base44/sdk/dist/utils/axios-client';
 
 const AuthContext = createContext();
@@ -40,6 +41,9 @@ export const AuthProvider = ({ children }) => {
         // If we got the app public settings successfully, check if user is authenticated
         if (appParams.token) {
           await checkUserAuth();
+        } else if (PUBLIC_DEMO_MODE) {
+          // In demo mode, establish demo session without requiring login
+          await bootstrapDemoSession();
         } else {
           setIsLoadingAuth(false);
           setIsAuthenticated(false);
@@ -110,7 +114,43 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const bootstrapDemoSession = async () => {
+    try {
+      // In demo mode, create a lightweight demo user object
+      // This allows all portal navigation without real auth
+      const demoUser = {
+        id: 'demo-user',
+        email: 'demo@demo.local',
+        full_name: 'Demo User',
+        role: 'user',
+        is_demo: true
+      };
+      setUser(demoUser);
+      setIsAuthenticated(true);
+      setIsLoadingAuth(false);
+    } catch (error) {
+      console.error('Demo bootstrap failed:', error);
+      // Even if bootstrap fails, allow demo mode to continue
+      const fallbackDemoUser = {
+        id: 'demo-user',
+        email: 'demo@demo.local',
+        full_name: 'Demo User',
+        role: 'user',
+        is_demo: true
+      };
+      setUser(fallbackDemoUser);
+      setIsAuthenticated(true);
+      setIsLoadingAuth(false);
+    }
+  };
+
   const logout = (shouldRedirect = true) => {
+    // In demo mode, don't actually logout; re-bootstrap instead
+    if (PUBLIC_DEMO_MODE) {
+      bootstrapDemoSession();
+      return;
+    }
+    
     setUser(null);
     setIsAuthenticated(false);
     
@@ -124,6 +164,10 @@ export const AuthProvider = ({ children }) => {
   };
 
   const navigateToLogin = () => {
+    // In demo mode, never redirect to login
+    if (PUBLIC_DEMO_MODE) {
+      return;
+    }
     // Use the SDK's redirectToLogin method
     base44.auth.redirectToLogin(window.location.href);
   };

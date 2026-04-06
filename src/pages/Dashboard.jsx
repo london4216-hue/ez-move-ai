@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useNavigate } from "react-router-dom";
+import { PUBLIC_DEMO_MODE } from "@/lib/featureFlags";
 import { differenceInDays, parseISO } from "date-fns";
 import { Package, Home, Sparkles, RotateCcw, LogOut } from "lucide-react";
 import ChecklistPanel from "@/components/dashboard/ChecklistPanel";
@@ -42,7 +43,22 @@ export default function Dashboard() {
         localStorage.removeItem(`onboarding_progress_${u?.id}`);
         setShowOnboarding(true);
       }
-    }).catch(() => navigate("/Register"));
+    }).catch(() => {
+      if (!PUBLIC_DEMO_MODE) {
+        navigate("/Register");
+      } else {
+        // In demo mode, create demo user and continue
+        const demoUser = {
+          id: 'demo-user',
+          email: 'demo@demo.local',
+          full_name: 'Demo User',
+          role: 'user',
+          is_demo: true
+        };
+        setUser(demoUser);
+        setLoading(false);
+      }
+    });
   }, []);
 
   const daysToClose = user?.estimated_close_date
