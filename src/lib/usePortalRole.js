@@ -2,12 +2,14 @@
 // Supports both new explicit roles and legacy admin+account_type pattern
 
 const DEMO_ACCOUNTS = {
-  "agent@ezmoveai.com":      "agent",
-  "broker@ezmoveai.com":     "broker",
-  "buyer@moveezai.com":      "user",
-  "seller@moveezai.com":     "user",
-  "superadmin@ezmoveai.com": "super_admin",
-  "london4216@gmail.com":    "super_admin",
+  // Gmail alias demo accounts (all go to london4216@gmail.com inbox)
+  "london4216+agent@gmail.com":      "agent",
+  "london4216+broker@gmail.com":     "broker",
+  "london4216+buyer@gmail.com":      "user",
+  "london4216+seller@gmail.com":     "user",
+  "london4216+superadmin@gmail.com": "super_admin",
+  // Owner account — full super_admin access
+  "london4216@gmail.com":            "super_admin",
 };
 
 export function getPortalRole(user) {

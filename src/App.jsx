@@ -15,6 +15,7 @@ import MyStuff from './pages/MyStuff';
 import RoleRouter from './pages/RoleRouter';
 import AgentDashboard from './pages/AgentDashboard';
 import DemoFlow from './pages/DemoFlow';
+import DemoLogin from './pages/DemoLogin';
 
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -74,6 +75,7 @@ const AuthenticatedApp = () => {
       <Route path="/MyStuff" element={<MyStuff />} />
       <Route path="/Preview" element={<Preview />} />
       <Route path="/Demo" element={<DemoFlow />} />
+      <Route path="/DemoLogin" element={<DemoLogin />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
