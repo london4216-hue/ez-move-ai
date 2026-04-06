@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useNavigate } from "react-router-dom";
-import { getPortalRole } from "@/lib/usePortalRole";
+import PortalGuard from "../components/PortalGuard";
 import { Plus, LogOut, Edit2, X, Trash2, Users, Building2, ArrowLeft, Loader2, CheckCircle2, CreditCard, Palette, Copy, Check, Shield } from "lucide-react";
 
 import { differenceInDays, parseISO } from "date-fns";
@@ -39,15 +39,8 @@ export default function BrokerDashboard() {
 
   useEffect(() => {
     const load = async () => {
-      const authed = await base44.auth.isAuthenticated();
-      if (!authed) {
-        base44.auth.redirectToLogin("/BrokerDashboard");
-        return;
-      }
       const user = await base44.auth.me().catch(() => null);
-      if (!user) { base44.auth.redirectToLogin("/BrokerDashboard"); return; }
-      const portalRole = getPortalRole(user);
-      if (portalRole !== "broker" && portalRole !== "super_admin") { navigate("/", { replace: true }); setLoading(false); return; }
+      if (!user) return;
       let agents = await base44.entities.Agent.filter({ created_by: user.email });
       let agentRecord = agents.length === 0
         ? await base44.entities.Agent.create({ company_name: user.full_name || "My Brokerage" })
@@ -147,14 +140,12 @@ export default function BrokerDashboard() {
 
   if (loading) return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-      <div className="flex flex-col items-center gap-3">
-        <div className="w-9 h-9 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-slate-400 text-sm font-medium">Loading your portal…</p>
-      </div>
+      <div className="w-9 h-9 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
     </div>
   );
 
   return (
+    <PortalGuard allowedRoles={["broker", "super_admin"]} loginHint="/BrokerDashboard">
     <div className="min-h-screen bg-slate-50">
       {/* Portal identity bar */}
       <div className="bg-purple-800 px-4 sm:px-6 py-2.5 flex items-center gap-2">
@@ -443,5 +434,6 @@ export default function BrokerDashboard() {
         </div>
       )}
     </div>
+    </PortalGuard>
   );
 }

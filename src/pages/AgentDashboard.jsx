@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { getPortalRole } from "@/lib/usePortalRole";
 import { base44 } from "@/api/base44Client";
 import { useNavigate } from "react-router-dom";
+import PortalGuard from "../components/PortalGuard";
 import { Plus, LogOut, Edit2, X, ArrowLeft, Loader2, Users, Trash2, CreditCard, CheckCircle2, Clock, Copy, Check, Sparkles, Shield } from "lucide-react";
 import ClientInsightsPanel from "../components/ai/ClientInsightsPanel";
 
@@ -40,15 +40,8 @@ export default function AgentDashboard() {
 
   useEffect(() => {
     const load = async () => {
-      const authed = await base44.auth.isAuthenticated();
-      if (!authed) {
-        base44.auth.redirectToLogin("/AgentDashboard");
-        return;
-      }
       const user = await base44.auth.me().catch(() => null);
-      if (!user) { base44.auth.redirectToLogin("/AgentDashboard"); return; }
-      const role = getPortalRole(user);
-      if (role !== 'agent' && role !== 'super_admin') { navigate("/", { replace: true }); return; }
+      if (!user) return;
       let agents = await base44.entities.Agent.filter({ created_by: user.email });
       let agentRecord = agents.length === 0
         ? await base44.entities.Agent.create({ company_name: user.full_name || "My Agency" })
@@ -125,14 +118,12 @@ export default function AgentDashboard() {
 
   if (loading) return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-      <div className="flex flex-col items-center gap-3">
-        <div className="w-9 h-9 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-slate-400 text-sm font-medium">Loading your portal…</p>
-      </div>
+      <div className="w-9 h-9 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
     </div>
   );
 
   return (
+    <PortalGuard allowedRoles={["agent", "super_admin"]} loginHint="/AgentDashboard">
     <div className="min-h-screen bg-slate-50">
       {/* Portal identity bar */}
       <div className="bg-blue-700 px-4 sm:px-6 py-2.5 flex items-center gap-2">
@@ -383,5 +374,6 @@ export default function AgentDashboard() {
         </div>
       )}
     </div>
+    </PortalGuard>
   );
 }

@@ -1,31 +1,25 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
 import { getPortalPath } from "@/lib/usePortalRole";
 import { SAFE_EDIT_MODE } from "@/lib/safeEditMode";
+import { useUserContext } from "@/lib/useUserContext";
 
 // Auto-redirects logged-in users to their portal.
 // Non-authenticated users see the Preview/landing page.
 export default function RoleRouter() {
   const navigate = useNavigate();
+  const { authStatus, user, isLoading } = useUserContext();
 
   useEffect(() => {
-    // SAFE_EDIT_MODE: skip all redirects so routes stay frozen during structural edits
     if (SAFE_EDIT_MODE) return;
+    if (isLoading) return;
 
-    base44.auth.isAuthenticated().then(async (authed) => {
-      if (!authed) {
-        navigate("/Preview", { replace: true });
-        return;
-      }
-      const user = await base44.auth.me().catch(() => null);
-      if (!user) {
-        navigate("/Preview", { replace: true });
-        return;
-      }
-      navigate(getPortalPath(user), { replace: true });
-    });
-  }, []);
+    if (authStatus !== "authenticated" || !user) {
+      navigate("/Preview", { replace: true });
+      return;
+    }
+    navigate(getPortalPath(user), { replace: true });
+  }, [isLoading, authStatus, user]);
 
   return (
     <div className="min-h-screen bg-slate-100 flex items-center justify-center">
