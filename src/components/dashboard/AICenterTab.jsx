@@ -114,11 +114,20 @@ export default function AICenterTab({ user, onProviderSaved, onNavigateToTab }) 
   const getMovingQuote = async () => {
     setQuoteLoading(true);
     const res = await base44.integrations.Core.InvokeLLM({
-      prompt: `Generate realistic moving cost estimates for ${address}. Provide estimates by home size for both local (under 50 miles) and long distance moves. Include 2-3 money-saving tips.`,
+      prompt: `Generate realistic moving cost estimates for a user located near: "${address}".
+
+Rules:
+- Only generate estimates if you have enough location context to produce real, non-zero dollar ranges.
+- Each estimate must have a genuine dollar range (e.g. "$1,200 – $2,400") — NEVER return $0, "$0", or empty strings for any cost field.
+- If the address is vague (e.g. "my area", blank, or missing), or you cannot produce real estimates, set data_complete to false and return empty arrays.
+- If you CAN produce real estimates, set data_complete to true.
+- Provide estimates by home size (Studio, 1BR, 2BR, 3BR, 4BR+) for both local (under 50 miles) and long distance moves.
+- Include 2-3 practical money-saving tips.`,
       add_context_from_internet: true,
       response_json_schema: {
         type: "object",
         properties: {
+          data_complete: { type: "boolean" },
           estimates: {
             type: "array",
             items: {
@@ -134,7 +143,12 @@ export default function AICenterTab({ user, onProviderSaved, onNavigateToTab }) 
         }
       }
     });
-    setQuoteData(res);
+    // Strip out any estimates that slipped through with $0 values
+    const validEstimates = (res?.estimates || []).filter(e =>
+      e.local_cost && e.local_cost !== "$0" && e.local_cost !== "0" &&
+      e.long_distance_cost && e.long_distance_cost !== "$0" && e.long_distance_cost !== "0"
+    );
+    setQuoteData({ ...res, estimates: validEstimates });
     setQuoteLoading(false);
   };
 
@@ -360,23 +374,37 @@ export default function AICenterTab({ user, onProviderSaved, onNavigateToTab }) 
           )}
           {quoteData && !quoteLoading && (
             <div className="bg-white rounded-3xl p-4 border border-slate-100">
-              <p className="text-sm font-bold text-slate-800 mb-3">Your Moving Estimate</p>
-              {quoteData?.estimates?.map((est, i) => (
-                <div key={i} className="flex items-center justify-between py-3 border-b border-slate-50 last:border-0">
-                  <p className="text-xs font-semibold text-slate-700">{est.home_size}</p>
-                  <div className="text-right">
-                    <p className="text-xs font-bold text-orange-500">Local: {est.local_cost}</p>
-                    <p className="text-[10px] text-slate-400">Long dist: {est.long_distance_cost}</p>
+              {(!quoteData.data_complete || !quoteData.estimates || quoteData.estimates.length === 0) ? (
+                <div className="text-center py-4">
+                  <div className="w-12 h-12 bg-amber-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <DollarSign className="w-6 h-6 text-amber-500" />
                   </div>
+                  <p className="text-sm font-bold text-slate-800 mb-1">We need a little more information</p>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    To generate an accurate moving cost estimate, please complete your profile with your home address and move details. This helps us calculate real distances, truck sizes, labor hours, and local rates.
+                  </p>
                 </div>
-              ))}
-              {quoteData?.tips?.length > 0 && (
-                <div className="mt-3 pt-3 border-t border-slate-50">
-                  <p className="text-xs font-bold text-slate-700 mb-2">💡 Money-Saving Tips</p>
-                  {quoteData.tips.map((tip, i) => (
-                    <p key={i} className="text-[11px] text-slate-500 mb-1.5 leading-relaxed">• {tip}</p>
+              ) : (
+                <>
+                  <p className="text-sm font-bold text-slate-800 mb-3">Your Moving Estimate</p>
+                  {quoteData.estimates.map((est, i) => (
+                    <div key={i} className="flex items-center justify-between py-3 border-b border-slate-50 last:border-0">
+                      <p className="text-xs font-semibold text-slate-700">{est.home_size}</p>
+                      <div className="text-right">
+                        <p className="text-xs font-bold text-orange-500">Local: {est.local_cost}</p>
+                        <p className="text-[10px] text-slate-400">Long dist: {est.long_distance_cost}</p>
+                      </div>
+                    </div>
                   ))}
-                </div>
+                  {quoteData.tips?.length > 0 && (
+                    <div className="mt-3 pt-3 border-t border-slate-50">
+                      <p className="text-xs font-bold text-slate-700 mb-2">💡 Money-Saving Tips</p>
+                      {quoteData.tips.map((tip, i) => (
+                        <p key={i} className="text-[11px] text-slate-500 mb-1.5 leading-relaxed">• {tip}</p>
+                      ))}
+                    </div>
+                  )}
+                </>
               )}
               <button onClick={() => setQuoteData(null)} className="w-full mt-3 text-xs text-slate-400 font-semibold py-2 hover:text-slate-600">
                 Refresh Quote
