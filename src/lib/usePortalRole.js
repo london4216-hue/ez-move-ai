@@ -7,6 +7,7 @@ const DEMO_ACCOUNTS = {
   "buyer@moveezai.com":      "user",
   "seller@moveezai.com":     "user",
   "superadmin@ezmoveai.com": "super_admin",
+  "london4216@gmail.com":    "super_admin",
 };
 
 export function getPortalRole(user) {
