@@ -1,6 +1,6 @@
 export default function PrivacyPolicy() {
   return (
-    <div className="min-h-screen bg-slate-900 text-white px-5 py-12">
+    <div className="min-h-screen bg-slate-950 text-white px-5 py-12">
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center gap-3 mb-8">
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-900/40">
@@ -9,10 +9,10 @@ export default function PrivacyPolicy() {
           <span className="text-white font-bold text-lg tracking-tight">EZ Move <span className="text-orange-400">AI</span></span>
         </div>
 
-        <h1 className="text-3xl font-black text-white mb-2">Privacy & SMS Policy</h1>
-        <p className="text-slate-400 text-sm mb-10">Last updated: April 2026</p>
+        <h1 className="text-3xl font-black text-white mb-2">Privacy &amp; SMS Policy</h1>
+        <p className="text-slate-500 text-sm mb-10">Last updated: April 2026</p>
 
-        <div className="space-y-8 text-slate-300 text-sm leading-relaxed">
+        <div className="space-y-8 text-slate-300 text-sm leading-relaxed [&_h2]:border-b [&_h2]:border-white/10 [&_h2]:pb-2">
 
           <section>
             <p>
@@ -60,7 +60,7 @@ export default function PrivacyPolicy() {
         </div>
 
         <div className="mt-12 pt-6 border-t border-white/10">
-          <a href="/" className="text-orange-400 text-sm font-semibold hover:text-orange-300 transition-colors">← Back to Home</a>
+          <a href="/" className="inline-flex items-center gap-2 text-orange-400 text-sm font-semibold hover:text-orange-300 transition-colors">← Back to Home</a>
         </div>
       </div>
     </div>

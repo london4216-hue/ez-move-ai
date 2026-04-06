@@ -62,7 +62,7 @@ export default function Home() {
       </nav>
 
       {/* Hero */}
-      <section className="flex flex-col items-center text-center px-5 pt-4 pb-6 max-w-3xl mx-auto w-full">
+      <section className="flex flex-col items-center text-center px-5 pt-8 pb-8 max-w-3xl mx-auto w-full">
         <div className="inline-flex items-center gap-2 bg-orange-500/20 border border-orange-500/30 rounded-full px-4 py-1.5 mb-6">
           <Zap className="w-3.5 h-3.5 text-orange-400" />
           <span className="text-orange-300 text-xs font-bold uppercase tracking-wider">AI-Powered Moving Assistant</span>
@@ -71,10 +71,8 @@ export default function Home() {
           Moving Made <span className="text-orange-400">Simple.</span><br />
           <span className="text-slate-400 text-3xl md:text-4xl font-bold">Powered by AI.</span>
         </h1>
-        <p className="text-slate-400 text-base md:text-lg max-w-2xl leading-relaxed mb-8">
-          EZ Move AI is the all-in-one moving platform for real estate professionals and their clients.
-          Give every buyer and seller a personalized, week-by-week moving plan with AI tools to find
-          local services, manage inventory, and stay on track from contract to closing day.
+        <p className="text-slate-300 text-base md:text-lg max-w-2xl leading-relaxed mb-8">
+          The all-in-one moving platform built for real estate professionals. Give every buyer and seller a personalized, week-by-week move plan — with AI tools to find local services, track inventory, and stay on schedule from contract to closing.
         </p>
         <div className="flex flex-wrap justify-center gap-3">
           {[
@@ -247,7 +245,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="py-6 text-center border-t border-white/10 mt-auto">
+      <footer className="py-8 text-center border-t border-white/10 mt-auto">
         <p className="text-slate-500 text-xs">© 2026 EZ Move AI · All Rights Reserved</p>
       </footer>
     </div>

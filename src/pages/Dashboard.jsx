@@ -58,7 +58,10 @@ export default function Dashboard() {
 
   if (loading) return (
     <div className="min-h-screen bg-slate-100 flex items-center justify-center">
-      <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-9 h-9 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+        <p className="text-slate-400 text-sm font-medium">Loading your move plan…</p>
+      </div>
     </div>
   );
 
@@ -145,7 +148,7 @@ export default function Dashboard() {
       </div>
 
       {/* Bottom Nav */}
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-slate-100 px-4 py-2 z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-slate-100 px-2 py-2 z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
         <div className="flex">
           {TABS.map(({ id, label, Icon }) => {
             const active = activeTab === id;
@@ -153,10 +156,10 @@ export default function Dashboard() {
               <button
                 key={id}
                 onClick={() => setActiveTab(id)}
-                className={`flex-1 flex flex-col items-center gap-1 py-1.5 rounded-xl transition-all active:scale-95 ${active ? "text-orange-500" : "text-slate-400"}`}
+                className={`flex-1 flex flex-col items-center gap-1 py-2 rounded-xl transition-all active:scale-95 min-h-[52px] ${active ? "text-orange-500" : "text-slate-400 hover:text-slate-600"}`}
               >
                 <Icon className={`w-5 h-5 ${active ? "stroke-[2.5]" : ""}`} />
-                <span className={`text-[10px] font-bold leading-none ${active ? "text-orange-500" : "text-slate-400"}`}>{label}</span>
+                <span className={`text-[11px] font-bold leading-none ${active ? "text-orange-500" : "text-slate-400"}`}>{label}</span>
               </button>
             );
           })}

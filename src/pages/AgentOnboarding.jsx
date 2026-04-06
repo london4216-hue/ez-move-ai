@@ -132,8 +132,8 @@ export default function AgentOnboarding() {
       {/* REGISTRATION STEP */}
       {step === "register" && (
         <div className="w-full max-w-sm bg-[#1E293B] rounded-3xl p-7 shadow-2xl border border-slate-700/50">
-          <h1 className="text-2xl font-black text-white mb-1">Join as an Agent</h1>
-          <p className="text-slate-400 text-sm mb-6">Set up your profile in seconds.</p>
+          <h1 className="text-2xl font-black text-white mb-1">Create Your Agent Profile</h1>
+          <p className="text-slate-400 text-sm mb-6">Takes less than 30 seconds to set up.</p>
 
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
@@ -201,7 +201,7 @@ export default function AgentOnboarding() {
             <button
               onClick={handleRegister}
               disabled={!canContinue || saving}
-              className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm disabled:opacity-40 flex items-center justify-center gap-2 shadow-lg shadow-orange-900/30 mt-2"
+              className="w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm disabled:opacity-40 flex items-center justify-center gap-2 shadow-lg shadow-orange-900/30 mt-2 min-h-[52px] transition-colors"
             >
               {saving ? (
                 <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Saving...</>
@@ -247,7 +247,7 @@ export default function AgentOnboarding() {
               )}
               <button
                 onClick={handleTutorialNext}
-                className="flex-1 py-3.5 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-orange-900/30"
+                className="flex-1 py-3.5 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-orange-900/30 min-h-[48px] transition-colors"
               >
                 {tutorialIdx < FEATURES.length - 1 ? (
                   <>Next <ChevronRight className="w-4 h-4" /></>

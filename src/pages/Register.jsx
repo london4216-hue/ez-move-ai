@@ -155,10 +155,7 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-5">
-      <div className="absolute top-5 left-5">
-        <h1 className="text-2xl font-black text-slate-800">Version 7</h1>
-      </div>
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 sm:p-8">
 
       <button
         onClick={() => {
@@ -166,14 +163,13 @@ export default function Register() {
           localStorage.setItem('register_progress', JSON.stringify(currentState));
           base44.auth.logout();
         }}
-        className="absolute top-5 right-5 flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all text-sm font-semibold"
+        className="absolute top-4 right-4 flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 transition-all text-sm font-semibold shadow-sm"
       >
         <LogOut className="w-4 h-4" />
         Save & Exit
       </button>
 
-      <div className="absolute top-12 left-1/2 -translate-x-1/2">
-        <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-2.5 mb-8">
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-200">
             <span className="text-white text-sm font-black">EZ</span>
           </div>
@@ -181,12 +177,11 @@ export default function Register() {
             EZ Move <span className="text-orange-500">AI</span>
           </span>
         </div>
-      </div>
 
-      <div className="w-full max-w-sm bg-white rounded-3xl p-7 shadow-2xl mt-16">
+      <div className="w-full max-w-sm bg-white rounded-3xl p-7 shadow-xl border border-slate-100">
         <div className="text-center mb-6">
-          <h1 className="text-lg font-black text-slate-800 mb-1">Welcome to Move <span className="text-orange-500">EZ AI</span></h1>
-          <p className="text-sm text-slate-500">Enter your new home address or the address of the home you're selling</p>
+          <h1 className="text-xl font-black text-slate-800 mb-2">Welcome to <span className="text-orange-500">EZ Move AI</span></h1>
+          <p className="text-sm text-slate-500 leading-relaxed">Enter your new home address to get your personalized move plan.</p>
         </div>
 
         <div className="space-y-3 mb-4">
@@ -240,7 +235,7 @@ export default function Register() {
             </div>
           </div>
           <div>
-            <label className="text-xs font-semibold text-slate-600 mb-1.5 block">Est. Close / First Day of Home</label>
+            <label className="text-xs font-semibold text-slate-600 mb-1.5 block">Est. Close Date <span className="text-slate-400 font-normal">(optional)</span></label>
             <input type="date" value={moveDate} onChange={(e) => setMoveDate(e.target.value)}
               className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/10 bg-white"
             />
@@ -252,7 +247,7 @@ export default function Register() {
         )}
 
         <button onClick={handleVerify} disabled={loading}
-          className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all shadow-lg shadow-orange-200 flex items-center justify-center gap-2"
+          className="w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white font-bold text-sm disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all shadow-lg shadow-orange-200 flex items-center justify-center gap-2 min-h-[52px]"
         >
           {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Verifying...</> : "Continue →"}
         </button>
