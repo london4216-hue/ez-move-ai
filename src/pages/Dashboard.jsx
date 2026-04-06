@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
 import { differenceInDays, parseISO } from "date-fns";
-import { LayoutList, CalendarDays, Package, Home, Sparkles, RotateCcw } from "lucide-react";
+import { Package, Home, Sparkles, RotateCcw, LogOut } from "lucide-react";
 import ChecklistPanel from "@/components/dashboard/ChecklistPanel";
 import CalendarSheet from "@/components/dashboard/CalendarSheet";
 import MyStuffTab from "@/components/dashboard/MyStuffTab";
@@ -12,9 +11,9 @@ import Week1OnboardingModal from "@/components/dashboard/Week1OnboardingModal";
 import AIMoveAssist from "@/components/dashboard/AIMoveAssist";
 
 const TABS = [
-  { id: "plan", label: "My Move", Icon: Home },
+  { id: "plan",      label: "My Move",  Icon: Home },
   { id: "inventory", label: "My Stuff", Icon: Package },
-  { id: "ai", label: "AI Assist", Icon: Sparkles },
+  { id: "ai",        label: "AI Assist", Icon: Sparkles },
 ];
 
 export default function Dashboard() {
@@ -43,7 +42,7 @@ export default function Dashboard() {
         localStorage.removeItem(`onboarding_progress_${u?.id}`);
         setShowOnboarding(true);
       }
-    }).catch(() => navigate(createPageUrl("Register")));
+    }).catch(() => navigate("/Register"));
   }, []);
 
   const daysToClose = user?.estimated_close_date
@@ -70,47 +69,52 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col max-w-md mx-auto border-x border-slate-200 shadow-[0_0_40px_rgba(0,0,0,0.08)]" style={{paddingTop: 0}}>
+    <div className="min-h-screen bg-slate-50 flex flex-col max-w-md mx-auto border-x border-slate-200 shadow-[0_0_40px_rgba(0,0,0,0.08)]">
       {showOnboarding && <Week1OnboardingModal user={user} onDone={handleOnboardingDone} />}
-      {showOnboarding && null /* hide dashboard until onboarding is done */}
       {!showOnboarding && (<>
       {/* Header */}
-      <div className="bg-white border-b border-slate-200 px-4 pt-2 pb-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {user?.role === 'admin' && (
-            <button
-              onClick={() => {
-                if (!confirm("Reset demo? This clears all checklist progress and onboarding data.")) return;
-                const keys = Object.keys(localStorage).filter(k => k.includes(user?.id) || k === 'register_progress');
-                keys.forEach(k => localStorage.removeItem(k));
-                window.location.reload();
-              }}
-              className="flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 hover:bg-red-50 hover:text-red-500 text-slate-400 text-[9px] font-bold transition-colors border border-slate-200 hover:border-red-200"
-            >
-              <RotateCcw className="w-2.5 h-2.5" />
-              Demo Reset
-            </button>
-            )}
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-900/30">
+      <div className="bg-white border-b border-slate-100 px-4 pt-3 pb-3">
+        <div className="flex items-center justify-between gap-2">
+          {/* Brand + name */}
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-md shadow-orange-200 flex-shrink-0">
               <span className="text-white text-[10px] font-black tracking-tight">EZ</span>
             </div>
             <div>
-              <p className="text-slate-900 font-bold text-sm leading-tight">
-                EZ Move <span className="text-orange-500">AI</span>
-              </p>
+              <p className="text-slate-900 font-black text-sm leading-tight">EZ Move <span className="text-orange-500">AI</span></p>
               {user?.full_name && (
-                <p className="text-[11px] leading-tight font-medium" style={{color: "#6B6B6B"}}>Hi, {user.full_name.split(" ")[0]}</p>
+                <p className="text-slate-400 text-[11px] font-medium leading-tight">Hi, {user.full_name.split(" ")[0]} 👋</p>
               )}
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5">
+          {/* Right side: countdown pill + avatar */}
+          <div className="flex items-center gap-2">
+            {closeStatus && (
+              <span className={`${closeStatus.color} text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-sm`}>
+                {closeStatus.label}
+              </span>
+            )}
+            {user?.role === 'admin' && (
+              <button
+                onClick={() => {
+                  if (!confirm("Reset demo? This clears all checklist progress and onboarding data.")) return;
+                  const keys = Object.keys(localStorage).filter(k => k.includes(user?.id) || k === 'register_progress');
+                  keys.forEach(k => localStorage.removeItem(k));
+                  window.location.reload();
+                }}
+                className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-red-50 hover:text-red-500 text-slate-400 flex items-center justify-center transition-colors border border-slate-200 hover:border-red-200"
+                title="Demo Reset"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+              </button>
+            )}
             <button
-              onClick={() => base44.auth.logout(createPageUrl("Register"))}
-              className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-colors"
+              onClick={() => base44.auth.logout("/")}
+              className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center shadow-sm hover:opacity-80 transition-opacity"
+              title="Sign out"
             >
-              <span className="text-slate-600 text-[10px] font-bold">{user?.full_name?.[0] || "U"}</span>
+              <span className="text-white text-[11px] font-black">{user?.full_name?.[0] || "U"}</span>
             </button>
           </div>
         </div>
@@ -118,19 +122,21 @@ export default function Dashboard() {
         {/* Progress bar toward close */}
         {user?.estimated_close_date && (
           <div className="mt-3">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-slate-500 text-[9px] font-semibold uppercase tracking-wider">Move Timeline</span>
-              <span className="text-orange-400 text-[9px] font-bold">
-                {daysToClose !== null && daysToClose > 0 ? `${daysToClose} days to close` : daysToClose === 0 ? "Closing today!" : "Closed!"}
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-slate-400 text-[9px] font-bold uppercase tracking-widest">Move Timeline</span>
+              <span className="text-orange-500 text-[10px] font-bold">
+                {daysToClose !== null && daysToClose > 0 ? `${daysToClose} days to closing` : daysToClose === 0 ? "Closing today!" : "Closed! 🎉"}
               </span>
             </div>
-            <div className="bg-slate-100 overflow-hidden" style={{height: "6px", borderRadius: "4px"}}>
+            <div className="bg-slate-100 rounded-full overflow-hidden" style={{height: "5px"}}>
               <div
-                className="h-full bg-gradient-to-r from-orange-500 to-orange-400 rounded-full transition-all duration-700"
+                className="h-full bg-gradient-to-r from-orange-500 to-amber-400 rounded-full transition-all duration-700"
                 style={{
-                  width: daysToClose === null ? '2%' : `${Math.max(2, Math.min(100, Math.round(
+                  width: daysToClose === null ? '2%' : `${Math.max(3, Math.min(100, Math.round(
                     (Math.max(0, daysToClose) / Math.max(1,
-                      differenceInDays(parseISO(user.estimated_close_date), user.registration_date ? parseISO(user.registration_date) : new Date())
+                      user.registration_date
+                        ? Math.abs(differenceInDays(parseISO(user.estimated_close_date), parseISO(user.registration_date)))
+                        : 90
                     )) * 100
                   )))}%`
                 }}
@@ -140,26 +146,30 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-24">
+      {/* Content */
+      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-28">
         {activeTab === "plan" && <ChecklistPanel user={user} />}
         {activeTab === "inventory" && <MyStuffTab user={user} onNavigate={setActiveTab} onStartOnboarding={() => setShowOnboarding(true)} />}
         {activeTab === "ai" && <AIMoveAssist user={user} />}
       </div>
 
       {/* Bottom Nav */}
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-slate-100 px-2 py-2 z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
-        <div className="flex">
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white/95 backdrop-blur-md border-t border-slate-100 px-3 pt-2 pb-3 z-50 shadow-[0_-8px_24px_rgba(0,0,0,0.07)]">
+        <div className="flex gap-1">
           {TABS.map(({ id, label, Icon }) => {
             const active = activeTab === id;
             return (
               <button
                 key={id}
                 onClick={() => setActiveTab(id)}
-                className={`flex-1 flex flex-col items-center gap-1 py-2 rounded-xl transition-all active:scale-95 min-h-[52px] ${active ? "text-orange-500" : "text-slate-400 hover:text-slate-600"}`}
+                className={`flex-1 flex flex-col items-center gap-1 py-2 rounded-2xl transition-all active:scale-95 min-h-[52px] ${
+                  active
+                    ? "bg-orange-50 text-orange-500"
+                    : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
+                }`}
               >
-                <Icon className={`w-5 h-5 ${active ? "stroke-[2.5]" : ""}`} />
-                <span className={`text-[11px] font-bold leading-none ${active ? "text-orange-500" : "text-slate-400"}`}>{label}</span>
+                <Icon className={`w-5 h-5 ${active ? "stroke-[2.5]" : "stroke-[1.5]"}`} />
+                <span className={`text-[10px] font-bold leading-none ${active ? "text-orange-500" : "text-slate-400"}`}>{label}</span>
               </button>
             );
           })}
