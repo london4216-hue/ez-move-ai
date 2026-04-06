@@ -13,7 +13,6 @@ import BrokerDashboard from './pages/BrokerDashboard';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import MyStuff from './pages/MyStuff';
 import RoleRouter from './pages/RoleRouter';
-import Home from './pages/Home';
 import AgentDashboard from './pages/AgentDashboard';
 import DemoFlow from './pages/DemoFlow';
 import DemoLogin from './pages/DemoLogin';
@@ -54,9 +53,11 @@ const AuthenticatedApp = () => {
   }
 
   // Render the main app
+  const HomePage = Pages['Home'];
+
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
+      <Route path="/" element={<HomePage />} />
       <Route path="/AgentDashboard" element={<AgentDashboard />} />
       <Route path="/Home" element={
         <LayoutWrapper currentPageName={mainPageKey}>
