@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { getPortalRole } from "@/lib/usePortalRole";
 import { base44 } from "@/api/base44Client";
 import { useNavigate } from "react-router-dom";
-import { Plus, LogOut, Edit2, X, ArrowLeft, Loader2, Users, Trash2, CreditCard, CheckCircle2, Clock, Copy, Check, Sparkles } from "lucide-react";
+import { Plus, LogOut, Edit2, X, ArrowLeft, Loader2, Users, Trash2, CreditCard, CheckCircle2, Clock, Copy, Check, Sparkles, Shield } from "lucide-react";
 import ClientInsightsPanel from "../components/ai/ClientInsightsPanel";
 import ClientAddressFields, { buildFullAddress } from "../components/register/ClientAddressFields";
 import { format, differenceInDays, parseISO } from "date-fns";
@@ -152,10 +152,15 @@ export default function AgentDashboard() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={() => setAddStep("form")}
-              className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition-colors shadow-md shadow-blue-200">
-              <Plus className="w-3.5 h-3.5" /> Add Client
-            </button>
+            {agent && (
+              <button onClick={() => setAddStep("form")}
+                className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition-colors shadow-md shadow-blue-200">
+                <Plus className="w-3.5 h-3.5" /> Add Client
+              </button>
+            )}
+            <a href="/SuperAdmin" className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-red-50 border border-slate-200 hover:border-red-200 text-slate-500 hover:text-red-500 text-xs font-bold transition-colors" title="Super Admin Portal">
+              <Shield className="w-3.5 h-3.5" /> Admin
+            </a>
             <button onClick={() => base44.auth.logout("/")} className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors">
               <LogOut className="w-4 h-4 text-slate-500" />
             </button>

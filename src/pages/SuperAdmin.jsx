@@ -472,12 +472,21 @@ export default function SuperAdmin() {
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar */}
-        <header className="bg-white border-b border-slate-200 shadow-sm px-4 sm:px-6 py-4 flex items-center justify-between flex-shrink-0">
+        <header className="bg-white border-b border-slate-200 shadow-sm px-4 sm:px-6 py-4 flex items-center justify-between flex-shrink-0 gap-4">
           <div>
             <h1 className="font-black text-slate-800 text-lg">{pageTitle}</h1>
             <p className="text-slate-400 text-xs">EZ Move AI · Super Admin Portal</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap justify-end">
+            {/* Portal switcher — navigate to any portal as super admin */}
+            <a href="/AgentDashboard"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-100 text-blue-700 text-xs font-bold transition-colors">
+              <UserCheck className="w-3.5 h-3.5" /> Agent Portal
+            </a>
+            <a href="/BrokerDashboard"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-50 hover:bg-purple-100 border border-purple-100 text-purple-700 text-xs font-bold transition-colors">
+              <Briefcase className="w-3.5 h-3.5" /> Broker Portal
+            </a>
             <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-1.5">
               <div className="w-2 h-2 rounded-full bg-emerald-500" />
               <span className="text-emerald-700 text-xs font-bold">System Online</span>

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useNavigate } from "react-router-dom";
 import { getPortalRole } from "@/lib/usePortalRole";
-import { Plus, LogOut, Edit2, X, Trash2, Users, Building2, ArrowLeft, Loader2, CheckCircle2, CreditCard, Palette, Copy, Check } from "lucide-react";
+import { Plus, LogOut, Edit2, X, Trash2, Users, Building2, ArrowLeft, Loader2, CheckCircle2, CreditCard, Palette, Copy, Check, Shield } from "lucide-react";
 import ClientAddressFields, { buildFullAddress } from "../components/register/ClientAddressFields";
 import { differenceInDays, parseISO } from "date-fns";
 
@@ -193,6 +193,9 @@ export default function BrokerDashboard() {
             <button onClick={() => setAddStep("form")} className="flex items-center gap-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition-colors shadow-md shadow-purple-200">
               <Plus className="w-3.5 h-3.5" /> Add Client
             </button>
+            <a href="/SuperAdmin" className="hidden sm:flex items-center gap-1.5 w-9 h-9 rounded-xl bg-slate-100 hover:bg-red-50 border border-slate-200 hover:border-red-200 text-slate-500 hover:text-red-500 justify-center transition-colors" title="Super Admin Portal">
+              <Shield className="w-4 h-4" />
+            </a>
             <button onClick={() => base44.auth.logout("/")} className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors">
               <LogOut className="w-4 h-4 text-slate-500" />
             </button>

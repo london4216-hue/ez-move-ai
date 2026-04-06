@@ -10,11 +10,8 @@ export function getPortalRole(user) {
   if (user.role === "agent") return "agent";
   if (user.role === "user") return "user";
 
-  // Legacy: admin role with account_type
-  if (user.role === "admin") {
-    if (user.account_type === "broker") return "broker";
-    return "agent"; // default admin = agent
-  }
+  // Legacy: admin role → super_admin (platform owner / builder account)
+  if (user.role === "admin") return "super_admin";
 
   return "user";
 }
