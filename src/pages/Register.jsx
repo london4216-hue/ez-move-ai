@@ -39,15 +39,11 @@ export default function Register() {
         const clients = await base44.entities.Client.filter({ invitation_code: codeFromUrl }).catch(() => []);
         const clientRecord = clients[0];
 
-        const wrongUser =
-          // Admin/agent is logged in — they should never go through client onboarding
-          user.role === 'admin' ||
-          // A specific client email is expected and it doesn't match the current user
-          (clientRecord?.user_email && clientRecord.user_email !== user.email);
+        // Only block agents/admins from going through buyer/seller onboarding.
+        // Do NOT block on email mismatch — this allows yopmail and other demo emails.
+        const wrongUser = user.role === 'admin' || user.role === 'agent' || user.role === 'broker';
 
         if (wrongUser) {
-          // Log out the current user and redirect straight back to this invite URL
-          // so the correct client can log in fresh
           base44.auth.logout(window.location.href);
           return;
         }
