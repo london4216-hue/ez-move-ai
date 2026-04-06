@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useEffect, useState } from 'react';
+import { PUBLIC_DEMO_MODE } from '@/lib/featureFlags';
 import {
   Building2, Users, UserCheck, Briefcase, Shield, Settings, Play, LogOut
 } from 'lucide-react';
@@ -112,7 +113,12 @@ export default function PreviewHub() {
           <p className="text-lg text-slate-600 max-w-2xl mx-auto">
             Choose a module to explore the platform. Each portal is fully functional and demo-ready.
           </p>
-          {user && (
+          {PUBLIC_DEMO_MODE && (
+            <p className="text-sm text-slate-500 mt-4">
+              Demo mode — no account required
+            </p>
+          )}
+          {!PUBLIC_DEMO_MODE && user && (
             <p className="text-sm text-slate-500 mt-4">
               Logged in as: <span className="font-semibold">{user.email}</span>
             </p>

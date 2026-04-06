@@ -8,6 +8,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
+import { PUBLIC_DEMO_MODE } from '@/lib/featureFlags';
 import AgentOnboarding from './pages/AgentOnboarding';
 import Preview from './pages/Preview';
 import SuperAdmin from './pages/SuperAdmin';
@@ -59,11 +60,11 @@ const AuthenticatedApp = () => {
   return (
     <Routes>
       <Route path="/" element={<PreviewHub />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/signup" element={<Home />} />
-      <Route path="/sign-up" element={<Home />} />
-      <Route path="/agent-signup" element={<Home />} />
-      <Route path="/broker-signup" element={<Home />} />
+      <Route path="/register" element={PUBLIC_DEMO_MODE ? <PreviewHub /> : <Register />} />
+      <Route path="/signup" element={PUBLIC_DEMO_MODE ? <PreviewHub /> : <Home />} />
+      <Route path="/sign-up" element={PUBLIC_DEMO_MODE ? <PreviewHub /> : <Home />} />
+      <Route path="/agent-signup" element={PUBLIC_DEMO_MODE ? <PreviewHub /> : <Home />} />
+      <Route path="/broker-signup" element={PUBLIC_DEMO_MODE ? <PreviewHub /> : <Home />} />
       <Route path="/AgentDashboard" element={<AgentDashboard />} />
       <Route path="/Home" element={
         <LayoutWrapper currentPageName={mainPageKey}>
