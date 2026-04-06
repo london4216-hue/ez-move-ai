@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { CheckCircle2, ChevronRight, ChevronLeft, Loader2, Phone, Save, Sparkles, DollarSign, Truck } from "lucide-react";
+import { buildMoveContext, formatContextForPrompt, getServiceAddress } from "@/lib/moveContext";
 
 // ── Room catalog ─────────────────────────────────────────────────────────────
 const ROOMS = [
@@ -32,8 +33,10 @@ const STEPS = ["welcome", "moving_question", "mileage_distance", "stays_goes", "
 const STORAGE_KEY = (id) => `onboarding_progress_${id}`;
 
 async function findProviders(query, address) {
+  if (!address) return [];
   const res = await base44.integrations.Core.InvokeLLM({
-    prompt: `Find 3 real top-rated local businesses for: "${query}" near ${address || "my area"}. Include name, phone number, and a 1-line description.`,
+    prompt: `Find 3 real top-rated local businesses for: "${query}" near this address: ${address}. Include name, phone number, and a 1-line description. Only return businesses that actually service this specific location.`,
+    add_context_from_internet: true,
     add_context_from_internet: true,
     response_json_schema: {
       type: "object",
@@ -137,32 +140,29 @@ export default function Week1OnboardingModal({ user, onDone }) {
     const moveItems = Object.entries(decisions).filter(([, v]) => v.choice === "move").map(([name, v]) => `${name} (${v.size || "Medium"}, qty ${v.qty || 1})`);
     const donateItems = Object.entries(decisions).filter(([, v]) => v.choice === "donate").map(([name, v]) => `${name} (${v.size || "Medium"})`);
     const q = moverQ || moverQForm;
+    const ctx = await buildMoveContext(user, q, moveDistanceMiles);
+    const contextBlock = formatContextForPrompt(ctx);
     const res = await base44.integrations.Core.InvokeLLM({
-      prompt: `A person is moving. Give them a professional mover-style quote breakdown.
+      prompt: `You are a professional moving company estimator. Use ONLY the data below — do not guess or invent numbers.
 
-Items being moved: ${moveItems.join(", ") || "none"}
+${contextBlock}
+
+Items moving: ${moveItems.join(", ") || "none listed"}
 Donate items: ${donateItems.join(", ") || "none"}
+Floors: ${q.floors || "1"} | Stairs: ${q.stairs || "none"} | Elevator: ${q.elevator || "no"}
+Walk to truck: ${q.walk_distance || "under 50 ft"} | Parking: ${q.parking || "street"}
+Hanging clothes: ${q.hanging_clothes || "some"} | Special items: ${q.special_items || "none"}
 
-Job details (as a mover would ask):
-- Floors: ${q.floors} floor(s)
-- Stairs: ${q.stairs}
-- Elevator available: ${q.elevator}
-- Walking distance from home to truck: ${q.walk_distance}
-- Parking situation: ${q.parking}
-- Distance from old home to new home: ${q.move_distance || "local (under 50 miles)"}
-- Hanging clothes/wardrobes: ${q.hanging_clothes || "some"} (indicates wardrobe box needs)
-- Special/heavy items: ${q.special_items || "none"}
+Using the measured distance (${ctx.distance_label}) from the addresses above, provide:
+1. Total weight in lbs based on items listed
+2. Box count (small, medium, large, wardrobe)
+3. Recommended truck size
+4. Cost range low/high in USD factoring in the actual measured distance
+5. Estimated hours
+6. IRS fair market value for donated items
+7. One mover pro tip
 
-Provide a detailed mover-style estimate including:
-1. Total estimated weight in lbs (like a mover would calculate it)
-2. How many small/medium/large/wardrobe boxes are needed (wardrobe boxes for hanging clothes)
-3. Recommended truck size (e.g. 10ft, 16ft, 20ft, 26ft)
-4. Estimated move cost range low and high in $, factoring in stairs/distance/special items
-5. Estimated hours to complete the move
-6. Tax write-off value for donated items (IRS fair market value)
-7. A one-sentence pro tip from a mover's perspective
-
-Be specific and realistic, like a professional moving company estimate.`,
+IMPORTANT: If pickup/dropoff are "not provided", set move_cost_low and move_cost_high to 0 and note in the tip that an address is needed for accurate pricing.`,
       response_json_schema: {
         type: "object",
         properties: {
@@ -208,7 +208,7 @@ Be specific and realistic, like a professional moving company estimate.`,
     persist({ needsEstate: answer });
     if (answer) {
       setLoadingAI(true);
-      setProviders(await findProviders("estate sale companies", user?.home_address));
+      setProviders(await findProviders("estate sale companies", getServiceAddress(user, "from")));
       setLoadingAI(false);
     } else {
       goTo(stepIdx + 1, { needsEstate: answer });
@@ -236,7 +236,7 @@ Be specific and realistic, like a professional moving company estimate.`,
     persist({ needsMover: answer });
     if (answer) {
       setLoadingAI(true);
-      const found = await findProviders("local moving companies", user?.home_address);
+      const found = await findProviders("local moving companies", getServiceAddress(user, "from"));
       setProviders(found);
       setLoadingAI(false);
       // Save movers as contacts handled via selectMoverProvider

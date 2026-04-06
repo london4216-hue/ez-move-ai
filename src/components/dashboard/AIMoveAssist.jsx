@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Sparkles, Phone, BookmarkPlus, Check, Loader2, ChevronDown, ChevronUp, MapPin, Package, Clock, DollarSign, FileCheck, FileText } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import { getServiceAddress } from "@/lib/moveContext";
 
 // ── Shared provider card ─────────────────────────────────────────────────────
 function ProviderCard({ provider, onSave, saved }) {
@@ -42,9 +43,11 @@ function MoversCard({ user }) {
   const [fetched, setFetched] = useState(false);
 
   const find = async () => {
+    const addr = getServiceAddress(user, "from");
+    if (!addr) { setLoading(false); return; }
     setLoading(true);
     const res = await base44.integrations.Core.InvokeLLM({
-      prompt: `Find 3 real top-rated local moving companies near: ${user?.home_address || "my area"}. Include name, phone, rating (e.g. 4.8/5), and a 1-line description.`,
+      prompt: `Find 3 real top-rated local moving companies near this address: ${addr}. Include name, phone number, rating (e.g. 4.8/5), and a 1-line description. Only return companies that actually service this location.`,
       add_context_from_internet: true,
       response_json_schema: {
         type: "object",
@@ -81,9 +84,11 @@ function JunkCard({ user }) {
   const [fetched, setFetched] = useState(false);
 
   const find = async () => {
+    const addr = getServiceAddress(user, "from");
+    if (!addr) { setLoading(false); return; }
     setLoading(true);
     const res = await base44.integrations.Core.InvokeLLM({
-      prompt: `Find 3 real local junk removal or hauling companies near: ${user?.home_address || "my area"}. Include name, phone, rating, and a 1-line description.`,
+      prompt: `Find 3 real local junk removal or hauling companies near this address: ${addr}. Include name, phone number, rating, and a 1-line description. Only return companies that actually service this area.`,
       add_context_from_internet: true,
       response_json_schema: {
         type: "object",
@@ -120,9 +125,11 @@ function DonationCard({ user }) {
   const [fetched, setFetched] = useState(false);
 
   const find = async () => {
+    const addr = getServiceAddress(user, "from");
+    if (!addr) { setLoading(false); return; }
     setLoading(true);
     const res = await base44.integrations.Core.InvokeLLM({
-      prompt: `Find 3 real local furniture donation centers or pickup services near: ${user?.home_address || "my area"}. Include name, phone, rating, and a 1-line description.`,
+      prompt: `Find 3 real local furniture donation centers or free pickup services near this address: ${addr}. Include name, phone number, rating, and a 1-line description. Only return centers that actually serve this area.`,
       add_context_from_internet: true,
       response_json_schema: {
         type: "object",
@@ -302,8 +309,15 @@ function TimelineCard({ user }) {
   const generate = async () => {
     setLoading(true);
     const closeDate = user?.estimated_close_date || "4 weeks from now";
+    const pickup = user?.moving_from_address || user?.home_address || "not provided";
+    const dropoff = user?.home_address || "not provided";
     const res = await base44.integrations.Core.InvokeLLM({
-      prompt: `Create a 4-week packing timeline for a home move with closing date: ${closeDate}. For each week, give a short title and exactly 3 specific tasks to complete that week. Return 4 weeks.`,
+      prompt: `Create a 4-week packing timeline for a home move.
+Moving FROM: ${pickup}
+Moving TO: ${dropoff}
+Closing date: ${closeDate}
+
+For each week, give a short title and exactly 3 specific tasks relevant to this particular move. Return 4 weeks.`,
       response_json_schema: {
         type: "object",
         properties: {
