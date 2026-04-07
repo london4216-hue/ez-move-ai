@@ -318,15 +318,16 @@ function ContactFields({ contact, onChange, roles }) {
       </div>
       <div>
         <label className="text-xs font-semibold text-slate-600 mb-1.5 block">Role *</label>
-        <div className="grid grid-cols-2 gap-2">
+        <select
+          value={contact.role}
+          onChange={(e) => onChange({ ...contact, role: e.target.value })}
+          className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:border-orange-400"
+        >
+          <option value="">Select a role…</option>
           {roles.map((r, i) => (
-            <button key={i} onClick={() => onChange({ ...contact, role: r.label })}
-              className={`p-3 rounded-xl border-2 text-left transition-all ${contact.role === r.label ? "border-orange-500 bg-orange-50" : "border-slate-200"}`}>
-              <span className="text-base">{r.emoji}</span>
-              <p className="text-xs font-semibold text-slate-700 mt-1">{r.label}</p>
-            </button>
+            <option key={i} value={r.label}>{r.emoji} {r.label}</option>
           ))}
-        </div>
+        </select>
       </div>
       <div>
         <label className="text-xs font-semibold text-slate-600 mb-1.5 block">Phone</label>
