@@ -578,7 +578,7 @@ function Step6Summary({ state, quote, onFinish }) {
           }
         }
       });
-      setSummary(res);
+      setSummary(res.data);
     } catch (err) {
       console.error('AI Summary error:', err);
     } finally {
