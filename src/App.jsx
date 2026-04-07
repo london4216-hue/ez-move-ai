@@ -19,7 +19,7 @@ import RoleRouter from './pages/RoleRouter';
 import AgentDashboard from './pages/AgentDashboard';
 import DemoFlow from './pages/DemoFlow';
 import DemoLogin from './pages/DemoLogin';
-import OnboardingWeek1 from './pages/OnboardingWeek1';
+
 
 import BuyerExperience from './pages/BuyerExperience';
 import Marketplace from './pages/Marketplace';
@@ -95,7 +95,7 @@ const AuthenticatedApp = () => {
       <Route path="/Preview" element={<Preview />} />
       <Route path="/Demo" element={<DemoFlow />} />
       <Route path="/DemoLogin" element={<DemoLogin />} />
-      <Route path="/OnboardingWeek1" element={<OnboardingWeek1 />} />
+
       <Route path="/BuyerExperience" element={<BuyerExperience />} />
       <Route path="/Marketplace" element={<Marketplace />} />
       <Route path="/AccessExpired" element={<AccessExpired />} />
