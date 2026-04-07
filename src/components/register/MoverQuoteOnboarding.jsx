@@ -12,7 +12,7 @@ const TOTAL_STEPS = 7;
 
 const STEP_TITLES = [
   "Welcome!", "Move Basics", "Your Inventory", "Access Conditions",
-  "Packing Needs", "Cost Breakdown", "AI Move Summary"
+  "Cost Breakdown", "What Stays & Goes", "AI Move Summary"
 ];
 
 const HOME_TYPES = ["Apartment", "House", "Townhome", "Condo", "Studio"];
@@ -430,43 +430,69 @@ function Step3Access({ data, onChange, onNext }) {
   );
 }
 
-function Step4Packing({ data, onChange, onNext }) {
-  const materials = data.materials || [];
-  const toggleMaterial = (m) => {
-    onChange("materials", materials.includes(m) ? materials.filter(x => x !== m) : [...materials, m]);
+function StepStaysGoes({ data, onChange, onNext }) {
+  const inventory = data.inventory || {};
+  const staysGoes = data.staysGoes || {};
+
+  // Build flat list of rooms with items
+  const roomsWithItems = ROOM_TYPES.filter(room => {
+    const total = Object.values(inventory[room.id] || {}).reduce((a, b) => a + b, 0);
+    return total > 0;
+  });
+
+  const setRoom = (roomId, decision) => {
+    onChange("staysGoes", { ...staysGoes, [roomId]: decision });
   };
+
+  const allDecided = roomsWithItems.length === 0 || roomsWithItems.every(r => staysGoes[r.id]);
 
   return (
     <div className="space-y-4">
-      <InsightBanner text="Packing services typically add $150–$500 but reduce damage claims by 80%." />
+      <InsightBanner text="Confirm what's moving with you vs staying behind or being donated. This finalizes your estimate." />
       <Card>
-        <h2 className="text-xl font-black text-slate-900 mb-1">Packing Services</h2>
-        <p className="text-sm text-slate-500 mb-5">How much packing help do you need?</p>
+        <h2 className="text-xl font-black text-slate-900 mb-1">What Stays & What Goes?</h2>
+        <p className="text-sm text-slate-500 mb-4">For each room, choose what happens to those items.</p>
+        {roomsWithItems.length === 0 && (
+          <p className="text-sm text-slate-400 text-center py-4">No inventory added — all clear to move!</p>
+        )}
         <div className="space-y-3">
-          {PACK_OPTIONS.map(p => (
-            <button key={p.id} onClick={() => onChange("packOption", p.id)}
-              className={`w-full text-left px-4 py-4 rounded-2xl border-2 transition-all active:scale-[0.98] ${
-                data.packOption === p.id ? "border-orange-400 bg-orange-50" : "border-slate-200 bg-white hover:border-orange-300"
-              }`}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-bold text-slate-800 text-sm">{p.label}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">{p.sub}</p>
+          {roomsWithItems.map(room => {
+            const total = Object.values(inventory[room.id] || {}).reduce((a, b) => a + b, 0);
+            const decision = staysGoes[room.id];
+            return (
+              <div key={room.id} className="border border-slate-100 rounded-2xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-xl">{room.emoji}</span>
+                  <div>
+                    <p className="font-bold text-slate-800 text-sm">{room.label}</p>
+                    <p className="text-xs text-slate-400">{total} item{total !== 1 ? "s" : ""}</p>
+                  </div>
                 </div>
-                <span className="text-sm font-black text-orange-500">{p.fee > 0 ? `+$${p.fee}` : "Free"}</span>
+                <div className="flex gap-2">
+                  {[
+                    { id: "moving", label: "🚛 Moving with me", active: "bg-orange-50 border-orange-400 text-orange-700" },
+                    { id: "staying", label: "🏠 Staying behind", active: "bg-slate-100 border-slate-400 text-slate-700" },
+                    { id: "donate", label: "♻️ Donating", active: "bg-emerald-50 border-emerald-400 text-emerald-700" },
+                  ].map(opt => (
+                    <button key={opt.id} onClick={() => setRoom(room.id, opt.id)}
+                      className={`flex-1 py-2 rounded-xl border-2 text-xs font-bold transition-all ${
+                        decision === opt.id ? opt.active : "border-slate-200 text-slate-500"
+                      }`}>
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </button>
-          ))}
+            );
+          })}
         </div>
       </Card>
-      <Card>
-        <h2 className="text-lg font-black text-slate-900 mb-1">Materials Needed</h2>
-        <p className="text-sm text-slate-500 mb-4">Check anything you need the crew to bring.</p>
-        <div className="flex flex-wrap gap-2">
-          {MATERIAL_OPTIONS.map(m => <ToggleChip key={m} label={m} selected={materials.includes(m)} onClick={() => toggleMaterial(m)} />)}
-        </div>
-      </Card>
-      <PrimaryBtn onClick={onNext} disabled={!data.packOption}>See My Quote <ChevronRight className="w-4 h-4" /></PrimaryBtn>
+      <PrimaryBtn onClick={onNext} disabled={!allDecided}>
+        Get My AI Move Summary <ChevronRight className="w-4 h-4" />
+      </PrimaryBtn>
+      <button onClick={onNext} className="w-full text-center text-xs text-slate-400 font-semibold py-2">
+        Skip — decide later
+      </button>
     </div>
   );
 }
@@ -650,7 +676,7 @@ export default function MoverQuoteOnboarding({ userId, onComplete }) {
     return {};
   });
 
-  const quote = step >= 5 ? calcQuote(state) : null;
+  const quote = step >= 4 ? calcQuote(state) : null;
 
   const setField = (key, val) => {
     const next = { ...state, [key]: val };
@@ -694,8 +720,8 @@ export default function MoverQuoteOnboarding({ userId, onComplete }) {
         {step === 1 && <Step1Basics data={state} onChange={setField} onNext={next} />}
         {step === 2 && <Step2Inventory data={state} onChange={setField} onNext={next} />}
         {step === 3 && <Step3Access data={state} onChange={setField} onNext={next} />}
-        {step === 4 && <Step4Packing data={state} onChange={setField} onNext={next} />}
-        {step === 5 && quote && <Step5Quote quote={quote} onNext={next} />}
+        {step === 4 && quote && <Step5Quote quote={quote} onNext={next} />}
+        {step === 5 && <StepStaysGoes data={state} onChange={setField} onNext={next} />}
         {step === 6 && quote && <Step6Summary state={state} quote={quote} onFinish={finish} />}
       </div>
     </div>
