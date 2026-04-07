@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import Week1Setup from "@/components/register/Week1Setup";
-import PreOnboardingSteps from "@/components/register/PreOnboardingSteps";
+import MoverQuoteOnboarding from "@/components/register/MoverQuoteOnboarding";
 import { PUBLIC_DEMO_MODE } from "@/lib/featureFlags";
 
 function getDemoUserId() {
@@ -80,7 +80,7 @@ export default function OnboardingWeek1() {
           </span>
         </div>
         {!preOnboardingDone ? (
-          <PreOnboardingSteps
+          <MoverQuoteOnboarding
             userId={user.id}
             onComplete={(data) => {
               localStorage.setItem(`pre_onboarding_done_${user.id}`, "true");
