@@ -644,6 +644,7 @@ export default function MoverQuoteOnboarding({ userId, onComplete }) {
       return {
         fromAddress: "159 Summer Street, New York, NY 10024",
         toAddress: "42 West 72nd Street, New York, NY 10023",
+        moveDate: new Date().toISOString().split('T')[0],
       };
     }
     return {};
