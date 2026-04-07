@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { PUBLIC_DEMO_MODE } from "@/lib/featureFlags";
 import {
   ChevronRight, ChevronLeft, CheckCircle2, Sparkles, Loader2,
   MapPin, Truck, DollarSign, Star, AlertTriangle
@@ -606,7 +607,17 @@ function Step7Summary({ state, quote, onFinish }) {
 export default function MoverQuoteOnboarding({ userId, onComplete }) {
   const [step, setStep] = useState(0);
   const [state, setState] = useState(() => {
-    try { return JSON.parse(localStorage.getItem(`mq_${userId}`)) || {}; } catch { return {}; }
+    try {
+      const saved = JSON.parse(localStorage.getItem(`mq_${userId}`));
+      if (saved) return saved;
+    } catch {}
+    if (PUBLIC_DEMO_MODE) {
+      return {
+        fromAddress: "159 Summer Street, New York, NY 10024",
+        toAddress: "42 West 72nd Street, New York, NY 10023",
+      };
+    }
+    return {};
   });
 
   const quote = step >= 5 ? calcQuote(state) : null;
