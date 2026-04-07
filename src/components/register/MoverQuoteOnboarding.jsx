@@ -8,11 +8,11 @@ import {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const TOTAL_STEPS = 7;
+const TOTAL_STEPS = 6;
 
 const STEP_TITLES = [
   "Welcome!", "Move Basics", "Your Inventory", "Access Conditions",
-  "Cost Breakdown", "What Stays & Goes", "AI Move Summary"
+  "Cost Breakdown", "AI Move Summary"
 ];
 
 const HOME_TYPES = ["Apartment", "House", "Townhome", "Condo", "Studio"];
@@ -425,7 +425,7 @@ function Step3Access({ data, onChange, onNext }) {
           ))}
         </div>
       </Card>
-      <PrimaryBtn onClick={onNext} disabled={!ac.stairs || !ac.parking}>Next: Packing Needs <ChevronRight className="w-4 h-4" /></PrimaryBtn>
+      <PrimaryBtn onClick={onNext} disabled={!ac.stairs || !ac.parking}>See My Quote <ChevronRight className="w-4 h-4" /></PrimaryBtn>
     </div>
   );
 }
@@ -677,6 +677,8 @@ export default function MoverQuoteOnboarding({ userId, onComplete }) {
   });
 
   const quote = step >= 4 ? calcQuote(state) : null;
+  // Save move profile for task generation when completing
+  const saveProfile = (s) => localStorage.setItem(`pre_onboarding_${userId}`, JSON.stringify({ ...s, fromMoverQuote: true }));
 
   const setField = (key, val) => {
     const next = { ...state, [key]: val };
@@ -688,7 +690,7 @@ export default function MoverQuoteOnboarding({ userId, onComplete }) {
   const back = () => setStep(s => Math.max(0, s - 1));
 
   const finish = () => {
-    localStorage.setItem(`pre_onboarding_${userId}`, JSON.stringify({ ...state, fromMoverQuote: true }));
+    saveProfile(state);
     if (quote) localStorage.setItem(`demo_mover_cost_${userId}`, JSON.stringify(quote));
     onComplete && onComplete(state);
   };
@@ -721,8 +723,7 @@ export default function MoverQuoteOnboarding({ userId, onComplete }) {
         {step === 2 && <Step2Inventory data={state} onChange={setField} onNext={next} />}
         {step === 3 && <Step3Access data={state} onChange={setField} onNext={next} />}
         {step === 4 && quote && <Step5Quote quote={quote} onNext={next} />}
-        {step === 5 && <StepStaysGoes data={state} onChange={setField} onNext={next} />}
-        {step === 6 && quote && <Step6Summary state={state} quote={quote} onFinish={finish} />}
+        {step === 5 && quote && <Step6Summary state={state} quote={quote} onFinish={finish} />}
       </div>
     </div>
   );
