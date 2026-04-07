@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useNavigate } from "react-router-dom";
 import { PUBLIC_DEMO_MODE } from "@/lib/featureFlags";
 import { differenceInDays, parseISO } from "date-fns";
-import { Package, Home, Sparkles, RotateCcw, LogOut } from "lucide-react";
+import { Package, Home, Sparkles, RotateCcw, LogOut, QrCode } from "lucide-react";
 import ChecklistPanel from "@/components/dashboard/ChecklistPanel";
 import CalendarSheet from "@/components/dashboard/CalendarSheet";
 import MyStuffTab from "@/components/dashboard/MyStuffTab";
@@ -160,6 +160,21 @@ export default function Dashboard() {
             </div>
           </div>
         )}
+      </div>
+
+      {/* QR Labels shortcut */}
+      <div className="px-4 pt-3">
+        <button onClick={() => navigate("/BoxInventory")}
+          className="w-full flex items-center gap-3 bg-white border border-slate-100 rounded-2xl px-4 py-3 text-left active:scale-[0.98] transition-transform shadow-sm">
+          <div className="w-9 h-9 rounded-xl bg-orange-50 flex items-center justify-center flex-shrink-0">
+            <QrCode className="w-4 h-4 text-orange-500" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-black text-slate-800">QR Labels & Box Inventory</p>
+            <p className="text-[11px] text-slate-400">Snap a photo, get a smart label</p>
+          </div>
+          <span className="text-[10px] bg-orange-100 text-orange-600 font-bold px-2 py-0.5 rounded-full">NEW</span>
+        </button>
       </div>
 
       {/* Content */}

@@ -26,6 +26,10 @@ import Marketplace from './pages/Marketplace';
 import AccessExpired from './pages/AccessExpired';
 import SellerExperience from './pages/SellerExperience';
 import Register from './pages/Register';
+import AddBox from './pages/AddBox';
+import LabelPreview from './pages/LabelPreview';
+import BoxDetail from './pages/BoxDetail';
+import BoxInventory from './pages/BoxInventory';
 
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -96,6 +100,10 @@ const AuthenticatedApp = () => {
       <Route path="/Marketplace" element={<Marketplace />} />
       <Route path="/AccessExpired" element={<AccessExpired />} />
       <Route path="/SellerExperience" element={<SellerExperience />} />
+      <Route path="/AddBox" element={<AddBox />} />
+      <Route path="/LabelPreview" element={<LabelPreview />} />
+      <Route path="/box/:id" element={<BoxDetail />} />
+      <Route path="/BoxInventory" element={<BoxInventory />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

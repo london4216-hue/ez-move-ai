@@ -1,0 +1,49 @@
+{
+  "name": "Box",
+  "type": "object",
+  "properties": {
+    "userId": {
+      "type": "string"
+    },
+    "photo": {
+      "type": "string",
+      "description": "Uploaded photo URL"
+    },
+    "room": {
+      "type": "string",
+      "enum": [
+        "Bedroom",
+        "Living Room",
+        "Kitchen",
+        "Bathroom",
+        "Office",
+        "Garage",
+        "Dining Room",
+        "Kids Room",
+        "Storage",
+        "Other"
+      ]
+    },
+    "contentsSummary": {
+      "type": "string"
+    },
+    "fragile": {
+      "type": "boolean",
+      "default": false
+    },
+    "weightEstimate": {
+      "type": "string"
+    },
+    "qrCode": {
+      "type": "string",
+      "description": "QR code image URL"
+    },
+    "boxNumber": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "userId",
+    "room"
+  ]
+}
