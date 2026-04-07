@@ -485,9 +485,6 @@ function StepStaysGoes({ data, onChange, onNext }) {
       <PrimaryBtn onClick={onNext} disabled={!allDecided}>
         Get My AI Move Summary <ChevronRight className="w-4 h-4" />
       </PrimaryBtn>
-      <button onClick={onNext} className="w-full text-center text-xs text-slate-400 font-semibold py-2">
-        Skip — decide later
-      </button>
     </div>
   );
 }
