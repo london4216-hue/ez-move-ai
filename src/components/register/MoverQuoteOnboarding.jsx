@@ -294,55 +294,56 @@ function Step1Basics({ data, onChange }) {
   );
 }
 
-function RoomCard({ room, roomInventory, onChange }) {
-  const [expanded, setExpanded] = useState(false);
-  const items = ROOM_ITEMS[room.id] || [];
-  const totalQty = Object.values(roomInventory || {}).reduce((a, b) => a + b, 0);
+// All items in one flat list for icon grid
+const ALL_ITEMS = [
+  { id: "bed_queen", label: "Queen Bed", emoji: "🛏️" },
+  { id: "bed_king", label: "King Bed", emoji: "🛏️" },
+  { id: "sofa_3", label: "3-Seat Sofa", emoji: "🛋️" },
+  { id: "dining_table", label: "Dining Table", emoji: "🪑" },
+  { id: "dresser", label: "Dresser", emoji: "🪞" },
+  { id: "tv", label: "TV", emoji: "📺" },
+  { id: "office_desk", label: "Office Desk", emoji: "🖥️" },
+  { id: "bookshelf", label: "Bookshelf", emoji: "📚" },
+  { id: "nightstand", label: "Nightstand", emoji: "🪔" },
+  { id: "coffee_table", label: "Coffee Table", emoji: "🪵" },
+  { id: "kitchen_island", label: "Kitchen Island", emoji: "🍳" },
+  { id: "boxes", label: "Boxes", emoji: "📦" },
+];
 
-  const setQty = (itemId, qty) => {
-    onChange({ ...(roomInventory || {}), [itemId]: qty });
-    if (!expanded && qty > 0) setExpanded(true);
-  };
-
+function ItemIcon({ item, qty, onSelect }) {
   return (
-    <div className={`rounded-2xl border-2 transition-all ${totalQty > 0 ? "border-orange-300 bg-orange-50/30" : "border-slate-200 bg-white"}`}>
-      <button
-        className="w-full flex items-center justify-between px-4 py-3.5"
-        onClick={() => setExpanded(e => !e)}
-      >
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">{room.emoji}</span>
-          <div className="text-left">
-            <p className="text-sm font-bold text-slate-800">{room.label}</p>
-            {totalQty > 0 && <p className="text-xs text-orange-500 font-semibold">{totalQty} item{totalQty !== 1 ? "s" : ""} added</p>}
-          </div>
-        </div>
-        {expanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
-      </button>
-
-      {expanded && (
-        <div className="px-4 pb-4 border-t border-slate-100 mt-0 pt-3">
-          {items.map(item => (
-            <QtyRow
-              key={item.id}
-              label={item.label}
-              emoji={item.emoji}
-              value={(roomInventory || {})[item.id] || 0}
-              onChange={qty => setQty(item.id, qty)}
-            />
-          ))}
-        </div>
-      )}
-    </div>
+    <button
+      onClick={() => onSelect(item.id)}
+      className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all active:scale-95 ${
+        qty > 0
+          ? "border-orange-300 bg-orange-50 shadow-md"
+          : "border-slate-200 bg-white hover:border-slate-300"
+      }`}
+    >
+      <span className="text-3xl">{item.emoji}</span>
+      <p className="text-xs font-bold text-slate-700 text-center leading-tight">{item.label}</p>
+      {qty > 0 && <p className="text-lg font-black text-orange-600">{qty}</p>}
+    </button>
   );
 }
 
 function Step2Inventory({ data, onChange, onNext }) {
-  const inventory = data.inventory || {};
+  const flatInventory = data.inventory || {};
   const specialItems = data.specialItems || [];
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [quantity, setQuantity] = useState(1);
 
-  const setRoomInventory = (roomId, roomData) => {
-    onChange("inventory", { ...inventory, [roomId]: roomData });
+  const handleSelectItem = (itemId) => {
+    setSelectedItem(itemId);
+    setQuantity(flatInventory[itemId] || 1);
+  };
+
+  const handleAddItem = () => {
+    if (selectedItem && quantity > 0) {
+      onChange("inventory", { ...flatInventory, [selectedItem]: quantity });
+      setSelectedItem(null);
+      setQuantity(1);
+    }
   };
 
   const toggleSpecial = (id) => {
@@ -351,33 +352,74 @@ function Step2Inventory({ data, onChange, onNext }) {
     onChange("specialItems", without.includes(id) ? without.filter(s => s !== id) : [...without, id]);
   };
 
-  const totalItems = Object.values(inventory).reduce((sum, room) =>
-    sum + Object.values(room || {}).reduce((a, b) => a + b, 0), 0);
+  const totalItems = Object.values(flatInventory).reduce((a, b) => a + b, 0);
+  const currentItem = selectedItem ? ALL_ITEMS.find(i => i.id === selectedItem) : null;
 
   return (
     <div className="space-y-4">
-      <InsightBanner text="Tap each room to add items. The more detail you provide, the more accurate your quote." />
+      <InsightBanner text="Tap items to add them. The more detail you provide, the more accurate your quote." />
 
+      {/* Icon Grid */}
       <Card>
-        <h2 className="text-xl font-black text-slate-900 mb-1">Room-by-Room Inventory</h2>
-        <p className="text-sm text-slate-500 mb-4">Tap a room to expand and add items.</p>
-        <div className="space-y-2">
-          {ROOM_TYPES.map(room => (
-            <RoomCard
-              key={room.id}
-              room={room}
-              roomInventory={inventory[room.id]}
-              onChange={(roomData) => setRoomInventory(room.id, roomData)}
+        <h2 className="text-xl font-black text-slate-900 mb-4">Select Items</h2>
+        <div className="grid grid-cols-3 gap-3">
+          {ALL_ITEMS.map(item => (
+            <ItemIcon
+              key={item.id}
+              item={item}
+              qty={flatInventory[item.id] || 0}
+              onSelect={handleSelectItem}
             />
           ))}
         </div>
-        {totalItems > 0 && (
-          <div className="mt-4 bg-orange-50 border border-orange-100 rounded-xl px-4 py-3 text-center">
-            <p className="text-sm font-bold text-orange-600">{totalItems} total items across your rooms</p>
-          </div>
-        )}
       </Card>
 
+      {/* Quantity Selector */}
+      {selectedItem && currentItem && (
+        <Card className="border-2 border-orange-300 bg-orange-50/50">
+          <p className="text-sm font-black text-slate-800 mb-4">How many {currentItem.label}?</p>
+          <div className="flex items-center justify-center gap-4">
+            <button
+              onClick={() => setQuantity(Math.max(0, quantity - 1))}
+              className="w-12 h-12 rounded-xl border-2 border-slate-200 flex items-center justify-center text-lg font-black text-slate-600 hover:bg-white"
+            >
+              −
+            </button>
+            <span className="text-4xl font-black text-orange-600 w-12 text-center">{quantity}</span>
+            <button
+              onClick={() => setQuantity(quantity + 1)}
+              className="w-12 h-12 rounded-xl border-2 border-slate-200 flex items-center justify-center text-lg font-black text-slate-600 hover:bg-white"
+            >
+              +
+            </button>
+          </div>
+          <div className="flex gap-2 mt-4">
+            <PrimaryBtn onClick={handleAddItem}>Add to Inventory</PrimaryBtn>
+            <button onClick={() => setSelectedItem(null)} className="flex-1 py-3 rounded-xl border-2 border-slate-200 text-slate-600 font-bold text-sm">Cancel</button>
+          </div>
+        </Card>
+      )}
+
+      {/* Current Inventory Preview */}
+      {totalItems > 0 && (
+        <Card>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3">Current Inventory</p>
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(flatInventory)
+              .filter(([, qty]) => qty > 0)
+              .map(([itemId, qty]) => {
+                const item = ALL_ITEMS.find(i => i.id === itemId);
+                return item ? (
+                  <div key={itemId} className="bg-slate-100 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700">
+                    {item.emoji} {item.label} × {qty}
+                  </div>
+                ) : null;
+              })}
+          </div>
+        </Card>
+      )}
+
+      {/* Special Items */}
       <Card>
         <h2 className="text-lg font-black text-slate-900 mb-1">Special Items</h2>
         <p className="text-sm text-slate-500 mb-4">Require certified handlers — select all that apply.</p>
@@ -388,8 +430,6 @@ function Step2Inventory({ data, onChange, onNext }) {
           ))}
         </div>
       </Card>
-
-
     </div>
   );
 }
