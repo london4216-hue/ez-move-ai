@@ -24,6 +24,14 @@ export default function Dashboard() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const navigate = useNavigate();
 
+  // Guard: Redirect if onboarding not complete
+  useEffect(() => {
+    const onboardingComplete = localStorage.getItem('onboardingComplete') === 'true';
+    if (!onboardingComplete) {
+      navigate('/OnboardingWeek1');
+    }
+  }, [navigate]);
+
   useEffect(() => {
     base44.auth.me().then(u => {
       setUser(u);
