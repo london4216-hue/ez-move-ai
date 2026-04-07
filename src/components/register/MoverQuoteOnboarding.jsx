@@ -242,7 +242,7 @@ function Step0Welcome({ onNext }) {
   );
 }
 
-function Step1Basics({ data, onChange, onNext }) {
+function Step1Basics({ data, onChange }) {
   const [calculating, setCalculating] = useState(false);
 
   const calcDistance = async () => {
@@ -252,8 +252,6 @@ function Step1Basics({ data, onChange, onNext }) {
     if (from && to) onChange("miles", Math.round(haversineDistance(from.lat, from.lon, to.lat, to.lon)));
     setCalculating(false);
   };
-
-  const canNext = data.moveDate && data.fromAddress && data.toAddress && data.homeType;
 
   return (
     <div className="space-y-4">
@@ -292,7 +290,6 @@ function Step1Basics({ data, onChange, onNext }) {
           </div>
         </div>
       </Card>
-      <PrimaryBtn onClick={onNext} disabled={!canNext}>Next: Inventory <ChevronRight className="w-4 h-4" /></PrimaryBtn>
     </div>
   );
 }
@@ -392,9 +389,7 @@ function Step2Inventory({ data, onChange, onNext }) {
         </div>
       </Card>
 
-      <PrimaryBtn onClick={onNext} disabled={totalItems === 0 && specialItems.length === 0}>
-        Next: Access Conditions <ChevronRight className="w-4 h-4" />
-      </PrimaryBtn>
+
     </div>
   );
 }
@@ -425,7 +420,7 @@ function Step3Access({ data, onChange, onNext }) {
           ))}
         </div>
       </Card>
-      <PrimaryBtn onClick={onNext} disabled={!ac.stairs || !ac.parking}>See My Quote <ChevronRight className="w-4 h-4" /></PrimaryBtn>
+
     </div>
   );
 }
@@ -552,7 +547,6 @@ function Step5Quote({ quote, onNext }) {
         </div>
       </Card>
 
-      <PrimaryBtn onClick={onNext}>Get My AI Move Summary <ChevronRight className="w-4 h-4" /></PrimaryBtn>
     </div>
   );
 }
@@ -682,44 +676,61 @@ function Step6Summary({ state, quote, onFinish }) {
   );
 }
 
+// ─── Mini Timeline Strip ──────────────────────────────────────────────────────
+
+const STEP_ICONS = ["🎉", "📍", "📦", "🚪", "💰", "✨"];
+
+function MiniTimeline({ currentStep }) {
+  return (
+    <div className="flex items-center justify-center gap-1 py-4 overflow-x-auto">
+      {STEP_TITLES.map((title, i) => (
+        <div key={i} className="flex items-center gap-1">
+          <div className={`flex flex-col items-center gap-1 transition-all ${
+            i < currentStep ? "opacity-100" : i === currentStep ? "opacity-100" : "opacity-30"
+          }`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm border-2 transition-all ${
+              i < currentStep
+                ? "bg-orange-100 border-orange-400"
+                : i === currentStep
+                ? "bg-orange-500 border-orange-500 shadow-md shadow-orange-200"
+                : "bg-white border-slate-200"
+            }`}>
+              {i < currentStep ? "✓" : STEP_ICONS[i]}
+            </div>
+          </div>
+          {i < STEP_TITLES.length - 1 && (
+            <div className={`w-4 h-0.5 rounded-full mb-2 ${
+              i < currentStep ? "bg-orange-400" : "bg-slate-200"
+            }`} />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 export default function MoverQuoteOnboarding({ userId, onComplete }) {
   const [step, setStep] = useState(0);
-  const [state, setState] = useState(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem(`mq_${userId}`));
-      if (saved) return saved;
-    } catch {}
-    if (PUBLIC_DEMO_MODE) {
-      return {
-        fromAddress: "159 Summer Street, New York, NY 10024",
-        toAddress: "42 West 72nd Street, New York, NY 10023",
-        moveDate: new Date().toISOString().split('T')[0],
-      };
+
+  const canProceed = (st, state) => {
+    if (st === 0) return true;
+    if (st === 1) return !!(state.moveDate && state.fromAddress && state.toAddress && state.homeType);
+    if (st === 2) {
+      const totalItems = Object.values(state.inventory || {}).reduce((sum, room) =>
+        sum + Object.values(room || {}).reduce((a, b) => a + b, 0), 0);
+      return totalItems > 0 || (state.specialItems || []).length > 0;
     }
-    return {};
-  });
-
-  const quote = step >= 4 ? calcQuote(state) : null;
-
-  const setField = (key, val) => {
-    const next = { ...state, [key]: val };
-    setState(next);
-    localStorage.setItem(`mq_${userId}`, JSON.stringify(next));
-  };
-
-  const next = () => setStep(s => Math.min(TOTAL_STEPS - 1, s + 1));
-  const back = () => setStep(s => Math.max(0, s - 1));
-
-  const finish = () => {
-    localStorage.setItem(`pre_onboarding_${userId}`, JSON.stringify({ ...state, fromMoverQuote: true }));
-    if (quote) localStorage.setItem(`demo_mover_cost_${userId}`, JSON.stringify(quote));
-    onComplete && onComplete(state);
+    if (st === 3) return !!(state.accessConditions?.stairs && state.accessConditions?.parking);
+    if (st === 4) return true;
+    return false;
   };
 
   return (
     <div className="w-full animate-fade-in" style={{ background: "linear-gradient(180deg,#F7F9FC 0%,#FFFFFF 100%)", minHeight: "100vh" }}>
+
+      {/* Sticky top header */}
       <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-slate-100 shadow-sm px-5 py-3 flex items-center justify-between">
         {step > 0 ? (
           <button onClick={back} className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
@@ -729,20 +740,35 @@ export default function MoverQuoteOnboarding({ userId, onComplete }) {
         <span className="text-sm font-bold text-slate-700">{STEP_TITLES[step]}</span>
         <span className="text-xs font-bold text-orange-500">Step {step + 1} of {TOTAL_STEPS}</span>
       </div>
+
+      {/* Progress bar */}
       <div className="px-5 pt-3 pb-1 bg-white border-b border-slate-50">
         <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
           <div className="h-full bg-gradient-to-r from-orange-500 to-amber-400 rounded-full transition-all duration-500"
             style={{ width: `${((step + 1) / TOTAL_STEPS) * 100}%` }} />
         </div>
       </div>
-      <div className="px-4 pt-4 pb-24 max-w-lg mx-auto space-y-4">
+
+      {/* Scrollable content */}
+      <div className="px-4 pt-4 pb-40 max-w-lg mx-auto space-y-4">
         {step === 0 && <Step0Welcome onNext={next} />}
-        {step === 1 && <Step1Basics data={state} onChange={setField} onNext={next} />}
-        {step === 2 && <Step2Inventory data={state} onChange={setField} onNext={next} />}
-        {step === 3 && <Step3Access data={state} onChange={setField} onNext={next} />}
-        {step === 4 && quote && <Step5Quote quote={quote} onNext={next} />}
+        {step === 1 && <Step1Basics data={state} onChange={setField} />}
+        {step === 2 && <Step2Inventory data={state} onChange={setField} />}
+        {step === 3 && <Step3Access data={state} onChange={setField} />}
+        {step === 4 && quote && <Step5Quote quote={quote} />}
         {step === 5 && quote && <Step6Summary state={state} quote={quote} onFinish={finish} />}
+        {step < 5 && <MiniTimeline currentStep={step} />}
       </div>
+
+      {step > 0 && step < 5 && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-100 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] px-4 py-4">
+          <div className="max-w-lg mx-auto">
+            <PrimaryBtn onClick={next} disabled={!canProceed(step, state)}>
+              {step === 4 ? "Get My AI Summary" : "Continue"} <ChevronRight className="w-4 h-4" />
+            </PrimaryBtn>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
