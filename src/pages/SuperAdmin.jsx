@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useNavigate } from "react-router-dom";
 import { getPortalRole } from "@/lib/usePortalRole";
+import { PUBLIC_DEMO_MODE } from "@/lib/featureFlags";
 
 import {
   Users, DollarSign, Building2, User, LogOut, Trash2, TrendingUp,
@@ -411,8 +412,8 @@ export default function SuperAdmin() {
 
   useEffect(() => {
     const load = async () => {
-      const me = await base44.auth.me();
-      if (getPortalRole(me) !== "super_admin") { navigate("/"); return; }
+      const me = await base44.auth.me().catch(() => null);
+      if (!PUBLIC_DEMO_MODE && getPortalRole(me) !== "super_admin") { navigate("/"); return; }
       const [agentList, clientList] = await Promise.all([
         base44.entities.Agent.list(),
         base44.entities.Client.list(),

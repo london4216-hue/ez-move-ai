@@ -10,6 +10,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useUserContext } from "@/lib/useUserContext";
+import { PUBLIC_DEMO_MODE } from "@/lib/featureFlags";
 
 export default function PortalGuard({ allowedRoles, loginHint, children }) {
   const { authStatus, role, isLoading } = useUserContext();
@@ -21,6 +22,8 @@ export default function PortalGuard({ allowedRoles, loginHint, children }) {
 
   useEffect(() => {
     if (isLoading) return;
+    // In demo mode, skip all auth/role checks
+    if (PUBLIC_DEMO_MODE) return;
     if (authStatus !== "authenticated") {
       base44.auth.redirectToLogin(loginHint || "/");
       return;
@@ -43,8 +46,8 @@ export default function PortalGuard({ allowedRoles, loginHint, children }) {
     );
   }
 
-  if (authStatus !== "authenticated") return null;
-  if (!isSuperAdmin && (!role || !allowedRoles.includes(role))) return null;
+  if (!PUBLIC_DEMO_MODE && authStatus !== "authenticated") return null;
+  if (!PUBLIC_DEMO_MODE && !isSuperAdmin && (!role || !allowedRoles.includes(role))) return null;
 
   return children;
 }

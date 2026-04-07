@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useNavigate } from "react-router-dom";
+import { PUBLIC_DEMO_MODE } from "@/lib/featureFlags";
 
 import { Plus, LogOut, Edit2, X, Trash2, Users, Building2, ArrowLeft, Loader2, CheckCircle2, CreditCard, Palette, Copy, Check, Shield } from "lucide-react";
 
@@ -40,14 +41,16 @@ export default function BrokerDashboard() {
   useEffect(() => {
     const load = async () => {
       const user = await base44.auth.me().catch(() => null);
-      if (!user) { base44.auth.redirectToLogin(window.location.pathname); return; }
-      let agents = await base44.entities.Agent.filter({ created_by: user.email });
+      if (!user && !PUBLIC_DEMO_MODE) { base44.auth.redirectToLogin(window.location.pathname); return; }
+      const userEmail = user?.email || 'demo@demo.local';
+      const userFullName = user?.full_name || 'Demo Broker';
+      let agents = await base44.entities.Agent.filter({ created_by: userEmail }).catch(() => []);
       let agentRecord = agents.length === 0
-        ? await base44.entities.Agent.create({ company_name: user.full_name || "My Brokerage" })
+        ? await base44.entities.Agent.create({ company_name: userFullName || "My Brokerage" }).catch(() => ({ id: 'demo', company_name: 'Demo Brokerage', clients_count: 0, total_charged: 0 }))
         : agents[0];
       setAgent(agentRecord);
       setBrandName(agentRecord.company_name || "");
-      const clientList = await base44.entities.Client.filter({ agent_id: agentRecord.id });
+      const clientList = await base44.entities.Client.filter({ agent_id: agentRecord.id }).catch(() => []);
       setClients(clientList.sort((a, b) => new Date(b.invited_date || 0) - new Date(a.invited_date || 0)));
       setLoading(false);
     };

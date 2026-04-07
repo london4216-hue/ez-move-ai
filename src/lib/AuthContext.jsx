@@ -52,6 +52,13 @@ export const AuthProvider = ({ children }) => {
       } catch (appError) {
         console.error('App state check failed:', appError);
         
+        // In demo mode, don't let public-settings failure block the app
+        if (PUBLIC_DEMO_MODE) {
+          setIsLoadingPublicSettings(false);
+          await bootstrapDemoSession();
+          return;
+        }
+        
         // Handle app-level errors
         if (appError.status === 403 && appError.data?.extra_data?.reason) {
           const reason = appError.data.extra_data.reason;
@@ -82,6 +89,12 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Unexpected error:', error);
+      // In demo mode, don't let any error block the app
+      if (PUBLIC_DEMO_MODE) {
+        setIsLoadingPublicSettings(false);
+        await bootstrapDemoSession();
+        return;
+      }
       setAuthError({
         type: 'unknown',
         message: error.message || 'An unexpected error occurred'
