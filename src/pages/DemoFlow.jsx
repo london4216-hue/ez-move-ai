@@ -91,8 +91,7 @@ function DemoOnboarding() {
     { num: 3, title: 'Cost Estimate', desc: 'Moving cost projection' },
     { num: 4, title: 'Find Movers', desc: 'AI matches local providers' },
     { num: 5, title: 'Schedule Walkthrough', desc: 'Set appointment date' },
-    { num: 6, title: 'Add Lawyer Info', desc: 'Closing day details' },
-    { num: 7, title: 'Review & Confirm', desc: 'Summary of your move plan' },
+    { num: 6, title: 'Review & Confirm', desc: 'Summary of your move plan' },
   ];
   
   const currentStep = steps[step - 1];
@@ -100,13 +99,13 @@ function DemoOnboarding() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-slate-900">7-Step Onboarding Wizard</h2>
-        <p className="text-slate-600 text-sm mt-1">Step {step} of 7</p>
+        <h2 className="text-2xl font-bold text-slate-900">6-Step Onboarding Wizard</h2>
+        <p className="text-slate-600 text-sm mt-1">Step {step} of 6</p>
       </div>
       
       {/* Progress bar */}
       <div className="w-full bg-slate-200 rounded-full h-2">
-        <div className="bg-blue-600 h-2 rounded-full transition-all" style={{ width: `${(step / 7) * 100}%` }}></div>
+        <div className="bg-blue-600 h-2 rounded-full transition-all" style={{ width: `${(step / 6) * 100}%` }}></div>
       </div>
 
       {/* Current step */}
