@@ -89,7 +89,7 @@ export default function PreviewHub() {
   const handleModuleClick = (path) => {
     if (path === '/Dashboard') {
       seedDemoData();
-      navigate('/OnboardingWeek1');
+      navigate('/Demo');
       return;
     }
     navigate(path);
