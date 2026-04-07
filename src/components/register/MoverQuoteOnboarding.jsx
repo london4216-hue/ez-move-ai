@@ -713,16 +713,47 @@ function MiniTimeline({ currentStep }) {
 
 export default function MoverQuoteOnboarding({ userId, onComplete }) {
   const [step, setStep] = useState(0);
-
-  const canProceed = (st, state) => {
-    if (st === 0) return true;
-    if (st === 1) return !!(state.moveDate && state.fromAddress && state.toAddress && state.homeType);
-    if (st === 2) {
-      const totalItems = Object.values(state.inventory || {}).reduce((sum, room) =>
-        sum + Object.values(room || {}).reduce((a, b) => a + b, 0), 0);
-      return totalItems > 0 || (state.specialItems || []).length > 0;
+  const [state, setState] = useState(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(`mq_${userId}`));
+      if (saved) return saved;
+    } catch {}
+    if (PUBLIC_DEMO_MODE) {
+      return {
+        fromAddress: "159 Summer Street, New York, NY 10024",
+        toAddress: "42 West 72nd Street, New York, NY 10023",
+        moveDate: new Date().toISOString().split('T')[0],
+      };
     }
-    if (st === 3) return !!(state.accessConditions?.stairs && state.accessConditions?.parking);
+    return {};
+  });
+
+  const quote = step >= 4 ? calcQuote(state) : null;
+
+  const setField = (key, val) => {
+    const next2 = { ...state, [key]: val };
+    setState(next2);
+    localStorage.setItem(`mq_${userId}`, JSON.stringify(next2));
+  };
+
+  const next = () => setStep(s => Math.min(TOTAL_STEPS - 1, s + 1));
+  const back = () => setStep(s => Math.max(0, s - 1));
+
+  const finish = () => {
+    localStorage.setItem(`pre_onboarding_${userId}`, JSON.stringify({ ...state, fromMoverQuote: true }));
+    if (quote) localStorage.setItem(`demo_mover_cost_${userId}`, JSON.stringify(quote));
+    onComplete && onComplete(state);
+  };
+
+  const canProceed = (st, st2) => {
+    if (st === 0) return true;
+    if (st === 1) return !!(st2.moveDate && st2.fromAddress && st2.toAddress && st2.homeType);
+    if (st === 2) {
+      const totalItems = Object.values(st2.inventory || {}).reduce((sum, room) =>
+        sum + Object.values(room || {}).reduce((a, b) => a + b, 0), 0);
+      return totalItems > 0 || (st2.specialItems || []).length > 0;
+    }
+    if (st === 3) return !!(st2.accessConditions?.stairs && st2.accessConditions?.parking);
     if (st === 4) return true;
     return false;
   };
@@ -763,7 +794,7 @@ export default function MoverQuoteOnboarding({ userId, onComplete }) {
       {step > 0 && step < 5 && (
         <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-100 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] px-4 py-4">
           <div className="max-w-lg mx-auto">
-            <PrimaryBtn onClick={next} disabled={!canProceed(step, state)}>
+            <PrimaryBtn onClick={next} disabled={!canProceed(step, state)}> 
               {step === 4 ? "Get My AI Summary" : "Continue"} <ChevronRight className="w-4 h-4" />
             </PrimaryBtn>
           </div>
