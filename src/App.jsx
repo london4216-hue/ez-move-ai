@@ -19,7 +19,6 @@ import RoleRouter from './pages/RoleRouter';
 import AgentDashboard from './pages/AgentDashboard';
 import DemoFlow from './pages/DemoFlow';
 import DemoLogin from './pages/DemoLogin';
-import Dashboard from './pages/Dashboard.jsx';
 
 import BuyerExperience from './pages/BuyerExperience';
 import Marketplace from './pages/Marketplace';
@@ -66,7 +65,7 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
-      <Route path="/" element={<Dashboard />} />
+      <Route path="/" element={<Home />} />
       <Route path="/register" element={PUBLIC_DEMO_MODE ? <PreviewHub /> : <Register />} />
       <Route path="/signup" element={PUBLIC_DEMO_MODE ? <PreviewHub /> : <Home />} />
       <Route path="/sign-up" element={PUBLIC_DEMO_MODE ? <PreviewHub /> : <Home />} />
