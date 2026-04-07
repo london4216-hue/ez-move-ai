@@ -79,6 +79,9 @@ export default function PreviewHub() {
     localStorage.removeItem(`week1_setup_${demoId}`);
     localStorage.removeItem(`onboarding_done_${demoId}`);
     localStorage.removeItem(`walkthrough_done_w1_${demoId}`);
+    localStorage.removeItem(`pre_onboarding_done_${demoId}`);
+    localStorage.removeItem(`pre_onboarding_${demoId}`);
+    localStorage.removeItem(`demo_mover_cost_${demoId}`);
     return demoId;
   };
 

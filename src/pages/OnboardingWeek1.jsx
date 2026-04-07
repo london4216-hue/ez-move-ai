@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import Week1Setup from "@/components/register/Week1Setup";
+import PreOnboardingSteps from "@/components/register/PreOnboardingSteps";
 import { PUBLIC_DEMO_MODE } from "@/lib/featureFlags";
 
 function getDemoUserId() {
@@ -17,6 +18,7 @@ function getDemoUserId() {
 export default function OnboardingWeek1() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [preOnboardingDone, setPreOnboardingDone] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -77,12 +79,22 @@ export default function OnboardingWeek1() {
             EZ Move <span className="text-orange-500">AI</span>
           </span>
         </div>
-        <Week1Setup
-          userId={user.id}
-          userAddress={user.home_address || ""}
-          onComplete={handleComplete}
-          hideButtons={false}
-        />
+        {!preOnboardingDone ? (
+          <PreOnboardingSteps
+            userId={user.id}
+            onComplete={(data) => {
+              localStorage.setItem(`pre_onboarding_done_${user.id}`, "true");
+              setPreOnboardingDone(true);
+            }}
+          />
+        ) : (
+          <Week1Setup
+            userId={user.id}
+            userAddress={user.home_address || ""}
+            onComplete={handleComplete}
+            hideButtons={false}
+          />
+        )}
       </div>
     </div>
   );
