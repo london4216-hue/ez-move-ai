@@ -19,7 +19,7 @@ import RoleRouter from './pages/RoleRouter';
 import AgentDashboard from './pages/AgentDashboard';
 import DemoFlow from './pages/DemoFlow';
 import DemoLogin from './pages/DemoLogin';
-import Dashboard from './pages/Dashboard';
+import Dashboard from './pages/Dashboard.jsx';
 
 import BuyerExperience from './pages/BuyerExperience';
 import Marketplace from './pages/Marketplace';
