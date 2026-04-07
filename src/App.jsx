@@ -23,6 +23,7 @@ import OnboardingWeek1 from './pages/OnboardingWeek1';
 
 import BuyerExperience from './pages/BuyerExperience';
 import Marketplace from './pages/Marketplace';
+import AccessExpired from './pages/AccessExpired';
 import SellerExperience from './pages/SellerExperience';
 import Register from './pages/Register';
 
@@ -93,6 +94,7 @@ const AuthenticatedApp = () => {
       <Route path="/OnboardingWeek1" element={<OnboardingWeek1 />} />
       <Route path="/BuyerExperience" element={<BuyerExperience />} />
       <Route path="/Marketplace" element={<Marketplace />} />
+      <Route path="/AccessExpired" element={<AccessExpired />} />
       <Route path="/SellerExperience" element={<SellerExperience />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>

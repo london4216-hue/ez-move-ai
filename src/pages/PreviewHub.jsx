@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import PublicVersionGate from '@/components/PublicVersionGate';
 import { base44 } from '@/api/base44Client';
 import { useEffect, useState } from 'react';
 import { PUBLIC_DEMO_MODE } from '@/lib/featureFlags';
@@ -107,6 +108,7 @@ export default function PreviewHub() {
   }
 
   return (
+    <PublicVersionGate>
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       {/* Header */}
       <header className="bg-white border-b border-slate-200 shadow-sm px-4 sm:px-6 py-4">
@@ -189,5 +191,6 @@ export default function PreviewHub() {
         <p>EZ Move AI Platform Preview • All modules in demo mode</p>
       </div>
     </div>
+    </PublicVersionGate>
   );
 }

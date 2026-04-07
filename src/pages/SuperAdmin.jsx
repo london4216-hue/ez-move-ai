@@ -295,6 +295,81 @@ function ReportingScreen({ agents, clients }) {
   );
 }
 
+// ─── Version Control Screen ─────────────────────────────────────────────────
+function VersionControlScreen() {
+  const [version, setVersion] = useState(null);
+  const [settingId, setSettingId] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    base44.entities.AppSettings.filter({ key: "public_version" }).then(res => {
+      if (res.length > 0) { setVersion(res[0].value); setSettingId(res[0].id); }
+      else { setVersion("1"); }
+    });
+  }, []);
+
+  const increment = async () => {
+    setSaving(true);
+    const next = String(parseInt(version || "1") + 1);
+    if (settingId) {
+      await base44.entities.AppSettings.update(settingId, { key: "public_version", value: next });
+    } else {
+      const rec = await base44.entities.AppSettings.create({ key: "public_version", value: next });
+      setSettingId(rec.id);
+    }
+    setVersion(next);
+    setSaving(false);
+  };
+
+  const demoUrl = `${window.location.origin}/?v=${version}`;
+
+  const copyLink = () => {
+    navigator.clipboard.writeText(demoUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="space-y-5 max-w-lg">
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+        <div className="flex items-center gap-2 mb-1">
+          <Key className="w-4 h-4 text-orange-500" />
+          <h2 className="font-bold text-slate-800">Public Demo Link Control</h2>
+        </div>
+        <p className="text-slate-400 text-xs mb-6">Increment the version to instantly invalidate all old demo links. Only people with the latest link can access the hub.</p>
+
+        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 text-center mb-5">
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Current Public Version</p>
+          <p className="text-5xl font-black text-orange-500 my-2">{version ?? "\u2014"}</p>
+          <p className="text-xs text-slate-400">All links with ?v={version} are active. All others are expired.</p>
+        </div>
+
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 bg-slate-100 rounded-xl px-4 py-3">
+            <p className="text-xs font-mono text-slate-600 flex-1 truncate">{demoUrl}</p>
+            <button onClick={copyLink}
+              className={`flex-shrink-0 text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${
+                copied ? "bg-emerald-500 text-white" : "bg-white border border-slate-200 text-slate-600 hover:bg-orange-50 hover:text-orange-500"
+              }`}>
+              {copied ? "Copied!" : "Copy"}
+            </button>
+          </div>
+
+          <button
+            onClick={increment}
+            disabled={saving || version === null}
+            className="w-full py-3.5 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold text-sm disabled:opacity-40 transition-colors flex items-center justify-center gap-2"
+          >
+            {saving ? "Updating\u2026" : `\uD83D\uDD12 Invalidate Old Links \u2014 Publish v${parseInt(version || 1) + 1}`}
+          </button>
+          <p className="text-[10px] text-slate-400 text-center">\u26A0\uFE0F This cannot be undone. Anyone with v{version} links will see the expired page.</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Placeholder screens ──────────────────────────────────────────────────────
 function PlaceholderScreen({ title, Icon }) {
   return (
@@ -511,7 +586,7 @@ export default function SuperAdmin() {
             <ReportingScreen agents={agents} clients={clients} />
           )}
           {activeNav === "settings" && (
-            <PlaceholderScreen title="System Settings" Icon={Settings} />
+            <VersionControlScreen />
           )}
           {activeNav === "audit" && (
             <PlaceholderScreen title="Audit Log" Icon={ClipboardList} />
