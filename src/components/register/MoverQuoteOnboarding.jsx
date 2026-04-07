@@ -558,10 +558,13 @@ function Step5Quote({ quote, onNext }) {
 }
 
 function Step6Summary({ state, quote, onFinish }) {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [summary, setSummary] = useState(null);
+  const [started, setStarted] = useState(false);
 
-  useState(() => {
+  const generate = () => {
+    setLoading(true);
+    setStarted(true);
     const totalItems = Object.values(state.inventory || {}).reduce((sum, room) =>
       sum + Object.values(room || {}).reduce((a, b) => a + b, 0), 0);
     base44.integrations.Core.InvokeLLM({
@@ -576,7 +579,29 @@ function Step6Summary({ state, quote, onFinish }) {
         }
       }
     }).then(res => { setSummary(res); setLoading(false); });
-  }, []);
+  };
+
+  if (!started) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center py-8">
+          <div className="text-5xl mb-4">✨</div>
+          <h2 className="text-2xl font-black text-slate-900 mb-2">Your Move Quote is Ready!</h2>
+          <p className="text-sm text-slate-500 max-w-xs mx-auto">Generate a personalized AI move summary with a day-of timeline, risk radar, and pro tips.</p>
+        </div>
+        <div className="bg-orange-50 border border-orange-100 rounded-2xl p-5 text-center">
+          <p className="text-3xl font-black text-orange-600 mb-1">${quote.total.toLocaleString()}</p>
+          <p className="text-xs text-slate-500">Estimated range: ${quote.low.toLocaleString()} – ${quote.high.toLocaleString()}</p>
+        </div>
+        <PrimaryBtn onClick={generate}>
+          <Sparkles className="w-4 h-4" /> Generate My AI Move Summary
+        </PrimaryBtn>
+        <button onClick={onFinish} className="w-full text-center text-xs text-slate-400 font-semibold py-2">
+          Skip — go to my dashboard
+        </button>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -677,8 +702,6 @@ export default function MoverQuoteOnboarding({ userId, onComplete }) {
   });
 
   const quote = step >= 4 ? calcQuote(state) : null;
-  // Save move profile for task generation when completing
-  const saveProfile = (s) => localStorage.setItem(`pre_onboarding_${userId}`, JSON.stringify({ ...s, fromMoverQuote: true }));
 
   const setField = (key, val) => {
     const next = { ...state, [key]: val };
@@ -690,15 +713,13 @@ export default function MoverQuoteOnboarding({ userId, onComplete }) {
   const back = () => setStep(s => Math.max(0, s - 1));
 
   const finish = () => {
-    saveProfile(state);
+    localStorage.setItem(`pre_onboarding_${userId}`, JSON.stringify({ ...state, fromMoverQuote: true }));
     if (quote) localStorage.setItem(`demo_mover_cost_${userId}`, JSON.stringify(quote));
     onComplete && onComplete(state);
   };
 
   return (
     <div className="w-full animate-fade-in" style={{ background: "linear-gradient(180deg,#F7F9FC 0%,#FFFFFF 100%)", minHeight: "100vh" }}>
-
-      {/* Sticky header */}
       <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-slate-100 shadow-sm px-5 py-3 flex items-center justify-between">
         {step > 0 ? (
           <button onClick={back} className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
@@ -708,15 +729,12 @@ export default function MoverQuoteOnboarding({ userId, onComplete }) {
         <span className="text-sm font-bold text-slate-700">{STEP_TITLES[step]}</span>
         <span className="text-xs font-bold text-orange-500">Step {step + 1} of {TOTAL_STEPS}</span>
       </div>
-
-      {/* Progress bar */}
       <div className="px-5 pt-3 pb-1 bg-white border-b border-slate-50">
         <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
           <div className="h-full bg-gradient-to-r from-orange-500 to-amber-400 rounded-full transition-all duration-500"
             style={{ width: `${((step + 1) / TOTAL_STEPS) * 100}%` }} />
         </div>
       </div>
-
       <div className="px-4 pt-4 pb-24 max-w-lg mx-auto space-y-4">
         {step === 0 && <Step0Welcome onNext={next} />}
         {step === 1 && <Step1Basics data={state} onChange={setField} onNext={next} />}
