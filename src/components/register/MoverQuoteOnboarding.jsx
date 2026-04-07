@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { PUBLIC_DEMO_MODE } from "@/lib/featureFlags";
 import {
@@ -561,7 +561,7 @@ function Step6Summary({ state, quote, onFinish }) {
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState(null);
 
-  useState(() => {
+  useEffect(() => {
     const totalItems = Object.values(state.inventory || {}).reduce((sum, room) =>
       sum + Object.values(room || {}).reduce((a, b) => a + b, 0), 0);
     base44.integrations.Core.InvokeLLM({
