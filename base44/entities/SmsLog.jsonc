@@ -1,0 +1,48 @@
+{
+  "name": "SmsLog",
+  "type": "object",
+  "properties": {
+    "to": {
+      "type": "string",
+      "description": "Recipient phone number"
+    },
+    "message": {
+      "type": "string",
+      "description": "SMS message body"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "sent",
+        "failed",
+        "opted_out"
+      ],
+      "default": "sent"
+    },
+    "error": {
+      "type": "string",
+      "description": "Error message if failed"
+    },
+    "portal_role": {
+      "type": "string",
+      "description": "Which portal sent it (broker, agent, system)"
+    },
+    "portal_user_id": {
+      "type": "string",
+      "description": "ID of the portal user who sent it"
+    },
+    "client_id": {
+      "type": "string",
+      "description": "Associated client ID if applicable"
+    },
+    "sid": {
+      "type": "string",
+      "description": "Twilio message SID"
+    }
+  },
+  "required": [
+    "to",
+    "message",
+    "status"
+  ]
+}
