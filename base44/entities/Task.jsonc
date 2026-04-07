@@ -1,0 +1,49 @@
+{
+  "name": "Task",
+  "type": "object",
+  "properties": {
+    "userId": {
+      "type": "string"
+    },
+    "weekNumber": {
+      "type": "number"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "instructions": {
+      "type": "string"
+    },
+    "aiTips": {
+      "type": "string"
+    },
+    "aiSearchQuery": {
+      "type": "string"
+    },
+    "emoji": {
+      "type": "string"
+    },
+    "estimatedTime": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "not_started",
+        "in_progress",
+        "done",
+        "skipped",
+        "na"
+      ],
+      "default": "not_started"
+    }
+  },
+  "required": [
+    "userId",
+    "weekNumber",
+    "title"
+  ]
+}
