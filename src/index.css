@@ -81,6 +81,31 @@
   * {
     @apply border-border outline-ring/50;
   }
+}
+
+/* EZ Move AI — Global Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes slideUp {
+  from { transform: translateY(24px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+@keyframes scaleIn {
+  from { transform: scale(0.92); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+@keyframes ripple {
+  from { transform: scale(0); opacity: 0.4; }
+  to   { transform: scale(4); opacity: 0; }
+}
+
+.animate-fade-in  { animation: fadeIn  0.25s ease both; }
+.animate-slide-up { animation: slideUp 0.3s cubic-bezier(.22,.68,0,1.2) both; }
+.animate-scale-in { animation: scaleIn 0.2s ease both; }
+
+@layer base {
 
   body {
     @apply bg-background text-foreground;
