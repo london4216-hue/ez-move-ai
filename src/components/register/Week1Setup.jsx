@@ -196,29 +196,38 @@ export default function Week1Setup({ userId, userAddress, onComplete, onSaveExit
               {aiResults.length === 0 ? (
                 <p className="text-sm text-slate-400 py-4 text-center">No results found. You can always search later in the AI tools tab.</p>
               ) : (
-                <div className="space-y-3 mb-5">
-                  {aiResults.map((r, i) => (
-                    <div key={i} className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
-                      <div className="flex items-start justify-between gap-2 mb-1">
-                        <p className="font-bold text-slate-800 text-sm">{r.name}</p>
-                        {r.rating && <span className="text-xs font-bold text-amber-500 whitespace-nowrap">{r.rating}</span>}
-                      </div>
-                      <p className="text-xs text-slate-500 mb-1.5">{r.description}</p>
-                      {r.phone && (
-                        <a href={`tel:${r.phone}`} className="text-xs font-bold text-orange-500">📞 {r.phone}</a>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                <>
+                  <p className="text-xs text-orange-600 font-bold text-center mb-3">Tap a provider to select &amp; continue</p>
+                  <div className="space-y-3 mb-5">
+                    {aiResults.map((r, i) => (
+                      <button
+                        key={i}
+                        onClick={() => {
+                          localStorage.setItem(`demo_estate_pro_${userId}`, JSON.stringify(r));
+                          advance(answers);
+                        }}
+                        className="w-full text-left bg-white border-2 border-slate-100 rounded-2xl p-4 shadow-sm hover:border-orange-400 hover:bg-orange-50 active:scale-[0.98] transition-all"
+                      >
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <p className="font-bold text-slate-800 text-sm">{r.name}</p>
+                          {r.rating && <span className="text-xs font-bold text-amber-500 whitespace-nowrap">{r.rating}</span>}
+                        </div>
+                        <p className="text-xs text-slate-500 mb-1.5">{r.description}</p>
+                        {r.phone && <p className="text-xs font-bold text-orange-500">📞 {r.phone}</p>}
+                        <p className="text-xs text-orange-500 font-bold mt-2">Tap to select →</p>
+                      </button>
+                    ))}
+                  </div>
+                </>
               )}
 
               <p className="text-xs text-slate-400 text-center mb-4">These results are also saved in your AI Tools tab for reference.</p>
 
               <button
                 onClick={() => advance(answers)}
-                className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-orange-200 active:scale-[0.98] transition-transform"
+                className="w-full py-3.5 rounded-2xl border border-slate-200 text-slate-500 font-semibold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
               >
-                Got it — Continue <ChevronRight className="w-4 h-4" />
+                Skip — Continue without selecting
               </button>
             </>
           )}
