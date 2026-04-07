@@ -69,33 +69,23 @@ export default function OnboardingWeek1() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-sm">
-        <div className="flex items-center gap-2.5 mb-8 justify-center">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-200">
-            <span className="text-white text-sm font-black">EZ</span>
-          </div>
-          <span className="text-slate-800 font-bold text-lg tracking-tight">
-            EZ Move <span className="text-orange-500">AI</span>
-          </span>
-        </div>
-        {!preOnboardingDone ? (
-          <MoverQuoteOnboarding
-            userId={user.id}
-            onComplete={(data) => {
-              localStorage.setItem(`pre_onboarding_done_${user.id}`, "true");
-              setPreOnboardingDone(true);
-            }}
-          />
-        ) : (
-          <Week1Setup
-            userId={user.id}
-            userAddress={user.home_address || ""}
-            onComplete={handleComplete}
-            hideButtons={false}
-          />
-        )}
-      </div>
+    <div className="min-h-screen bg-slate-50">
+      {!preOnboardingDone ? (
+        <MoverQuoteOnboarding
+          userId={user.id}
+          onComplete={(data) => {
+            localStorage.setItem(`pre_onboarding_done_${user.id}`, "true");
+            setPreOnboardingDone(true);
+          }}
+        />
+      ) : (
+        <Week1Setup
+          userId={user.id}
+          userAddress={user.home_address || ""}
+          onComplete={handleComplete}
+          hideButtons={false}
+        />
+      )}
     </div>
   );
 }
