@@ -22,8 +22,13 @@ export default function OnboardingWeek1() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Reset demo state on page load
+    const demoId = getDemoUserId();
+    localStorage.removeItem(`mq_${demoId}`);
+    localStorage.removeItem(`pre_onboarding_${demoId}`);
+    localStorage.removeItem(`demo_mover_cost_${demoId}`);
+    
     if (PUBLIC_DEMO_MODE) {
-      const demoId = getDemoUserId();
       const demoAddress = localStorage.getItem('demo_home_address') || '742 Evergreen Terrace, Springfield, IL 62704';
       const demoCloseDate = localStorage.getItem('demo_close_date') || (() => {
         const d = new Date(); d.setDate(d.getDate() + 30); return d.toISOString().split('T')[0];

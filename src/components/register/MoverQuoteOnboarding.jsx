@@ -558,25 +558,61 @@ function Step5Quote({ quote, onNext }) {
 }
 
 function Step6Summary({ state, quote, onFinish }) {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [summary, setSummary] = useState(null);
 
-  useEffect(() => {
+  const generateSummary = async () => {
+    setLoading(true);
     const totalItems = Object.values(state.inventory || {}).reduce((sum, room) =>
       sum + Object.values(room || {}).reduce((a, b) => a + b, 0), 0);
-    base44.integrations.Core.InvokeLLM({
-      prompt: `You are a professional moving coordinator. Generate a personalized AI move summary for a client moving from "${state.fromAddress || "origin"}" to "${state.toAddress || "destination"}" on ${state.moveDate || "their move date"}. Home type: ${state.homeType || "home"}. Crew: ${quote.crewSize} movers. Est hours: ${quote.estimatedHours}. Truck: ${quote.truckSize}. Total items: ${totalItems}. Move complexity: ${quote.complexity}/10. Provide: 1. move_day_timeline: array of 5 time-based steps. 2. risk_radar: array of 3 top risks with risk and tip fields. 3. recommendations: 3 pro tips. 4. simulation: a short paragraph describing what move day will feel like.`,
-      response_json_schema: {
-        type: "object",
-        properties: {
-          move_day_timeline: { type: "array", items: { type: "string" } },
-          risk_radar: { type: "array", items: { type: "object", properties: { risk: { type: "string" }, tip: { type: "string" } } } },
-          recommendations: { type: "array", items: { type: "string" } },
-          simulation: { type: "string" }
+    try {
+      const res = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are a professional moving coordinator. Generate a personalized AI move summary for a client moving from "${state.fromAddress || "origin"}" to "${state.toAddress || "destination"}" on ${state.moveDate || "their move date"}. Home type: ${state.homeType || "home"}. Crew: ${quote.crewSize} movers. Est hours: ${quote.estimatedHours}. Truck: ${quote.truckSize}. Total items: ${totalItems}. Move complexity: ${quote.complexity}/10. Provide: 1. move_day_timeline: array of 5 time-based steps. 2. risk_radar: array of 3 top risks with risk and tip fields. 3. recommendations: 3 pro tips. 4. simulation: a short paragraph describing what move day will feel like.`,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            move_day_timeline: { type: "array", items: { type: "string" } },
+            risk_radar: { type: "array", items: { type: "object", properties: { risk: { type: "string" }, tip: { type: "string" } } } },
+            recommendations: { type: "array", items: { type: "string" } },
+            simulation: { type: "string" }
+          }
         }
-      }
-    }).then(res => { setSummary(res); setLoading(false); });
-  }, []);
+      });
+      setSummary(res);
+    } catch (err) {
+      console.error('AI Summary error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!summary && !loading) {
+    return (
+      <div className="space-y-4">
+        <div className="text-center py-8">
+          <div className="text-4xl mb-3">✨</div>
+          <h2 className="text-xl font-black text-slate-900">AI Move Summary</h2>
+          <p className="text-sm text-slate-500 mt-1">Get personalized insights about your move</p>
+        </div>
+        <Card>
+          <p className="text-sm text-slate-600 leading-relaxed text-center">Based on your move details, we'll generate a personalized timeline, risk assessment, and pro tips for move day.</p>
+        </Card>
+        <PrimaryBtn onClick={generateSummary} disabled={loading}>
+          {loading ? (
+            <>
+              <Sparkles className="w-4 h-4 animate-spin" />
+              Generating…
+            </>
+          ) : (
+            <>
+              Generate My Summary
+              <ChevronRight className="w-4 h-4" />
+            </>
+          )}
+        </PrimaryBtn>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
