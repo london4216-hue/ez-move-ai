@@ -8,30 +8,6 @@ import {
 
 const MODULES = [
   {
-    id: 'agent',
-    label: 'Agent Portal',
-    icon: UserCheck,
-    path: '/AgentDashboard',
-    color: 'bg-blue-500',
-    description: 'Manage buyers & sellers, track moves',
-  },
-  {
-    id: 'broker',
-    label: 'Broker/Movers',
-    icon: Briefcase,
-    path: '/BrokerDashboard',
-    color: 'bg-purple-500',
-    description: 'Multi-agent firm management',
-  },
-  {
-    id: 'buyer',
-    label: 'Buyer/Seller DEMO',
-    icon: Users,
-    path: '/Dashboard',
-    color: 'bg-emerald-500',
-    description: 'Move planning & checklist',
-  },
-  {
     id: 'sales',
     label: 'Sales Site',
     icon: Settings,
@@ -41,11 +17,35 @@ const MODULES = [
   },
   {
     id: 'admin',
-    label: 'Super Admin',
+    label: 'Super Portal',
     icon: Shield,
     path: '/SuperAdmin',
     color: 'bg-red-600',
     description: 'System & billing management',
+  },
+  {
+    id: 'broker',
+    label: 'Broker Portal',
+    icon: Briefcase,
+    path: '/BrokerDashboard',
+    color: 'bg-purple-500',
+    description: 'Multi-agent firm management',
+  },
+  {
+    id: 'agent',
+    label: 'Agent Portal',
+    icon: UserCheck,
+    path: '/AgentDashboard',
+    color: 'bg-blue-500',
+    description: 'Manage buyers & sellers, track moves',
+  },
+  {
+    id: 'buyer',
+    label: 'Buyer/Seller Demo',
+    icon: Users,
+    path: '/Dashboard',
+    color: 'bg-emerald-500',
+    description: 'Full move planning & checklist demo',
   },
 ];
 
@@ -62,8 +62,29 @@ export default function PreviewHub() {
       .finally(() => setLoading(false));
   }, []);
 
+  const seedDemoData = () => {
+    // Generate or reuse demo user id
+    let demoId = localStorage.getItem('demo_user_id');
+    if (!demoId) {
+      demoId = 'demo-' + Math.random().toString(36).slice(2, 10);
+      localStorage.setItem('demo_user_id', demoId);
+    }
+    // Seed close date 30 days from today
+    const closeDate = new Date();
+    closeDate.setDate(closeDate.getDate() + 30);
+    const closeDateStr = closeDate.toISOString().split('T')[0];
+    localStorage.setItem('demo_close_date', closeDateStr);
+    localStorage.setItem('demo_home_address', '742 Evergreen Terrace, Springfield, IL 62704');
+    // Clear previous onboarding so full flow always runs
+    localStorage.removeItem(`week1_setup_${demoId}`);
+    localStorage.removeItem(`onboarding_done_${demoId}`);
+    localStorage.removeItem(`walkthrough_done_w1_${demoId}`);
+    return demoId;
+  };
+
   const handleModuleClick = (path) => {
     if (path === '/Dashboard') {
+      seedDemoData();
       navigate('/OnboardingWeek1');
       return;
     }
@@ -150,7 +171,7 @@ export default function PreviewHub() {
                     {module.description}
                   </p>
                   <div className="flex items-center gap-2 text-orange-500 font-semibold text-sm group-hover:gap-3 transition-all">
-                    <span>Open Portal</span>
+                    <span>{module.id === 'buyer' ? 'LAUNCH DEMO' : 'Open Portal'}</span>
                     <Play className="w-3.5 h-3.5" />
                   </div>
                 </div>

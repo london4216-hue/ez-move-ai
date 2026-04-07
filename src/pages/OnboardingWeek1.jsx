@@ -21,7 +21,12 @@ export default function OnboardingWeek1() {
 
   useEffect(() => {
     if (PUBLIC_DEMO_MODE) {
-      setUser({ id: getDemoUserId(), home_address: '' });
+      const demoId = getDemoUserId();
+      const demoAddress = localStorage.getItem('demo_home_address') || '742 Evergreen Terrace, Springfield, IL 62704';
+      const demoCloseDate = localStorage.getItem('demo_close_date') || (() => {
+        const d = new Date(); d.setDate(d.getDate() + 30); return d.toISOString().split('T')[0];
+      })();
+      setUser({ id: demoId, home_address: demoAddress, estimated_close_date: demoCloseDate });
       setLoading(false);
       return;
     }
