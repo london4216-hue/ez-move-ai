@@ -11,7 +11,7 @@ export const WEEK1_TASKS = [
   {
     id: "w1-2",
     title: "Start donation / sell pile",
-    description: "Decide what's worth selling at estate sale vs. donating",
+    description: "What's worth selling vs. donating",
     emoji: "📦",
     ai_search_query: null,
     ai_label: null,
@@ -19,7 +19,7 @@ export const WEEK1_TASKS = [
   {
     id: "w1-3",
     title: "Estate sale decision",
-    description: "Do you need a professional estate sale company?",
+    description: "Find local estate sale professionals",
     emoji: "🏷️",
     ai_search_query: "top rated estate sale professionals near",
     ai_label: "Find Estate Sale Professionals",
@@ -27,9 +27,17 @@ export const WEEK1_TASKS = [
   {
     id: "w1-4",
     title: "Request mover quotes",
-    description: "Compare 3 top-rated local movers",
+    description: "Compare 3 top-rated movers side by side",
     emoji: "🚚",
     ai_search_query: "top rated local movers near",
     ai_label: "Find Local Movers",
+  },
+  {
+    id: "w1-5",
+    title: "Finalize mover",
+    description: "Confirm mover selection and lock in date",
+    emoji: "✅",
+    ai_search_query: null,
+    ai_label: null,
   },
 ];

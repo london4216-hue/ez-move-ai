@@ -17,7 +17,7 @@ const MODULES = [
   },
   {
     id: 'admin',
-    label: 'Super Admin',
+    label: 'Super Admin Portal',
     icon: Shield,
     path: '/SuperAdmin',
     color: 'bg-red-600',
