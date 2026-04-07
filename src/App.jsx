@@ -21,6 +21,7 @@ import DemoFlow from './pages/DemoFlow';
 import DemoLogin from './pages/DemoLogin';
 
 
+import OnboardingWeek1 from './pages/OnboardingWeek1';
 import BuyerExperience from './pages/BuyerExperience';
 import Marketplace from './pages/Marketplace';
 import AccessExpired from './pages/AccessExpired';
@@ -66,8 +67,9 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
-      <Route path="/" element={<PreviewHub />} />
-      <Route path="/register" element={PUBLIC_DEMO_MODE ? <PreviewHub /> : <Register />} />
+      <Route path="/" element={PUBLIC_DEMO_MODE ? <OnboardingWeek1 /> : <PreviewHub />} />
+      <Route path="/OnboardingWeek1" element={<OnboardingWeek1 />} />
+      <Route path="/register" element={PUBLIC_DEMO_MODE ? <OnboardingWeek1 /> : <Register />} />
       <Route path="/signup" element={PUBLIC_DEMO_MODE ? <PreviewHub /> : <Home />} />
       <Route path="/sign-up" element={PUBLIC_DEMO_MODE ? <PreviewHub /> : <Home />} />
       <Route path="/agent-signup" element={PUBLIC_DEMO_MODE ? <PreviewHub /> : <Home />} />
