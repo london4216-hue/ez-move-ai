@@ -83,16 +83,13 @@ export default function PreviewHub() {
     localStorage.removeItem(`pre_onboarding_done_${demoId}`);
     localStorage.removeItem(`pre_onboarding_${demoId}`);
     localStorage.removeItem(`demo_mover_cost_${demoId}`);
-    // Also clear for the hardcoded demo-user ID used in Dashboard's demo mode
-    localStorage.removeItem('onboarding_done_demo-user');
-    localStorage.removeItem('onboarding_progress_demo-user');
     return demoId;
   };
 
   const handleModuleClick = (path) => {
     if (path === '/Dashboard') {
       seedDemoData();
-      navigate('/BuyerExperience');
+      navigate('/OnboardingWeek1');
       return;
     }
     navigate(path);

@@ -242,7 +242,7 @@ function Step0Welcome({ onNext }) {
   );
 }
 
-function Step1Basics({ data, onChange }) {
+function Step1Basics({ data, onChange, onNext }) {
   const [calculating, setCalculating] = useState(false);
 
   const calcDistance = async () => {
@@ -252,6 +252,8 @@ function Step1Basics({ data, onChange }) {
     if (from && to) onChange("miles", Math.round(haversineDistance(from.lat, from.lon, to.lat, to.lon)));
     setCalculating(false);
   };
+
+  const canNext = data.moveDate && data.fromAddress && data.toAddress && data.homeType;
 
   return (
     <div className="space-y-4">
@@ -290,60 +292,60 @@ function Step1Basics({ data, onChange }) {
           </div>
         </div>
       </Card>
+      <PrimaryBtn onClick={onNext} disabled={!canNext}>Next: Inventory <ChevronRight className="w-4 h-4" /></PrimaryBtn>
     </div>
   );
 }
 
-// All items in one flat list for icon grid
-const ALL_ITEMS = [
-  { id: "bed_queen", label: "Queen Bed", emoji: "🛏️" },
-  { id: "bed_king", label: "King Bed", emoji: "🛏️" },
-  { id: "sofa_3", label: "3-Seat Sofa", emoji: "🛋️" },
-  { id: "dining_table", label: "Dining Table", emoji: "🪑" },
-  { id: "dresser", label: "Dresser", emoji: "🪞" },
-  { id: "tv", label: "TV", emoji: "📺" },
-  { id: "office_desk", label: "Office Desk", emoji: "🖥️" },
-  { id: "bookshelf", label: "Bookshelf", emoji: "📚" },
-  { id: "nightstand", label: "Nightstand", emoji: "🪔" },
-  { id: "coffee_table", label: "Coffee Table", emoji: "🪵" },
-  { id: "kitchen_island", label: "Kitchen Island", emoji: "🍳" },
-  { id: "boxes", label: "Boxes", emoji: "📦" },
-];
+function RoomCard({ room, roomInventory, onChange }) {
+  const [expanded, setExpanded] = useState(false);
+  const items = ROOM_ITEMS[room.id] || [];
+  const totalQty = Object.values(roomInventory || {}).reduce((a, b) => a + b, 0);
 
-function ItemIcon({ item, qty, onSelect }) {
+  const setQty = (itemId, qty) => {
+    onChange({ ...(roomInventory || {}), [itemId]: qty });
+    if (!expanded && qty > 0) setExpanded(true);
+  };
+
   return (
-    <button
-      onClick={() => onSelect(item.id)}
-      className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all active:scale-95 ${
-        qty > 0
-          ? "border-orange-300 bg-orange-50 shadow-md"
-          : "border-slate-200 bg-white hover:border-slate-300"
-      }`}
-    >
-      <span className="text-3xl">{item.emoji}</span>
-      <p className="text-xs font-bold text-slate-700 text-center leading-tight">{item.label}</p>
-      {qty > 0 && <p className="text-lg font-black text-orange-600">{qty}</p>}
-    </button>
+    <div className={`rounded-2xl border-2 transition-all ${totalQty > 0 ? "border-orange-300 bg-orange-50/30" : "border-slate-200 bg-white"}`}>
+      <button
+        className="w-full flex items-center justify-between px-4 py-3.5"
+        onClick={() => setExpanded(e => !e)}
+      >
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">{room.emoji}</span>
+          <div className="text-left">
+            <p className="text-sm font-bold text-slate-800">{room.label}</p>
+            {totalQty > 0 && <p className="text-xs text-orange-500 font-semibold">{totalQty} item{totalQty !== 1 ? "s" : ""} added</p>}
+          </div>
+        </div>
+        {expanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+      </button>
+
+      {expanded && (
+        <div className="px-4 pb-4 border-t border-slate-100 mt-0 pt-3">
+          {items.map(item => (
+            <QtyRow
+              key={item.id}
+              label={item.label}
+              emoji={item.emoji}
+              value={(roomInventory || {})[item.id] || 0}
+              onChange={qty => setQty(item.id, qty)}
+            />
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
 function Step2Inventory({ data, onChange, onNext }) {
-  const flatInventory = data.inventory || {};
+  const inventory = data.inventory || {};
   const specialItems = data.specialItems || [];
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [quantity, setQuantity] = useState(1);
 
-  const handleSelectItem = (itemId) => {
-    setSelectedItem(itemId);
-    setQuantity(flatInventory[itemId] || 1);
-  };
-
-  const handleAddItem = () => {
-    if (selectedItem && quantity > 0) {
-      onChange("inventory", { ...flatInventory, [selectedItem]: quantity });
-      setSelectedItem(null);
-      setQuantity(1);
-    }
+  const setRoomInventory = (roomId, roomData) => {
+    onChange("inventory", { ...inventory, [roomId]: roomData });
   };
 
   const toggleSpecial = (id) => {
@@ -352,74 +354,33 @@ function Step2Inventory({ data, onChange, onNext }) {
     onChange("specialItems", without.includes(id) ? without.filter(s => s !== id) : [...without, id]);
   };
 
-  const totalItems = Object.values(flatInventory).reduce((a, b) => a + b, 0);
-  const currentItem = selectedItem ? ALL_ITEMS.find(i => i.id === selectedItem) : null;
+  const totalItems = Object.values(inventory).reduce((sum, room) =>
+    sum + Object.values(room || {}).reduce((a, b) => a + b, 0), 0);
 
   return (
     <div className="space-y-4">
-      <InsightBanner text="Tap items to add them. The more detail you provide, the more accurate your quote." />
+      <InsightBanner text="Tap each room to add items. The more detail you provide, the more accurate your quote." />
 
-      {/* Icon Grid */}
       <Card>
-        <h2 className="text-xl font-black text-slate-900 mb-4">Select Items</h2>
-        <div className="grid grid-cols-3 gap-3">
-          {ALL_ITEMS.map(item => (
-            <ItemIcon
-              key={item.id}
-              item={item}
-              qty={flatInventory[item.id] || 0}
-              onSelect={handleSelectItem}
+        <h2 className="text-xl font-black text-slate-900 mb-1">Room-by-Room Inventory</h2>
+        <p className="text-sm text-slate-500 mb-4">Tap a room to expand and add items.</p>
+        <div className="space-y-2">
+          {ROOM_TYPES.map(room => (
+            <RoomCard
+              key={room.id}
+              room={room}
+              roomInventory={inventory[room.id]}
+              onChange={(roomData) => setRoomInventory(room.id, roomData)}
             />
           ))}
         </div>
+        {totalItems > 0 && (
+          <div className="mt-4 bg-orange-50 border border-orange-100 rounded-xl px-4 py-3 text-center">
+            <p className="text-sm font-bold text-orange-600">{totalItems} total items across your rooms</p>
+          </div>
+        )}
       </Card>
 
-      {/* Quantity Selector */}
-      {selectedItem && currentItem && (
-        <Card className="border-2 border-orange-300 bg-orange-50/50">
-          <p className="text-sm font-black text-slate-800 mb-4">How many {currentItem.label}?</p>
-          <div className="flex items-center justify-center gap-4">
-            <button
-              onClick={() => setQuantity(Math.max(0, quantity - 1))}
-              className="w-12 h-12 rounded-xl border-2 border-slate-200 flex items-center justify-center text-lg font-black text-slate-600 hover:bg-white"
-            >
-              −
-            </button>
-            <span className="text-4xl font-black text-orange-600 w-12 text-center">{quantity}</span>
-            <button
-              onClick={() => setQuantity(quantity + 1)}
-              className="w-12 h-12 rounded-xl border-2 border-slate-200 flex items-center justify-center text-lg font-black text-slate-600 hover:bg-white"
-            >
-              +
-            </button>
-          </div>
-          <div className="flex gap-2 mt-4">
-            <PrimaryBtn onClick={handleAddItem}>Add to Inventory</PrimaryBtn>
-            <button onClick={() => setSelectedItem(null)} className="flex-1 py-3 rounded-xl border-2 border-slate-200 text-slate-600 font-bold text-sm">Cancel</button>
-          </div>
-        </Card>
-      )}
-
-      {/* Current Inventory Preview */}
-      {totalItems > 0 && (
-        <Card>
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3">Current Inventory</p>
-          <div className="flex flex-wrap gap-2">
-            {Object.entries(flatInventory)
-              .filter(([, qty]) => qty > 0)
-              .map(([itemId, qty]) => {
-                const item = ALL_ITEMS.find(i => i.id === itemId);
-                return item ? (
-                  <div key={itemId} className="bg-slate-100 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700">
-                    {item.emoji} {item.label} × {qty}
-                  </div>
-                ) : null;
-              })}
-          </div>
-        </Card>
-      )}
-
-      {/* Special Items */}
       <Card>
         <h2 className="text-lg font-black text-slate-900 mb-1">Special Items</h2>
         <p className="text-sm text-slate-500 mb-4">Require certified handlers — select all that apply.</p>
@@ -430,6 +391,10 @@ function Step2Inventory({ data, onChange, onNext }) {
           ))}
         </div>
       </Card>
+
+      <PrimaryBtn onClick={onNext} disabled={totalItems === 0 && specialItems.length === 0}>
+        Next: Access Conditions <ChevronRight className="w-4 h-4" />
+      </PrimaryBtn>
     </div>
   );
 }
@@ -460,7 +425,7 @@ function Step3Access({ data, onChange, onNext }) {
           ))}
         </div>
       </Card>
-
+      <PrimaryBtn onClick={onNext} disabled={!ac.stairs || !ac.parking}>See My Quote <ChevronRight className="w-4 h-4" /></PrimaryBtn>
     </div>
   );
 }
@@ -525,6 +490,9 @@ function StepStaysGoes({ data, onChange, onNext }) {
       <PrimaryBtn onClick={onNext} disabled={!allDecided}>
         Get My AI Move Summary <ChevronRight className="w-4 h-4" />
       </PrimaryBtn>
+      <button onClick={onNext} className="w-full text-center text-xs text-slate-400 font-semibold py-2">
+        Skip — decide later
+      </button>
     </div>
   );
 }
@@ -584,18 +552,16 @@ function Step5Quote({ quote, onNext }) {
         </div>
       </Card>
 
+      <PrimaryBtn onClick={onNext}>Get My AI Move Summary <ChevronRight className="w-4 h-4" /></PrimaryBtn>
     </div>
   );
 }
 
 function Step6Summary({ state, quote, onFinish }) {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState(null);
-  const [started, setStarted] = useState(false);
 
-  const generate = () => {
-    setLoading(true);
-    setStarted(true);
+  useState(() => {
     const totalItems = Object.values(state.inventory || {}).reduce((sum, room) =>
       sum + Object.values(room || {}).reduce((a, b) => a + b, 0), 0);
     base44.integrations.Core.InvokeLLM({
@@ -610,29 +576,7 @@ function Step6Summary({ state, quote, onFinish }) {
         }
       }
     }).then(res => { setSummary(res); setLoading(false); });
-  };
-
-  if (!started) {
-    return (
-      <div className="space-y-6">
-        <div className="text-center py-8">
-          <div className="text-5xl mb-4">✨</div>
-          <h2 className="text-2xl font-black text-slate-900 mb-2">Your Move Quote is Ready!</h2>
-          <p className="text-sm text-slate-500 max-w-xs mx-auto">Generate a personalized AI move summary with a day-of timeline, risk radar, and pro tips.</p>
-        </div>
-        <div className="bg-orange-50 border border-orange-100 rounded-2xl p-5 text-center">
-          <p className="text-3xl font-black text-orange-600 mb-1">${quote.total.toLocaleString()}</p>
-          <p className="text-xs text-slate-500">Estimated range: ${quote.low.toLocaleString()} – ${quote.high.toLocaleString()}</p>
-        </div>
-        <PrimaryBtn onClick={generate}>
-          <Sparkles className="w-4 h-4" /> Generate My AI Move Summary
-        </PrimaryBtn>
-        <button onClick={onFinish} className="w-full text-center text-xs text-slate-400 font-semibold py-2">
-          Skip — go to my dashboard
-        </button>
-      </div>
-    );
-  }
+  }, []);
 
   if (loading) {
     return (
@@ -713,39 +657,6 @@ function Step6Summary({ state, quote, onFinish }) {
   );
 }
 
-// ─── Mini Timeline Strip ──────────────────────────────────────────────────────
-
-const STEP_ICONS = ["🎉", "📍", "📦", "🚪", "💰", "✨"];
-
-function MiniTimeline({ currentStep }) {
-  return (
-    <div className="flex items-center justify-center gap-1 py-4 overflow-x-auto">
-      {STEP_TITLES.map((title, i) => (
-        <div key={i} className="flex items-center gap-1">
-          <div className={`flex flex-col items-center gap-1 transition-all ${
-            i < currentStep ? "opacity-100" : i === currentStep ? "opacity-100" : "opacity-30"
-          }`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm border-2 transition-all ${
-              i < currentStep
-                ? "bg-orange-100 border-orange-400"
-                : i === currentStep
-                ? "bg-orange-500 border-orange-500 shadow-md shadow-orange-200"
-                : "bg-white border-slate-200"
-            }`}>
-              {i < currentStep ? "✓" : STEP_ICONS[i]}
-            </div>
-          </div>
-          {i < STEP_TITLES.length - 1 && (
-            <div className={`w-4 h-0.5 rounded-full mb-2 ${
-              i < currentStep ? "bg-orange-400" : "bg-slate-200"
-            }`} />
-          )}
-        </div>
-      ))}
-    </div>
-  );
-}
-
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 export default function MoverQuoteOnboarding({ userId, onComplete }) {
@@ -766,39 +677,28 @@ export default function MoverQuoteOnboarding({ userId, onComplete }) {
   });
 
   const quote = step >= 4 ? calcQuote(state) : null;
+  // Save move profile for task generation when completing
+  const saveProfile = (s) => localStorage.setItem(`pre_onboarding_${userId}`, JSON.stringify({ ...s, fromMoverQuote: true }));
 
   const setField = (key, val) => {
-    const next2 = { ...state, [key]: val };
-    setState(next2);
-    localStorage.setItem(`mq_${userId}`, JSON.stringify(next2));
+    const next = { ...state, [key]: val };
+    setState(next);
+    localStorage.setItem(`mq_${userId}`, JSON.stringify(next));
   };
 
   const next = () => setStep(s => Math.min(TOTAL_STEPS - 1, s + 1));
   const back = () => setStep(s => Math.max(0, s - 1));
 
   const finish = () => {
-    localStorage.setItem(`pre_onboarding_${userId}`, JSON.stringify({ ...state, fromMoverQuote: true }));
+    saveProfile(state);
     if (quote) localStorage.setItem(`demo_mover_cost_${userId}`, JSON.stringify(quote));
     onComplete && onComplete(state);
-  };
-
-  const canProceed = (st, st2) => {
-    if (st === 0) return true;
-    if (st === 1) return !!(st2.moveDate && st2.fromAddress && st2.toAddress && st2.homeType);
-    if (st === 2) {
-      const totalItems = Object.values(st2.inventory || {}).reduce((sum, room) =>
-        sum + Object.values(room || {}).reduce((a, b) => a + b, 0), 0);
-      return totalItems > 0 || (st2.specialItems || []).length > 0;
-    }
-    if (st === 3) return !!(st2.accessConditions?.stairs && st2.accessConditions?.parking);
-    if (st === 4) return true;
-    return false;
   };
 
   return (
     <div className="w-full animate-fade-in" style={{ background: "linear-gradient(180deg,#F7F9FC 0%,#FFFFFF 100%)", minHeight: "100vh" }}>
 
-      {/* Sticky top header */}
+      {/* Sticky header */}
       <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-slate-100 shadow-sm px-5 py-3 flex items-center justify-between">
         {step > 0 ? (
           <button onClick={back} className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
@@ -817,26 +717,14 @@ export default function MoverQuoteOnboarding({ userId, onComplete }) {
         </div>
       </div>
 
-      {/* Scrollable content */}
-      <div className="px-4 pt-4 pb-40 max-w-lg mx-auto space-y-4">
+      <div className="px-4 pt-4 pb-24 max-w-lg mx-auto space-y-4">
         {step === 0 && <Step0Welcome onNext={next} />}
-        {step === 1 && <Step1Basics data={state} onChange={setField} />}
-        {step === 2 && <Step2Inventory data={state} onChange={setField} />}
-        {step === 3 && <Step3Access data={state} onChange={setField} />}
-        {step === 4 && quote && <Step5Quote quote={quote} />}
+        {step === 1 && <Step1Basics data={state} onChange={setField} onNext={next} />}
+        {step === 2 && <Step2Inventory data={state} onChange={setField} onNext={next} />}
+        {step === 3 && <Step3Access data={state} onChange={setField} onNext={next} />}
+        {step === 4 && quote && <Step5Quote quote={quote} onNext={next} />}
         {step === 5 && quote && <Step6Summary state={state} quote={quote} onFinish={finish} />}
-        {step < 5 && <MiniTimeline currentStep={step} />}
       </div>
-
-      {step > 0 && step < 5 && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-100 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] px-4 py-4">
-          <div className="max-w-lg mx-auto">
-            <PrimaryBtn onClick={next} disabled={!canProceed(step, state)}> 
-              {step === 4 ? "Get My AI Summary" : "Continue"} <ChevronRight className="w-4 h-4" />
-            </PrimaryBtn>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
