@@ -63,6 +63,14 @@ export default function PreviewHub() {
   }, []);
 
   const handleModuleClick = (path) => {
+    if (path === '/Dashboard') {
+      const userId = user?.id || 'demo-user';
+      const onboardingDone = localStorage.getItem(`onboarding_done_${userId}`);
+      if (!onboardingDone) {
+        navigate('/OnboardingWeek1');
+        return;
+      }
+    }
     navigate(path);
   };
 
