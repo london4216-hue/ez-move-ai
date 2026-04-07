@@ -2,41 +2,20 @@ import { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { PUBLIC_DEMO_MODE } from "@/lib/featureFlags";
 import {
-  ChevronRight, ChevronLeft, CheckCircle2, Sparkles, Loader2,
-  MapPin, Truck, DollarSign, Star, AlertTriangle
+  ChevronRight, ChevronLeft, CheckCircle2, Sparkles,
+  MapPin, DollarSign, Star, AlertTriangle, Plus, Minus, ChevronDown, ChevronUp
 } from "lucide-react";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 7;
 
 const STEP_TITLES = [
   "Welcome!", "Move Basics", "Your Inventory", "Access Conditions",
-  "Packing Needs", "AI Estimate", "Cost Breakdown", "AI Move Summary"
+  "Packing Needs", "Cost Breakdown", "AI Move Summary"
 ];
 
 const HOME_TYPES = ["Apartment", "House", "Townhome", "Condo", "Studio"];
-
-const ROOMS = [
-  { id: "living_room", label: "Living Room", emoji: "🛋️" },
-  { id: "bedroom", label: "Bedroom (each)", emoji: "🛏️" },
-  { id: "kitchen", label: "Kitchen", emoji: "🍳" },
-  { id: "dining_room", label: "Dining Room", emoji: "🪑" },
-  { id: "office", label: "Home Office", emoji: "💻" },
-  { id: "garage", label: "Garage", emoji: "🚗" },
-  { id: "basement", label: "Basement", emoji: "📦" },
-];
-
-const FURNITURE = [
-  { id: "sofa", label: "Sofa / Sectional", emoji: "🛋️" },
-  { id: "bed_frame", label: "Bed Frame", emoji: "🛏️" },
-  { id: "dresser", label: "Dresser", emoji: "🪞" },
-  { id: "dining_table", label: "Dining Table", emoji: "🪑" },
-  { id: "desk", label: "Desk", emoji: "🖥️" },
-  { id: "bookshelf", label: "Bookshelf", emoji: "📚" },
-  { id: "wardrobe", label: "Wardrobe / Armoire", emoji: "👕" },
-  { id: "tv_stand", label: "TV & Stand", emoji: "📺" },
-];
 
 const SPECIAL_ITEMS = [
   { id: "piano", label: "🎹 Piano", fee: 300 },
@@ -48,14 +27,6 @@ const SPECIAL_ITEMS = [
   { id: "none", label: "None", fee: 0 },
 ];
 
-const APPLIANCES = [
-  { id: "washer_dryer", label: "Washer / Dryer", emoji: "🫧" },
-  { id: "fridge", label: "Refrigerator", emoji: "🧊" },
-  { id: "dishwasher", label: "Dishwasher", emoji: "🍽️" },
-  { id: "stove", label: "Stove / Range", emoji: "🔥" },
-  { id: "none", label: "None", emoji: "✅" },
-];
-
 const PACK_OPTIONS = [
   { id: "full", label: "Full Pack", sub: "Crew packs everything", fee: 500 },
   { id: "partial", label: "Partial Pack", sub: "Crew packs kitchen + fragile", fee: 250 },
@@ -64,6 +35,63 @@ const PACK_OPTIONS = [
 ];
 
 const MATERIAL_OPTIONS = ["Boxes", "Packing Tape", "Bubble Wrap", "Packing Paper", "Wardrobe Boxes", "Mattress Bags"];
+
+// ─── Room Inventory Definitions ───────────────────────────────────────────────
+
+const ROOM_TYPES = [
+  { id: "bedroom", label: "Bedroom", emoji: "🛏️" },
+  { id: "living_room", label: "Living Room", emoji: "🛋️" },
+  { id: "kitchen", label: "Kitchen", emoji: "🍳" },
+  { id: "garage", label: "Garage", emoji: "🚗" },
+  { id: "bathroom", label: "Bathroom", emoji: "🚿" },
+  { id: "office", label: "Home Office", emoji: "💻" },
+];
+
+const ROOM_ITEMS = {
+  bedroom: [
+    { id: "bed_twin", label: "Bed (Twin)", emoji: "🛏️" },
+    { id: "bed_full", label: "Bed (Full)", emoji: "🛏️" },
+    { id: "bed_queen", label: "Bed (Queen)", emoji: "🛏️" },
+    { id: "bed_king", label: "Bed (King)", emoji: "🛏️" },
+    { id: "nightstand", label: "Nightstand", emoji: "🪔" },
+    { id: "dresser", label: "Dresser", emoji: "🪞" },
+    { id: "tv", label: "TV", emoji: "📺" },
+    { id: "lamps", label: "Lamps", emoji: "💡" },
+    { id: "boxes", label: "Boxes", emoji: "📦" },
+  ],
+  living_room: [
+    { id: "sofa_2", label: "Sofa (2-seat)", emoji: "🛋️" },
+    { id: "sofa_3", label: "Sofa (3-seat)", emoji: "🛋️" },
+    { id: "sectional", label: "Sectional", emoji: "🛋️" },
+    { id: "coffee_table", label: "Coffee Table", emoji: "🪵" },
+    { id: "tv", label: "TV", emoji: "📺" },
+    { id: "tv_stand", label: "TV Stand", emoji: "🗄️" },
+    { id: "lamps", label: "Lamps", emoji: "💡" },
+    { id: "boxes", label: "Boxes", emoji: "📦" },
+  ],
+  kitchen: [
+    { id: "cabinets", label: "Cabinets", emoji: "🗄️" },
+    { id: "dining_table", label: "Dining Table", emoji: "🪑" },
+    { id: "chairs", label: "Chairs", emoji: "🪑" },
+    { id: "boxes", label: "Boxes", emoji: "📦" },
+  ],
+  garage: [
+    { id: "tool_chest", label: "Tool Chest", emoji: "🧰" },
+    { id: "lawn_mower", label: "Lawn Mower", emoji: "🌿" },
+    { id: "bikes", label: "Bikes", emoji: "🚲" },
+    { id: "storage_shelves", label: "Storage Shelves", emoji: "📦" },
+  ],
+  bathroom: [
+    { id: "cabinets", label: "Cabinets", emoji: "🗄️" },
+    { id: "boxes", label: "Boxes", emoji: "📦" },
+  ],
+  office: [
+    { id: "desk", label: "Desk", emoji: "🖥️" },
+    { id: "office_chair", label: "Office Chair", emoji: "🪑" },
+    { id: "bookshelves", label: "Bookshelves", emoji: "📚" },
+    { id: "boxes", label: "Boxes", emoji: "📦" },
+  ],
+};
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -85,25 +113,33 @@ async function geocode(address) {
 }
 
 function calcQuote(state) {
-  const { rooms, furniture, specialItems, appliances, packOption, accessConditions, miles } = state;
-  const roomCount = Object.values(rooms || {}).reduce((a, b) => a + b, 0);
-  const furnitureCount = (furniture || []).length;
+  const { inventory = {}, specialItems = [], packOption, accessConditions = {}, miles } = state;
+
+  // Count total items from detailed inventory
+  let totalItems = 0;
+  let roomCount = 0;
+  Object.values(inventory).forEach(roomItems => {
+    const roomTotal = Object.values(roomItems || {}).reduce((a, b) => a + b, 0);
+    if (roomTotal > 0) roomCount++;
+    totalItems += roomTotal;
+  });
+
   const specialFees = (specialItems || []).filter(s => s !== "none")
     .reduce((sum, s) => sum + (SPECIAL_ITEMS.find(i => i.id === s)?.fee || 0), 0);
-  const applianceCount = (appliances || []).filter(a => a !== "none").length;
   const packFee = PACK_OPTIONS.find(p => p.id === packOption)?.fee || 0;
-  const baseHours = 2 + roomCount * 0.8 + furnitureCount * 0.3 + applianceCount * 0.5;
+  const baseHours = 2 + roomCount * 0.8 + totalItems * 0.15;
   const crewSize = roomCount <= 2 ? 2 : roomCount <= 5 ? 3 : 4;
   const hourlyRate = 150 + crewSize * 20;
   const laborCost = Math.round(baseHours * hourlyRate);
   const truckCost = crewSize <= 2 ? 150 : crewSize === 3 ? 200 : 250;
   const fuelCost = Math.round((miles || 15) * 1.5);
-  const accessFee = accessConditions?.stairs > 2 ? 100 : 0;
+  const accessFee = accessConditions?.stairs === "3–5" || accessConditions?.stairs === "6+" ? 100 : 0;
   const insurance = 75;
   const total = laborCost + truckCost + fuelCost + packFee + specialFees + accessFee + insurance;
   const truckSize = crewSize <= 2 ? "16ft" : crewSize === 3 ? "20ft" : "26ft";
-  const trips = miles > 60 ? 1 : applianceCount + roomCount > 8 ? 2 : 1;
-  const complexity = Math.min(10, Math.round((roomCount + furnitureCount * 0.5 + specialFees / 100) / 2));
+  const trips = (miles || 15) > 60 ? 1 : totalItems > 40 ? 2 : 1;
+  const complexity = Math.min(10, Math.round((roomCount + totalItems * 0.2 + specialFees / 100) / 2));
+
   return {
     crewSize, estimatedHours: Math.round(baseHours * 10) / 10, truckSize, trips, complexity,
     laborCost, truckCost, fuelCost, packCost: packFee, materialsCost: Math.round(packFee * 0.2),
@@ -155,6 +191,25 @@ function InsightBanner({ text }) {
   );
 }
 
+function QtyRow({ label, emoji, value, onChange }) {
+  return (
+    <div className="flex items-center justify-between py-2 border-b border-slate-50 last:border-0">
+      <span className="text-sm text-slate-700">{emoji} {label}</span>
+      <div className="flex items-center gap-2">
+        <button onClick={() => onChange(Math.max(0, value - 1))}
+          className="w-7 h-7 rounded-lg border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50">
+          <Minus className="w-3 h-3" />
+        </button>
+        <span className="text-sm font-black text-slate-800 w-5 text-center">{value}</span>
+        <button onClick={() => onChange(value + 1)}
+          className="w-7 h-7 rounded-lg border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50">
+          <Plus className="w-3 h-3" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── Steps ────────────────────────────────────────────────────────────────────
 
 function Step0Welcome({ onNext }) {
@@ -171,8 +226,8 @@ function Step0Welcome({ onNext }) {
         <p className="text-xs font-bold text-orange-500 uppercase tracking-wide">What we'll cover</p>
         {[
           ["📍", "Your move details & addresses"],
-          ["📦", "Your furniture & inventory"],
-          ["🚛", "AI crew & truck recommendation"],
+          ["📦", "Room-by-room inventory"],
+          ["🚛", "Access conditions & packing"],
           ["💰", "Full cost breakdown & quote"],
           ["✨", "Personalized AI move summary"],
         ].map(([emoji, text]) => (
@@ -235,24 +290,6 @@ function Step1Basics({ data, onChange, onNext }) {
               {HOME_TYPES.map(t => <ToggleChip key={t} label={t} selected={data.homeType === t} onClick={() => onChange("homeType", t)} />)}
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wide block mb-1.5">Floors / Stairs</label>
-              <select value={data.floors || ""} onChange={e => onChange("floors", e.target.value)}
-                className="w-full px-3 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 bg-white">
-                <option value="">Select</option>
-                {["1 floor", "2 floors", "3+ floors"].map(f => <option key={f}>{f}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wide block mb-1.5">Elevator?</label>
-              <select value={data.elevator || ""} onChange={e => onChange("elevator", e.target.value)}
-                className="w-full px-3 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400 bg-white">
-                <option value="">Select</option>
-                {["Yes — full service", "Yes — freight only", "No elevator"].map(o => <option key={o}>{o}</option>)}
-              </select>
-            </div>
-          </div>
         </div>
       </Card>
       <PrimaryBtn onClick={onNext} disabled={!canNext}>Next: Inventory <ChevronRight className="w-4 h-4" /></PrimaryBtn>
@@ -260,92 +297,104 @@ function Step1Basics({ data, onChange, onNext }) {
   );
 }
 
-function Step2Inventory({ data, onChange, onNext }) {
-  const rooms = data.rooms || {};
-  const furniture = data.furniture || [];
-  const boxCount = data.boxCount || 0;
-  const specialItems = data.specialItems || [];
-  const appliances = data.appliances || [];
+function RoomCard({ room, roomInventory, onChange }) {
+  const [expanded, setExpanded] = useState(false);
+  const items = ROOM_ITEMS[room.id] || [];
+  const totalQty = Object.values(roomInventory || {}).reduce((a, b) => a + b, 0);
 
-  const toggleList = (key, id, list, noneId) => {
-    if (id === noneId) { onChange(key, [noneId]); return; }
-    const without = list.filter(s => s !== noneId);
-    onChange(key, without.includes(id) ? without.filter(s => s !== id) : [...without, id]);
+  const setQty = (itemId, qty) => {
+    onChange({ ...(roomInventory || {}), [itemId]: qty });
+    if (!expanded && qty > 0) setExpanded(true);
   };
 
-  const roomCount = Object.values(rooms).reduce((a, b) => a + b, 0);
-  const canNext = roomCount > 0 && specialItems.length > 0 && appliances.length > 0;
+  return (
+    <div className={`rounded-2xl border-2 transition-all ${totalQty > 0 ? "border-orange-300 bg-orange-50/30" : "border-slate-200 bg-white"}`}>
+      <button
+        className="w-full flex items-center justify-between px-4 py-3.5"
+        onClick={() => setExpanded(e => !e)}
+      >
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">{room.emoji}</span>
+          <div className="text-left">
+            <p className="text-sm font-bold text-slate-800">{room.label}</p>
+            {totalQty > 0 && <p className="text-xs text-orange-500 font-semibold">{totalQty} item{totalQty !== 1 ? "s" : ""} added</p>}
+          </div>
+        </div>
+        {expanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+      </button>
+
+      {expanded && (
+        <div className="px-4 pb-4 border-t border-slate-100 mt-0 pt-3">
+          {items.map(item => (
+            <QtyRow
+              key={item.id}
+              label={item.label}
+              emoji={item.emoji}
+              value={(roomInventory || {})[item.id] || 0}
+              onChange={qty => setQty(item.id, qty)}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Step2Inventory({ data, onChange, onNext }) {
+  const inventory = data.inventory || {};
+  const specialItems = data.specialItems || [];
+
+  const setRoomInventory = (roomId, roomData) => {
+    onChange("inventory", { ...inventory, [roomId]: roomData });
+  };
+
+  const toggleSpecial = (id) => {
+    if (id === "none") { onChange("specialItems", ["none"]); return; }
+    const without = specialItems.filter(s => s !== "none");
+    onChange("specialItems", without.includes(id) ? without.filter(s => s !== id) : [...without, id]);
+  };
+
+  const totalItems = Object.values(inventory).reduce((sum, room) =>
+    sum + Object.values(room || {}).reduce((a, b) => a + b, 0), 0);
 
   return (
     <div className="space-y-4">
-      <InsightBanner text="Inventory is the #1 factor in your quote accuracy. More detail = better price." />
-      <Card>
-        <h2 className="text-xl font-black text-slate-900 mb-1">Rooms</h2>
-        <p className="text-sm text-slate-500 mb-4">How many of each room are you moving?</p>
-        <div className="space-y-3">
-          {ROOMS.map(r => (
-            <div key={r.id} className="flex items-center justify-between">
-              <span className="text-sm font-semibold text-slate-700">{r.emoji} {r.label}</span>
-              <div className="flex items-center gap-3">
-                <button onClick={() => onChange("rooms", { ...rooms, [r.id]: Math.max(0, (rooms[r.id] || 0) - 1) })}
-                  className="w-8 h-8 rounded-xl border border-slate-200 text-slate-500 font-bold text-lg flex items-center justify-center hover:bg-slate-50">−</button>
-                <span className="text-sm font-black text-slate-800 w-5 text-center">{rooms[r.id] || 0}</span>
-                <button onClick={() => onChange("rooms", { ...rooms, [r.id]: (rooms[r.id] || 0) + 1 })}
-                  className="w-8 h-8 rounded-xl border border-slate-200 text-slate-500 font-bold text-lg flex items-center justify-center hover:bg-slate-50">+</button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </Card>
+      <InsightBanner text="Tap each room to add items. The more detail you provide, the more accurate your quote." />
 
       <Card>
-        <h2 className="text-lg font-black text-slate-900 mb-1">Large Furniture</h2>
-        <p className="text-sm text-slate-500 mb-4">Select all items you're moving.</p>
-        <div className="grid grid-cols-2 gap-2">
-          {FURNITURE.map(f => (
-            <ToggleChip key={f.id} label={`${f.emoji} ${f.label}`} selected={furniture.includes(f.id)}
-              onClick={() => { const next = furniture.includes(f.id) ? furniture.filter(i => i !== f.id) : [...furniture, f.id]; onChange("furniture", next); }} />
+        <h2 className="text-xl font-black text-slate-900 mb-1">Room-by-Room Inventory</h2>
+        <p className="text-sm text-slate-500 mb-4">Tap a room to expand and add items.</p>
+        <div className="space-y-2">
+          {ROOM_TYPES.map(room => (
+            <RoomCard
+              key={room.id}
+              room={room}
+              roomInventory={inventory[room.id]}
+              onChange={(roomData) => setRoomInventory(room.id, roomData)}
+            />
           ))}
         </div>
-      </Card>
-
-      <Card>
-        <h2 className="text-lg font-black text-slate-900 mb-1">Boxes</h2>
-        <p className="text-sm text-slate-500 mb-4">Approximately how many packed boxes?</p>
-        <div className="flex items-center gap-4">
-          <button onClick={() => onChange("boxCount", Math.max(0, boxCount - 5))}
-            className="w-10 h-10 rounded-xl border border-slate-200 text-slate-500 font-bold text-xl flex items-center justify-center hover:bg-slate-50">−</button>
-          <div className="flex-1 text-center">
-            <p className="text-3xl font-black text-orange-500">{boxCount}</p>
-            <p className="text-xs text-slate-400">boxes</p>
+        {totalItems > 0 && (
+          <div className="mt-4 bg-orange-50 border border-orange-100 rounded-xl px-4 py-3 text-center">
+            <p className="text-sm font-bold text-orange-600">{totalItems} total items across your rooms</p>
           </div>
-          <button onClick={() => onChange("boxCount", boxCount + 5)}
-            className="w-10 h-10 rounded-xl border border-slate-200 text-slate-500 font-bold text-xl flex items-center justify-center hover:bg-slate-50">+</button>
-        </div>
+        )}
       </Card>
 
       <Card>
         <h2 className="text-lg font-black text-slate-900 mb-1">Special Items</h2>
-        <p className="text-sm text-slate-500 mb-4">Require certified handlers.</p>
-        <div className="space-y-2">
+        <p className="text-sm text-slate-500 mb-4">Require certified handlers — select all that apply.</p>
+        <div className="flex flex-wrap gap-2">
           {SPECIAL_ITEMS.map(s => (
             <ToggleChip key={s.id} label={`${s.label}${s.fee > 0 ? ` (+$${s.fee})` : ""}`}
-              selected={specialItems.includes(s.id)} onClick={() => toggleList("specialItems", s.id, specialItems, "none")} />
+              selected={specialItems.includes(s.id)} onClick={() => toggleSpecial(s.id)} />
           ))}
         </div>
       </Card>
 
-      <Card>
-        <h2 className="text-lg font-black text-slate-900 mb-1">Appliances</h2>
-        <div className="flex flex-wrap gap-2 mt-3">
-          {APPLIANCES.map(a => (
-            <ToggleChip key={a.id} label={`${a.emoji} ${a.label}`}
-              selected={appliances.includes(a.id)} onClick={() => toggleList("appliances", a.id, appliances, "none")} />
-          ))}
-        </div>
-      </Card>
-
-      <PrimaryBtn onClick={onNext} disabled={!canNext}>Next: Access Conditions <ChevronRight className="w-4 h-4" /></PrimaryBtn>
+      <PrimaryBtn onClick={onNext} disabled={totalItems === 0 && specialItems.length === 0}>
+        Next: Access Conditions <ChevronRight className="w-4 h-4" />
+      </PrimaryBtn>
     </div>
   );
 }
@@ -417,55 +466,12 @@ function Step4Packing({ data, onChange, onNext }) {
           {MATERIAL_OPTIONS.map(m => <ToggleChip key={m} label={m} selected={materials.includes(m)} onClick={() => toggleMaterial(m)} />)}
         </div>
       </Card>
-      <PrimaryBtn onClick={onNext} disabled={!data.packOption}>Next: AI Estimate <ChevronRight className="w-4 h-4" /></PrimaryBtn>
+      <PrimaryBtn onClick={onNext} disabled={!data.packOption}>See My Quote <ChevronRight className="w-4 h-4" /></PrimaryBtn>
     </div>
   );
 }
 
-function Step5Estimate({ quote, onNext }) {
-  const complexityColor = quote.complexity <= 3 ? "text-emerald-500" : quote.complexity <= 6 ? "text-amber-500" : "text-red-500";
-  const complexityLabel = quote.complexity <= 3 ? "Low" : quote.complexity <= 6 ? "Medium" : "High";
-  const barColor = quote.complexity <= 3 ? "bg-emerald-400" : quote.complexity <= 6 ? "bg-amber-400" : "bg-red-400";
-
-  return (
-    <div className="space-y-4">
-      <InsightBanner text="These estimates are generated from your inventory and access data — not guessed." />
-      <Card>
-        <div className="flex items-center gap-2 mb-4">
-          <Truck className="w-5 h-5 text-orange-500" />
-          <h2 className="text-xl font-black text-slate-900">AI Crew Estimate</h2>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          {[
-            { label: "Crew Size", value: `${quote.crewSize} movers` },
-            { label: "Est. Hours", value: `${quote.estimatedHours} hrs` },
-            { label: "Truck Size", value: quote.truckSize },
-            { label: "Trips", value: `${quote.trips} trip${quote.trips > 1 ? "s" : ""}` },
-          ].map(({ label, value }) => (
-            <div key={label} className="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-center">
-              <p className="text-xl font-black text-slate-800">{value}</p>
-              <p className="text-xs text-slate-400 font-semibold mt-1">{label}</p>
-            </div>
-          ))}
-        </div>
-        <div className="mt-4 bg-slate-50 border border-slate-100 rounded-2xl p-4 flex items-center justify-between">
-          <div>
-            <p className="text-xs text-slate-400 font-semibold">Move Complexity</p>
-            <p className={`text-2xl font-black ${complexityColor}`}>{complexityLabel}</p>
-          </div>
-          <div className="flex gap-1">
-            {[...Array(10)].map((_, i) => (
-              <div key={i} className={`w-2 h-6 rounded-full ${i < quote.complexity ? barColor : "bg-slate-200"}`} />
-            ))}
-          </div>
-        </div>
-      </Card>
-      <PrimaryBtn onClick={onNext}>See My Cost Breakdown <ChevronRight className="w-4 h-4" /></PrimaryBtn>
-    </div>
-  );
-}
-
-function Step6Quote({ quote, onNext }) {
+function Step5Quote({ quote, onNext }) {
   const lineItems = [
     { label: "Labor", amount: quote.laborCost },
     { label: "Truck", amount: quote.truckCost },
@@ -480,10 +486,30 @@ function Step6Quote({ quote, onNext }) {
   return (
     <div className="space-y-4">
       <InsightBanner text="This is a binding-quality estimate. Final price varies ±10% based on actual hours." />
+
+      {/* Crew summary */}
+      <Card>
+        <h2 className="text-lg font-black text-slate-900 mb-3">Your Move at a Glance</h2>
+        <div className="grid grid-cols-2 gap-3">
+          {[
+            { label: "Crew Size", value: `${quote.crewSize} movers` },
+            { label: "Est. Hours", value: `${quote.estimatedHours} hrs` },
+            { label: "Truck Size", value: quote.truckSize },
+            { label: "Trips", value: `${quote.trips} trip${quote.trips > 1 ? "s" : ""}` },
+          ].map(({ label, value }) => (
+            <div key={label} className="bg-slate-50 border border-slate-100 rounded-xl p-3 text-center">
+              <p className="text-lg font-black text-slate-800">{value}</p>
+              <p className="text-xs text-slate-400 font-semibold mt-0.5">{label}</p>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      {/* Cost breakdown */}
       <Card>
         <div className="flex items-center gap-2 mb-4">
           <DollarSign className="w-5 h-5 text-emerald-500" />
-          <h2 className="text-xl font-black text-slate-900">Your Cost Breakdown</h2>
+          <h2 className="text-xl font-black text-slate-900">Cost Breakdown</h2>
         </div>
         <div className="space-y-2 mb-4">
           {lineItems.map(({ label, amount }) => (
@@ -499,18 +525,21 @@ function Step6Quote({ quote, onNext }) {
           <p className="text-xs text-slate-500 mt-1">Range: ${quote.low.toLocaleString()} – ${quote.high.toLocaleString()}</p>
         </div>
       </Card>
+
       <PrimaryBtn onClick={onNext}>Get My AI Move Summary <ChevronRight className="w-4 h-4" /></PrimaryBtn>
     </div>
   );
 }
 
-function Step7Summary({ state, quote, onFinish }) {
+function Step6Summary({ state, quote, onFinish }) {
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState(null);
 
   useState(() => {
+    const totalItems = Object.values(state.inventory || {}).reduce((sum, room) =>
+      sum + Object.values(room || {}).reduce((a, b) => a + b, 0), 0);
     base44.integrations.Core.InvokeLLM({
-      prompt: `You are a professional moving coordinator. Generate a personalized AI move summary for a client moving from "${state.fromAddress}" to "${state.toAddress}" on ${state.moveDate}. Home type: ${state.homeType}. Crew: ${quote.crewSize} movers. Est hours: ${quote.estimatedHours}. Truck: ${quote.truckSize}. Move complexity: ${quote.complexity}/10. Provide: 1. move_day_timeline: array of 5 time-based steps. 2. risk_radar: array of 3 top risks with risk and tip fields. 3. recommendations: 3 pro tips. 4. simulation: a short paragraph describing what move day will feel like.`,
+      prompt: `You are a professional moving coordinator. Generate a personalized AI move summary for a client moving from "${state.fromAddress || "origin"}" to "${state.toAddress || "destination"}" on ${state.moveDate || "their move date"}. Home type: ${state.homeType || "home"}. Crew: ${quote.crewSize} movers. Est hours: ${quote.estimatedHours}. Truck: ${quote.truckSize}. Total items: ${totalItems}. Move complexity: ${quote.complexity}/10. Provide: 1. move_day_timeline: array of 5 time-based steps. 2. risk_radar: array of 3 top risks with risk and tip fields. 3. recommendations: 3 pro tips. 4. simulation: a short paragraph describing what move day will feel like.`,
       response_json_schema: {
         type: "object",
         properties: {
@@ -665,9 +694,8 @@ export default function MoverQuoteOnboarding({ userId, onComplete }) {
         {step === 2 && <Step2Inventory data={state} onChange={setField} onNext={next} />}
         {step === 3 && <Step3Access data={state} onChange={setField} onNext={next} />}
         {step === 4 && <Step4Packing data={state} onChange={setField} onNext={next} />}
-        {step === 5 && quote && <Step5Estimate quote={quote} onNext={next} />}
-        {step === 6 && quote && <Step6Quote quote={quote} onNext={next} />}
-        {step === 7 && quote && <Step7Summary state={state} quote={quote} onFinish={finish} />}
+        {step === 5 && quote && <Step5Quote quote={quote} onNext={next} />}
+        {step === 6 && quote && <Step6Summary state={state} quote={quote} onFinish={finish} />}
       </div>
     </div>
   );
