@@ -66,7 +66,7 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
-      <Route path="/" element={<PreviewHub />} />
+      <Route path="/" element={<OnboardingWeek1 />} />
       <Route path="/register" element={PUBLIC_DEMO_MODE ? <PreviewHub /> : <Register />} />
       <Route path="/signup" element={PUBLIC_DEMO_MODE ? <PreviewHub /> : <Home />} />
       <Route path="/sign-up" element={PUBLIC_DEMO_MODE ? <PreviewHub /> : <Home />} />

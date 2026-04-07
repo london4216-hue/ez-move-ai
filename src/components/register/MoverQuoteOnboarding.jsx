@@ -588,6 +588,7 @@ function Step6Summary({ state, quote, onFinish }) {
       ]
     };
     try {
+      localStorage.setItem('onboardingComplete', 'true');
       try {
         const res = await base44.integrations.Core.InvokeLLM({
           prompt: `You are a professional moving coordinator. Generate a personalized AI move summary for a client moving from "${state.fromAddress || "origin"}" to "${state.toAddress || "destination"}" on ${state.moveDate || "their move date"}. Home type: ${state.homeType || "home"}. Crew: ${quote.crewSize} movers. Est hours: ${quote.estimatedHours}. Truck: ${quote.truckSize}. Total items: ${totalItems}. Move complexity: ${quote.complexity}/10. Provide: 1. move_day_timeline: array of 5 time-based steps. 2. risk_radar: array of 3 top risks with risk and tip fields. 3. recommendations: 3 pro tips. 4. simulation: a short paragraph describing what move day will feel like.`,
