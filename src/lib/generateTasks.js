@@ -16,16 +16,6 @@ export function generateTasksForUser(userId, profile = {}) {
   // ── Week 1 — Foundation ────────────────────────────────────────────────────
   tasks.push({
     userId, weekNumber: 1,
-    emoji: "📋", title: "Confirm what stays vs. goes",
-    description: "Walk through each room and finalize decisions on furniture, appliances, and personal items.",
-    instructions: "Go room by room. For each item ask: does it fit the new place? Is it worth moving? Could someone else use it better?",
-    aiTips: "Items that cost less than $50 to replace are often not worth moving. Focus your energy on sentimental and high-value items.",
-    estimatedTime: "2–3 hours",
-    status: "not_started"
-  });
-
-  tasks.push({
-    userId, weekNumber: 1,
     emoji: "📦", title: "Start donation / sell pile",
     description: "Separate items into sell, donate, and trash categories.",
     instructions: "Place colored stickers or tape on items: blue=sell, green=donate, red=trash. Take photos of sell items immediately.",
@@ -59,6 +49,17 @@ export function generateTasksForUser(userId, profile = {}) {
   }
 
   // ── Week 2 — Clearing & Logistics ─────────────────────────────────────────
+  tasks.push({
+    userId, weekNumber: 2,
+    emoji: "📋", title: "Confirm what stays vs. goes",
+    description: "Walk through each room and finalize decisions on furniture, appliances, and personal items.",
+    instructions: "Go room by room. For each item ask: does it fit the new place? Is it worth moving? Could someone else use it better?",
+    aiTips: "Items that cost less than $50 to replace are often not worth moving. Focus your energy on sentimental and high-value items.",
+    estimatedTime: "2–3 hours",
+    status: "not_started",
+    visibilityGuard: { onboardingComplete: true }
+  });
+
   tasks.push({
     userId, weekNumber: 2,
     emoji: "✅", title: "Finalize and book your mover",

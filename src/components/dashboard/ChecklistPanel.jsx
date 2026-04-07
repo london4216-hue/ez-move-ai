@@ -123,7 +123,13 @@ export default function ChecklistPanel({ user }) {
 
         <div className="px-3 pb-3 space-y-2 max-h-[560px] overflow-y-auto">
           {weekNums.map(weekNum => {
-            const weekTasks = tasks.filter(t => t.weekNumber === weekNum);
+            const onboardingComplete = localStorage.getItem('onboardingComplete') === 'true';
+            let weekTasks = tasks.filter(t => t.weekNumber === weekNum);
+            // Hide visibility-guarded tasks if onboarding not complete
+            weekTasks = weekTasks.filter(task => {
+              if (task.visibilityGuard?.onboardingComplete === true && !onboardingComplete) return false;
+              return true;
+            });
             const doneTasks = weekTasks.filter(t => t.status === "done" || t.status === "na").length;
             const activeTasks = weekTasks.filter(t => t.status !== "na" && t.status !== "skipped");
             const progress = activeTasks.length ? Math.round((weekTasks.filter(t => t.status === "done").length / activeTasks.length) * 100) : 0;
