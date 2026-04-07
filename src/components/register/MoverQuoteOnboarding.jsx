@@ -565,22 +565,47 @@ function Step6Summary({ state, quote, onFinish }) {
     setLoading(true);
     const totalItems = Object.values(state.inventory || {}).reduce((sum, room) =>
       sum + Object.values(room || {}).reduce((a, b) => a + b, 0), 0);
+    
+    // Fallback demo data if API fails or inventory is empty
+    const fallbackSummary = {
+      simulation: "You'll arrive at 8am with a 3-person crew. First hour: protective coverings, furniture padding. Mid-morning: systematic room-by-room loading. Lunch break 12-1pm. Afternoon: continue loading, final walkthrough by 4pm. You'll be settled in your new place by evening.",
+      move_day_timeline: [
+        "8:00 AM - Crew arrival, equipment setup, protective coverings",
+        "9:00 AM - Begin systematic furniture padding and loading",
+        "12:00 PM - Lunch break (30-60 min)",
+        "1:00 PM - Resume loading remaining items",
+        "4:00 PM - Final walkthrough, last checks, depart"
+      ],
+      risk_radar: [
+        { risk: "Weather delays", tip: "Monitor forecast and plan an extra day if storms are forecasted" },
+        { risk: "Hidden obstacles", tip: "Measure stairwells/doorways in new home beforehand to avoid surprises" },
+        { risk: "Item damage", tip: "Mark fragile boxes clearly and brief crew on high-value items" }
+      ],
+      recommendations: [
+        "Pack an 'essentials' box with toiletries, meds, chargers for the first night",
+        "Do a final walkthrough of old place before leaving (closets, cabinets, utilities)",
+        "Take photos of the new place's condition before furniture arrives"
+      ]
+    };
     try {
-      const res = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are a professional moving coordinator. Generate a personalized AI move summary for a client moving from "${state.fromAddress || "origin"}" to "${state.toAddress || "destination"}" on ${state.moveDate || "their move date"}. Home type: ${state.homeType || "home"}. Crew: ${quote.crewSize} movers. Est hours: ${quote.estimatedHours}. Truck: ${quote.truckSize}. Total items: ${totalItems}. Move complexity: ${quote.complexity}/10. Provide: 1. move_day_timeline: array of 5 time-based steps. 2. risk_radar: array of 3 top risks with risk and tip fields. 3. recommendations: 3 pro tips. 4. simulation: a short paragraph describing what move day will feel like.`,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            move_day_timeline: { type: "array", items: { type: "string" } },
-            risk_radar: { type: "array", items: { type: "object", properties: { risk: { type: "string" }, tip: { type: "string" } } } },
-            recommendations: { type: "array", items: { type: "string" } },
-            simulation: { type: "string" }
+      try {
+        const res = await base44.integrations.Core.InvokeLLM({
+          prompt: `You are a professional moving coordinator. Generate a personalized AI move summary for a client moving from "${state.fromAddress || "origin"}" to "${state.toAddress || "destination"}" on ${state.moveDate || "their move date"}. Home type: ${state.homeType || "home"}. Crew: ${quote.crewSize} movers. Est hours: ${quote.estimatedHours}. Truck: ${quote.truckSize}. Total items: ${totalItems}. Move complexity: ${quote.complexity}/10. Provide: 1. move_day_timeline: array of 5 time-based steps. 2. risk_radar: array of 3 top risks with risk and tip fields. 3. recommendations: 3 pro tips. 4. simulation: a short paragraph describing what move day will feel like.`,
+          response_json_schema: {
+            type: "object",
+            properties: {
+              move_day_timeline: { type: "array", items: { type: "string" } },
+              risk_radar: { type: "array", items: { type: "object", properties: { risk: { type: "string" }, tip: { type: "string" } } } },
+              recommendations: { type: "array", items: { type: "string" } },
+              simulation: { type: "string" }
+            }
           }
-        }
-      });
-      setSummary(res.data);
-    } catch (err) {
-      console.error('AI Summary error:', err);
+        });
+        setSummary(res.data || fallbackSummary);
+      } catch (err) {
+        console.error('AI Summary error:', err);
+        setSummary(fallbackSummary);
+      }
     } finally {
       setLoading(false);
     }
