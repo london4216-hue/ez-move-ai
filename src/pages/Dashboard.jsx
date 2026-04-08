@@ -5,6 +5,7 @@ import { PUBLIC_DEMO_MODE } from "@/lib/featureFlags";
 import { differenceInDays, parseISO } from "date-fns";
 import { Package, Home, Sparkles, RotateCcw, LogOut, QrCode } from "lucide-react";
 import ChecklistPanel from "@/components/dashboard/ChecklistPanel";
+import DashboardHome from "@/components/dashboard/DashboardHome";
 import CalendarSheet from "@/components/dashboard/CalendarSheet";
 import MyStuffTab from "@/components/dashboard/MyStuffTab";
 import MoveCommandCenter from "@/components/dashboard/MoveCommandCenter";
@@ -12,7 +13,8 @@ import Week1OnboardingModal from "@/components/dashboard/Week1OnboardingModal";
 import AIMoveAssist from "@/components/dashboard/AIMoveAssist";
 
 const TABS = [
-  { id: "plan",      label: "My Move",  Icon: Home },
+  { id: "home",      label: "Dashboard", Icon: Home },
+  { id: "plan",      label: "My Move",  Icon: QrCode },
   { id: "inventory", label: "My Stuff", Icon: Package },
   { id: "ai",        label: "AI Assist", Icon: Sparkles },
 ];
@@ -187,6 +189,7 @@ export default function Dashboard() {
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto px-4 pt-4 pb-28">
+        {activeTab === "home" && <DashboardHome user={user} onViewChecklist={() => setActiveTab("plan")} />}
         {activeTab === "plan" && <ChecklistPanel user={user} />}
         {activeTab === "inventory" && <MyStuffTab user={user} onNavigate={setActiveTab} onStartOnboarding={() => setShowOnboarding(true)} />}
         {activeTab === "ai" && <AIMoveAssist user={user} />}
