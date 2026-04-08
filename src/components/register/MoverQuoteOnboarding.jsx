@@ -3,8 +3,9 @@ import { base44 } from "@/api/base44Client";
 import { PUBLIC_DEMO_MODE } from "@/lib/featureFlags";
 import {
   ChevronRight, ChevronLeft, CheckCircle2, Sparkles,
-  MapPin, DollarSign, Star, AlertTriangle, Plus, Minus, ChevronDown, ChevronUp
+  MapPin, DollarSign, Star, AlertTriangle, Plus, Minus, ChevronDown, ChevronUp, Clock
 } from "lucide-react";
+import RiskRadar from "@/components/register/RiskRadar";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -403,9 +404,32 @@ function Step3Access({ data, onChange, onNext }) {
   const ac = data.accessConditions || {};
   const set = (k, v) => onChange("accessConditions", { ...ac, [k]: v });
 
+  // Default demo time if not set
+  const moveTime = data.moveStartTime || "";
+
   return (
     <div className="space-y-4">
       <InsightBanner text="Access conditions affect crew time — stairs and parking can add 30–60 min." />
+
+      {/* Move Date & Time — mandatory for Risk Radar & Simulation */}
+      <Card>
+        <h2 className="text-xl font-black text-slate-900 mb-1">Move Date &amp; Start Time</h2>
+        <p className="text-sm text-slate-500 mb-4">Required to power your Risk Radar and Move Day Simulation.</p>
+        <div className="space-y-4">
+          <div>
+            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wide block mb-1.5">Move Date</label>
+            <input type="date" value={data.moveDate || ""} onChange={e => onChange("moveDate", e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400" />
+          </div>
+          <div>
+            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wide block mb-1.5">Estimated Start Time</label>
+            <input type="time" value={moveTime} onChange={e => onChange("moveStartTime", e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400" />
+            <p className="text-[10px] text-slate-400 mt-1">This powers your real-time Risk Radar and Move Day Simulation.</p>
+          </div>
+        </div>
+      </Card>
+
       <Card>
         <h2 className="text-xl font-black text-slate-900 mb-4">Access Conditions</h2>
         <div className="space-y-5">
@@ -557,9 +581,43 @@ function Step5Quote({ quote, onNext }) {
   );
 }
 
+function buildSimulation(state, quote) {
+  const startTime = state.moveStartTime || "09:00";
+  const [h, m] = startTime.split(":").map(Number);
+  const fmt = (hr, mn) => {
+    const suffix = hr >= 12 ? "PM" : "AM";
+    const fh = hr > 12 ? hr - 12 : hr === 0 ? 12 : hr;
+    return `${fh}:${String(mn).padStart(2, "0")} ${suffix}`;
+  };
+  const addMin = (hr, mn, mins) => { const total = hr * 60 + mn + mins; return [Math.floor(total / 60) % 24, total % 60]; };
+  const [lh, lm] = addMin(h, m, Math.round(quote.estimatedHours * 60 * 0.55));
+  const travelMins = Math.max(20, Math.round((state.miles || 15) * 1.2));
+  const [th, tm] = addMin(lh, lm, travelMins);
+  const [uh, um] = addMin(th, tm, Math.round(quote.estimatedHours * 60 * 0.45));
+  const isRush = h >= 7 && h <= 9;
+  const weatherNote = state.moveDate ? (() => { const d = new Date(state.moveDate + "T12:00:00"); return d.getDay() === 0 || d.getDay() === 6 ? " Rain possible — crews arrive with protective wrap." : ""; })() : "";
+  return {
+    arrival: fmt(h, m), loadDone: fmt(lh, lm), travelDone: fmt(th, tm), unloadDone: fmt(uh, um),
+    loadMins: Math.round(quote.estimatedHours * 60 * 0.55), travelMins,
+    unloadMins: Math.round(quote.estimatedHours * 60 * 0.45),
+    trafficNote: isRush ? "Rush hour start — build in 20–30 min buffer." : "",
+    weatherNote, miles: state.miles || 15,
+  };
+}
+
 function Step6Summary({ state, quote, onFinish }) {
   const [loading, setLoading] = useState(false);
   const [summary, setSummary] = useState(null);
+  const [activeTab, setActiveTab] = useState("simulation");
+
+  const enrichedState = { ...state };
+  if (!enrichedState.moveDate) {
+    const d = new Date(); d.setDate(d.getDate() + 10);
+    enrichedState.moveDate = d.toISOString().split("T")[0];
+    enrichedState._demoDate = true;
+  }
+  if (!enrichedState.moveStartTime) { enrichedState.moveStartTime = "09:00"; enrichedState._demoTime = true; }
+  const sim = buildSimulation(enrichedState, quote);
 
   const generateSummary = async () => {
     setLoading(true);
@@ -615,26 +673,57 @@ function Step6Summary({ state, quote, onFinish }) {
   if (!summary && !loading) {
     return (
       <div className="space-y-4">
-        <div className="text-center py-8">
+        <div className="text-center py-6">
           <div className="text-4xl mb-3">✨</div>
           <h2 className="text-xl font-black text-slate-900">AI Move Summary</h2>
-          <p className="text-sm text-slate-500 mt-1">Get personalized insights about your move</p>
+          <p className="text-sm text-slate-500 mt-1">Simulation, Risk Radar &amp; pro tips</p>
         </div>
-        <Card>
-          <p className="text-sm text-slate-600 leading-relaxed text-center">Based on your move details, we'll generate a personalized timeline, risk assessment, and pro tips for move day.</p>
-        </Card>
-        <PrimaryBtn onClick={generateSummary} disabled={loading}>
-          {loading ? (
-            <>
-              <Sparkles className="w-4 h-4 animate-spin" />
-              Generating…
-            </>
-          ) : (
-            <>
-              Generate My Summary
-              <ChevronRight className="w-4 h-4" />
-            </>
-          )}
+
+        {/* Tabs */}
+        <div className="flex gap-2 bg-slate-100 rounded-2xl p-1">
+          {["simulation", "risks"].map(tab => (
+            <button key={tab} onClick={() => setActiveTab(tab)}
+              className={`flex-1 py-2 rounded-xl text-xs font-black capitalize transition-all ${
+                activeTab === tab ? "bg-white shadow-sm text-slate-900" : "text-slate-400"
+              }`}>
+              {tab === "simulation" ? "🎬 Move Day Sim" : "⚡ Risk Radar"}
+            </button>
+          ))}
+        </div>
+
+        {activeTab === "simulation" && (
+          <Card>
+            {enrichedState._demoDate && <p className="text-[10px] text-amber-500 font-bold mb-3">📅 Demo date used — update in Step 2</p>}
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3">Move Day Timeline</p>
+            {[
+              { emoji: "🚛", label: "Crew Arrives", time: sim.arrival },
+              { emoji: "📦", label: `Load (~${sim.loadMins} min)`, time: `→ ${sim.loadDone}` },
+              { emoji: "🛣️", label: `Drive (~${sim.travelMins} min · ${sim.miles} mi)`, time: `→ ${sim.travelDone}` },
+              { emoji: "🏠", label: `Unload (~${sim.unloadMins} min)`, time: `→ ${sim.unloadDone}` },
+            ].map((row, i) => (
+              <div key={i} className="flex items-center gap-3 py-2 border-b border-slate-50 last:border-0">
+                <span className="text-lg w-7 text-center">{row.emoji}</span>
+                <p className="text-xs font-semibold text-slate-700 flex-1">{row.label}</p>
+                <p className="text-xs font-black text-orange-600">{row.time}</p>
+              </div>
+            ))}
+            {(sim.trafficNote || sim.weatherNote) && (
+              <div className="mt-3 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2 space-y-1">
+                {sim.trafficNote && <p className="text-[10px] text-amber-700 font-semibold">🚦 {sim.trafficNote}</p>}
+                {sim.weatherNote && <p className="text-[10px] text-amber-700 font-semibold">🌧️ {sim.weatherNote}</p>}
+              </div>
+            )}
+            <p className="text-[10px] text-slate-400 mt-3 italic">This simulation updates automatically as your move date approaches.</p>
+          </Card>
+        )}
+
+        {activeTab === "risks" && (
+          <RiskRadar moveDate={enrichedState.moveDate} moveStartTime={enrichedState.moveStartTime} miles={enrichedState.miles} />
+        )}
+
+        <PrimaryBtn onClick={generateSummary}>
+          Generate Full AI Summary
+          <ChevronRight className="w-4 h-4" />
         </PrimaryBtn>
       </div>
     );
