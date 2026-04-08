@@ -18,7 +18,7 @@ function getDemoUserId() {
 export default function OnboardingWeek1() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [preOnboardingDone, setPreOnboardingDone] = useState(false);
+  const [preOnboardingDone, setPreOnboardingDone] = useState(PUBLIC_DEMO_MODE);
   const navigate = useNavigate();
 
   useEffect(() => {
