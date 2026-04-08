@@ -270,12 +270,50 @@ function ServicesDashboard({ user }) {
   );
 }
 
+// ─── Item ID → readable name + default size mapper ───────────────────────────
+const ITEM_ID_MAP = {
+  bed_twin: ["Bed (Twin)", "Large"], bed_full: ["Bed (Full)", "Large"],
+  bed_queen: ["Bed (Queen)", "X-Large"], bed_king: ["Bed (King)", "X-Large"],
+  nightstand: ["Nightstand", "Small"], dresser: ["Dresser", "Large"],
+  tv: ["TV", "Medium"], lamps: ["Lamps", "Small"],
+  sofa_2: ["Sofa (2-seat)", "Large"], sofa_3: ["Sofa (3-seat)", "X-Large"],
+  sectional: ["Sectional", "X-Large"], coffee_table: ["Coffee Table", "Medium"],
+  tv_stand: ["TV Stand", "Medium"], dining_table: ["Dining Table", "Large"],
+  chairs: ["Chairs", "Small"], cabinets: ["Cabinets", "Large"],
+  boxes: ["Boxes", "Medium"], tool_chest: ["Tool Chest", "Large"],
+  lawn_mower: ["Lawn Mower", "Large"], bikes: ["Bikes", "Medium"],
+  storage_shelves: ["Storage Shelves", "Large"], desk: ["Desk", "Large"],
+  office_chair: ["Office Chair", "Medium"], bookshelves: ["Bookshelves", "Large"],
+};
+
+function importOnboardingInventory(userId) {
+  try {
+    const raw = localStorage.getItem(`mq_${userId}`);
+    if (!raw) return null;
+    const { inventory } = JSON.parse(raw);
+    if (!inventory) return null;
+    const items = [];
+    Object.entries(inventory).forEach(([, roomItems]) => {
+      Object.entries(roomItems || {}).forEach(([itemId, qty]) => {
+        for (let i = 0; i < qty; i++) {
+          const [name, size] = ITEM_ID_MAP[itemId] || [itemId.replace(/_/g, " "), "Medium"];
+          items.push({ id: `${itemId}-${i}-imported`, name, size });
+        }
+      });
+    });
+    return items.length > 0 ? items : null;
+  } catch { return null; }
+}
+
 export default function MyStuffTab({ user, onStartOnboarding }) {
   const [activeList, setActiveList] = useState(null);
   const [lists, setLists] = useState(() => {
     if (user?.stuff_lists) {
       try { return JSON.parse(user.stuff_lists); } catch {}
     }
+    // Auto-populate move list from onboarding inventory
+    const imported = importOnboardingInventory(user?.id);
+    if (imported) return { move: imported, junk: [], donate: [] };
     return { move: [], junk: [], donate: [] };
   });
   const [customInput, setCustomInput] = useState("");
@@ -283,7 +321,14 @@ export default function MyStuffTab({ user, onStartOnboarding }) {
   const [sent, setSent] = useState(false);
   const [selectingSize, setSelectingSize] = useState(null);
 
-  const onboardingDone = !!localStorage.getItem(`onboarding_done_${user?.id}`);
+  // Also show saved providers from dashboard builder
+  const savedMover = (() => { try { return JSON.parse(localStorage.getItem('ez_dashboard_mover')); } catch { return null; } })();
+  const savedJunk = (() => { try { return JSON.parse(localStorage.getItem('ez_dashboard_junk')); } catch { return null; } })();
+  const savedDonation = (() => { try { return JSON.parse(localStorage.getItem('ez_dashboard_donation')); } catch { return null; } })();
+
+  // Has inventory if there's onboarding data OR existing lists
+  const hasInventory = !!importOnboardingInventory(user?.id) || Object.values(lists).some(a => a.length > 0);
+  const onboardingDone = !!localStorage.getItem(`onboarding_done_${user?.id}`) || hasInventory;
   const currentList = LISTS.find(l => l.key === activeList);
   const items = activeList && activeList !== "summary" ? lists[activeList] : [];
   const totalItems = Object.values(lists).reduce((sum, arr) => sum + arr.length, 0);
@@ -345,6 +390,47 @@ export default function MyStuffTab({ user, onStartOnboarding }) {
     return (
       <div className="space-y-3">
         <ServicesDashboard user={user} />
+        {/* Saved Providers from Dashboard Builder */}
+        {(savedMover || savedJunk || savedDonation) && (
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+            <div className="px-4 py-3 border-b border-slate-100">
+              <p className="text-sm font-black text-slate-800">📌 Your Saved Providers</p>
+              <p className="text-[10px] text-slate-400 mt-0.5">Selected during onboarding — ready to contact</p>
+            </div>
+            <div className="divide-y divide-slate-50">
+              {savedMover && (
+                <div className="px-4 py-3 flex items-center gap-3">
+                  <span className="text-xl">🚛</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-black text-slate-800">{savedMover.name}</p>
+                    <p className="text-[10px] text-slate-400">Mover · ⭐ {savedMover.rating} ({savedMover.reviews} reviews)</p>
+                  </div>
+                  {savedMover.phone && <a href={`tel:${savedMover.phone}`} className="text-[10px] font-bold text-orange-500 bg-orange-50 px-2 py-1 rounded-lg flex items-center gap-1"><Phone className="w-3 h-3" />{savedMover.phone}</a>}
+                </div>
+              )}
+              {savedJunk && (
+                <div className="px-4 py-3 flex items-center gap-3">
+                  <span className="text-xl">🗑️</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-black text-slate-800">{savedJunk.name}</p>
+                    <p className="text-[10px] text-slate-400">Junk Removal · ⭐ {savedJunk.rating}</p>
+                  </div>
+                  {savedJunk.phone && <a href={`tel:${savedJunk.phone}`} className="text-[10px] font-bold text-orange-500 bg-orange-50 px-2 py-1 rounded-lg flex items-center gap-1"><Phone className="w-3 h-3" />{savedJunk.phone}</a>}
+                </div>
+              )}
+              {savedDonation && (
+                <div className="px-4 py-3 flex items-center gap-3">
+                  <span className="text-xl">♻️</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-black text-slate-800">{savedDonation.name}</p>
+                    <p className="text-[10px] text-slate-400">Donation Center · ⭐ {savedDonation.rating}</p>
+                  </div>
+                  {savedDonation.phone && <a href={`tel:${savedDonation.phone}`} className="text-[10px] font-bold text-orange-500 bg-orange-50 px-2 py-1 rounded-lg flex items-center gap-1"><Phone className="w-3 h-3" />{savedDonation.phone}</a>}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
         <div className="bg-white rounded-2xl px-4 py-4 border border-slate-100">
           <div className="flex items-center justify-between">
             <div>
