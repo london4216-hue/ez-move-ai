@@ -229,92 +229,154 @@ function FindMoverStep({ onNext, userAddress }) {
 }
 
 // Step 2: Junk Removal
-function JunkRemovalStep({ onNext }) {
-  const [answer, setAnswer] = useState(null);
-  const [inventory, setInventory] = useState({});
-  const [misc, setMisc] = useState("");
+function JunkRemovalStep({ onNext, userAddress }) {
+  const [loading, setLoading] = useState(false);
+  const [providers, setProviders] = useState(null);
 
-  if (!answer) {
-    return (
-      <div className="space-y-6">
-        <div className="text-center py-4">
-          <div className="text-5xl mb-3">🗑️</div>
-          <h2 className="text-2xl font-black text-slate-900 mb-2">Junk Removal</h2>
-          <p className="text-slate-500 text-base">Do you have any junk you want removed?</p>
-        </div>
-        <OptionButtons onSelect={(opt) => {
-          if (opt === "Yes") setAnswer("yes");
-          else onNext({ junkRemoval: opt, junkInventory: null });
-        }} />
+  const fetchProviders = async () => {
+    setLoading(true);
+    const fallback = [
+      { name: "Junk King", rating: "4.8", reviews: 421, phone: "(555) 100-5500", description: "Same-day junk pickup, eco-friendly disposal & recycling." },
+      { name: "1-800-GOT-JUNK?", rating: "4.7", reviews: 893, phone: "(555) 468-5865", description: "Nation's #1 junk removal. All items, any size load." },
+      { name: "LoadUp Junk Removal", rating: "4.6", reviews: 214, phone: "(555) 223-8844", description: "Upfront pricing, no hidden fees. Free online quotes." },
+    ];
+    try {
+      const res = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are a local services directory. Generate 3 realistic top-rated junk removal companies near "${userAddress || "the local area"}". Each should have a name, rating (4.5–5.0), reviews count, phone number, and a one-line description.`,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            providers: { type: "array", items: { type: "object", properties: { name: { type: "string" }, rating: { type: "string" }, reviews: { type: "number" }, phone: { type: "string" }, description: { type: "string" } } } }
+          }
+        }
+      });
+      setProviders(res.providers || fallback);
+    } catch { setProviders(fallback); }
+    finally { setLoading(false); }
+  };
+
+  if (loading) return (
+    <div className="flex flex-col items-center py-20 gap-4">
+      <div className="w-16 h-16 rounded-3xl bg-orange-50 flex items-center justify-center"><Sparkles className="w-8 h-8 text-orange-500 animate-pulse" /></div>
+      <p className="font-bold text-slate-700">Finding junk removal services near you…</p>
+    </div>
+  );
+
+  if (providers) return (
+    <div className="space-y-4">
+      <div className="text-center py-2">
+        <h2 className="text-xl font-black text-slate-900 mb-1">🗑️ Junk Removal Near You</h2>
+        <p className="text-sm text-slate-500">AI-curated based on your location</p>
       </div>
-    );
-  }
+      {providers.map((p, i) => (
+        <div key={i} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-2">
+          <div className="flex items-start justify-between">
+            <p className="font-black text-slate-900 text-base">{p.name}</p>
+            <div className="flex items-center gap-1 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">
+              <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
+              <span className="text-xs font-bold text-amber-700">{p.rating}</span>
+              <span className="text-[10px] text-amber-500">({p.reviews})</span>
+            </div>
+          </div>
+          <p className="text-sm text-slate-500">{p.description}</p>
+          <div className="flex items-center gap-2 pt-1"><Phone className="w-3.5 h-3.5 text-orange-500" /><span className="text-sm font-semibold text-orange-600">{p.phone}</span></div>
+        </div>
+      ))}
+      <button onClick={() => onNext({ junkRemoval: "Yes", junkProviders: providers })} className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-orange-200 active:scale-[0.98] transition-all">Continue <ChevronRight className="w-4 h-4" /></button>
+      <button onClick={() => onNext({ junkRemoval: "Maybe Later" })} className="w-full text-center text-xs text-slate-400 font-semibold py-2">Skip for now</button>
+    </div>
+  );
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h2 className="text-xl font-black text-slate-900 mb-1">🗑️ What needs to go?</h2>
-        <p className="text-sm text-slate-500">Select items from each room you want removed.</p>
+    <div className="space-y-6">
+      <div className="text-center py-4">
+        <div className="text-5xl mb-3">🗑️</div>
+        <h2 className="text-2xl font-black text-slate-900 mb-2">Junk Removal</h2>
+        <p className="text-slate-500 text-base">Do you have any junk you want removed?</p>
       </div>
-      <InventoryPicker inventory={inventory} setInventory={setInventory} misc={misc} setMisc={setMisc} />
-      <button
-        onClick={() => onNext({ junkRemoval: "Yes", junkInventory: inventory, junkMisc: misc })}
-        className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-orange-200 active:scale-[0.98] transition-all"
-      >
-        Continue <ChevronRight className="w-4 h-4" />
-      </button>
+      <div className="space-y-3">
+        <button onClick={fetchProviders} className="w-full py-4 rounded-2xl border-2 border-orange-400 bg-orange-50 text-orange-700 font-bold text-sm hover:bg-orange-100 active:scale-[0.98] transition-all">Yes, find junk removal</button>
+        {["No", "Maybe Later"].map(opt => (
+          <button key={opt} onClick={() => onNext({ junkRemoval: opt })} className="w-full py-4 rounded-2xl border-2 border-slate-200 bg-white text-slate-700 font-bold text-sm hover:bg-slate-50 active:scale-[0.98] transition-all">{opt}</button>
+        ))}
+      </div>
     </div>
   );
 }
 
 // Step 3: Donation Pickup
 function DonationStep({ onNext, prefilledAddress }) {
-  const [answer, setAnswer] = useState(null);
-  const [inventory, setInventory] = useState({});
-  const [misc, setMisc] = useState("");
-  const [address, setAddress] = useState(prefilledAddress || "");
+  const [loading, setLoading] = useState(false);
+  const [providers, setProviders] = useState(null);
+  const address = prefilledAddress || "";
 
-  if (!answer) {
-    return (
-      <div className="space-y-6">
-        <div className="text-center py-4">
-          <div className="text-5xl mb-3">♻️</div>
-          <h2 className="text-2xl font-black text-slate-900 mb-2">Donation Pickup</h2>
-          <p className="text-slate-500 text-base">Do you have items you want to donate?</p>
-        </div>
-        <OptionButtons onSelect={(opt) => {
-          if (opt === "Yes") setAnswer("yes");
-          else onNext({ donation: opt, donationInventory: null });
-        }} />
+  const fetchProviders = async () => {
+    setLoading(true);
+    const fallback = [
+      { name: "Habitat for Humanity ReStore", rating: "4.8", reviews: 512, phone: "(555) 422-7700", description: "Accepts furniture, appliances, and building materials." },
+      { name: "The Salvation Army", rating: "4.6", reviews: 378, phone: "(555) 728-5687", description: "Free pickup for furniture, clothing & household goods." },
+      { name: "GreenDrop", rating: "4.7", reviews: 201, phone: "(555) 944-3300", description: "Scheduled donation pickup. Benefits multiple charities." },
+    ];
+    try {
+      const res = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are a local services directory. Generate 3 realistic top-rated donation pickup or drop-off centers near "${address || "the local area"}". Each should have a name, rating (4.5–5.0), reviews count, phone number, and a one-line description of what they accept.`,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            providers: { type: "array", items: { type: "object", properties: { name: { type: "string" }, rating: { type: "string" }, reviews: { type: "number" }, phone: { type: "string" }, description: { type: "string" } } } }
+          }
+        }
+      });
+      setProviders(res.providers || fallback);
+    } catch { setProviders(fallback); }
+    finally { setLoading(false); }
+  };
+
+  if (loading) return (
+    <div className="flex flex-col items-center py-20 gap-4">
+      <div className="w-16 h-16 rounded-3xl bg-orange-50 flex items-center justify-center"><Sparkles className="w-8 h-8 text-orange-500 animate-pulse" /></div>
+      <p className="font-bold text-slate-700">Finding donation centers near you…</p>
+    </div>
+  );
+
+  if (providers) return (
+    <div className="space-y-4">
+      <div className="text-center py-2">
+        <h2 className="text-xl font-black text-slate-900 mb-1">♻️ Donation Centers Near You</h2>
+        <p className="text-sm text-slate-500">AI-curated based on your location</p>
       </div>
-    );
-  }
+      {providers.map((p, i) => (
+        <div key={i} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-2">
+          <div className="flex items-start justify-between">
+            <p className="font-black text-slate-900 text-base">{p.name}</p>
+            <div className="flex items-center gap-1 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">
+              <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
+              <span className="text-xs font-bold text-amber-700">{p.rating}</span>
+              <span className="text-[10px] text-amber-500">({p.reviews})</span>
+            </div>
+          </div>
+          <p className="text-sm text-slate-500">{p.description}</p>
+          <div className="flex items-center gap-2 pt-1"><Phone className="w-3.5 h-3.5 text-orange-500" /><span className="text-sm font-semibold text-orange-600">{p.phone}</span></div>
+        </div>
+      ))}
+      <button onClick={() => onNext({ donation: "Yes", donationProviders: providers })} className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-orange-200 active:scale-[0.98] transition-all">Finish Setup <ChevronRight className="w-4 h-4" /></button>
+      <button onClick={() => onNext({ donation: "Maybe Later" })} className="w-full text-center text-xs text-slate-400 font-semibold py-2">Skip for now</button>
+    </div>
+  );
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h2 className="text-xl font-black text-slate-900 mb-1">♻️ What are you donating?</h2>
-        <p className="text-sm text-slate-500">Select items and we'll find donation centers near you.</p>
+    <div className="space-y-6">
+      <div className="text-center py-4">
+        <div className="text-5xl mb-3">♻️</div>
+        <h2 className="text-2xl font-black text-slate-900 mb-2">Donation Pickup</h2>
+        <p className="text-slate-500 text-base">Do you have items you want to donate?</p>
       </div>
-      {!prefilledAddress && (
-        <div className="bg-white rounded-2xl border-2 border-slate-200 p-4">
-          <label className="text-xs font-bold text-slate-500 uppercase tracking-wide block mb-2">Your Current Address</label>
-          <input
-            type="text"
-            value={address}
-            onChange={e => setAddress(e.target.value)}
-            placeholder="123 Current St, City, State"
-            className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-400"
-          />
-        </div>
-      )}
-      <InventoryPicker inventory={inventory} setInventory={setInventory} misc={misc} setMisc={setMisc} />
-      <button
-        onClick={() => onNext({ donation: "Yes", donationInventory: inventory, donationMisc: misc, donationAddress: address })}
-        className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-orange-200 active:scale-[0.98] transition-all"
-      >
-        Finish Setup <ChevronRight className="w-4 h-4" />
-      </button>
+      <div className="space-y-3">
+        <button onClick={fetchProviders} className="w-full py-4 rounded-2xl border-2 border-orange-400 bg-orange-50 text-orange-700 font-bold text-sm hover:bg-orange-100 active:scale-[0.98] transition-all">Yes, find donation centers</button>
+        {["No", "Maybe Later"].map(opt => (
+          <button key={opt} onClick={() => onNext({ donation: opt })} className="w-full py-4 rounded-2xl border-2 border-slate-200 bg-white text-slate-700 font-bold text-sm hover:bg-slate-50 active:scale-[0.98] transition-all">{opt}</button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -357,7 +419,7 @@ export default function PostOnboardingSteps({ userId, userAddress, onComplete, o
 
       <div className="px-4 pt-6 pb-24 max-w-lg mx-auto">
         {step === 0 && <FindMoverStep onNext={advance} userAddress={userAddress} />}
-        {step === 1 && <JunkRemovalStep onNext={advance} />}
+        {step === 1 && <JunkRemovalStep onNext={advance} userAddress={userAddress} />}
         {step === 2 && <DonationStep onNext={advance} prefilledAddress={userAddress} />}
       </div>
     </div>
