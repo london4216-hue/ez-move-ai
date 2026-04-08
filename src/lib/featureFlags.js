@@ -4,7 +4,7 @@
  */
 
 export const featureFlags = {
-  ENABLE_REGISTRATION: false, // Hide signup/registration when false
+  ENABLE_REGISTRATION: true, // Hide signup/registration when false
   PUBLIC_DEMO_MODE: true, // When true: blocks all signup routes, removes personal email from landing
 };
 

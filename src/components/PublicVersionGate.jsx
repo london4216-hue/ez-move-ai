@@ -34,11 +34,11 @@ export default function PublicVersionGate({ children }) {
         return;
       }
 
-      // If no ?v= at all, or version mismatch → expired
-      if (!urlVersion || urlVersion !== currentVersion) {
-        navigate("/AccessExpired");
-        return;
-      }
+      // Version gate disabled — allow all visitors through
+      // if (!urlVersion || urlVersion !== currentVersion) {
+      //   navigate("/AccessExpired");
+      //   return;
+      // }
 
       setChecking(false);
     };
