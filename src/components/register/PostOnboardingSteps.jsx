@@ -109,7 +109,7 @@ function OptionButtons({ onSelect }) {
 }
 
 // Step 1: Find a Mover
-function FindMoverStep({ onNext, onMoverWorkflow }) {
+function FindMoverStep({ onNext }) {
   return (
     <div className="space-y-6">
       <div className="text-center py-4">
@@ -117,10 +117,7 @@ function FindMoverStep({ onNext, onMoverWorkflow }) {
         <h2 className="text-2xl font-black text-slate-900 mb-2">Find a Mover</h2>
         <p className="text-slate-500 text-base">Would you like EZ Move AI to find you a top-tier mover?</p>
       </div>
-      <OptionButtons onSelect={(opt) => {
-        if (opt === "Yes") onMoverWorkflow();
-        else onNext({ findMover: opt });
-      }} />
+      <OptionButtons onSelect={(opt) => onNext({ findMover: opt })} />
     </div>
   );
 }
@@ -253,7 +250,7 @@ export default function PostOnboardingSteps({ userId, userAddress, onComplete, o
       </div>
 
       <div className="px-4 pt-6 pb-24 max-w-lg mx-auto">
-        {step === 0 && <FindMoverStep onNext={advance} onMoverWorkflow={onMoverWorkflow} />}
+        {step === 0 && <FindMoverStep onNext={advance} />}
         {step === 1 && <JunkRemovalStep onNext={advance} />}
         {step === 2 && <DonationStep onNext={advance} prefilledAddress={userAddress} />}
       </div>
