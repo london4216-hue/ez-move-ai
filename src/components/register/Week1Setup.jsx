@@ -142,6 +142,16 @@ export default function Week1Setup({ userId, userAddress, onComplete, onSaveExit
           </div>
         </div>
 
+        {/* AI Insight card */}
+        <div className="bg-white rounded-2xl border border-orange-100 shadow-sm px-4 py-3 flex items-start gap-2.5 animate-slide-up">
+          <div className="w-7 h-7 rounded-xl bg-orange-50 flex items-center justify-center flex-shrink-0">
+            <Sparkles className="w-3.5 h-3.5 text-orange-500" />
+          </div>
+          <div>
+            <p className="text-[10px] font-bold text-orange-500 uppercase tracking-wide mb-0.5">AI Insight</p>
+            <p className="text-xs text-slate-600 leading-relaxed">We're customizing your move plan based on your answers.</p>
+          </div>
+        </div>
 
         {/* Task card */}
         {aiPhase === null && (
