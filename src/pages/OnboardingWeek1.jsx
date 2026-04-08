@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import Week1Setup from "@/components/register/Week1Setup";
+import PostOnboardingSteps from "@/components/register/PostOnboardingSteps";
 import MoverQuoteOnboarding from "@/components/register/MoverQuoteOnboarding";
 import { PUBLIC_DEMO_MODE } from "@/lib/featureFlags";
 
@@ -19,6 +19,7 @@ export default function OnboardingWeek1() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [preOnboardingDone, setPreOnboardingDone] = useState(false);
+  const [showMoverWorkflow, setShowMoverWorkflow] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -84,11 +85,11 @@ export default function OnboardingWeek1() {
           }}
         />
       ) : (
-        <Week1Setup
+        <PostOnboardingSteps
           userId={user.id}
           userAddress={user.home_address || ""}
           onComplete={handleComplete}
-          hideButtons={false}
+          onMoverWorkflow={() => setShowMoverWorkflow(true)}
         />
       )}
     </div>
