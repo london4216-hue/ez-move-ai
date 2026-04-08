@@ -113,6 +113,7 @@ function OptionButtons({ onSelect }) {
 function FindMoverStep({ onNext, userAddress }) {
   const [loading, setLoading] = useState(false);
   const [movers, setMovers] = useState(null);
+  const [selected, setSelected] = useState(null);
 
   const fetchMovers = async () => {
     setLoading(true);
@@ -163,42 +164,42 @@ function FindMoverStep({ onNext, userAddress }) {
     );
   }
 
-  if (movers) {
-    return (
-      <div className="space-y-4">
-        <div className="text-center py-2">
-          <h2 className="text-xl font-black text-slate-900 mb-1">Top Movers Near You</h2>
-          <p className="text-sm text-slate-500">AI-curated based on your move details</p>
-        </div>
-        {movers.map((m, i) => (
-          <div key={i} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-2">
-            <div className="flex items-start justify-between">
-              <p className="font-black text-slate-900 text-base">{m.name}</p>
-              <div className="flex items-center gap-1 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">
-                <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
-                <span className="text-xs font-bold text-amber-700">{m.rating}</span>
-                <span className="text-[10px] text-amber-500">({m.reviews})</span>
-              </div>
-            </div>
-            <p className="text-sm text-slate-500 leading-relaxed">{m.description}</p>
-            <div className="flex items-center gap-2 pt-1">
-              <Phone className="w-3.5 h-3.5 text-orange-500" />
-              <span className="text-sm font-semibold text-orange-600">{m.phone}</span>
+  if (movers) return (
+    <div className="space-y-4">
+      <div className="text-center py-2">
+        <h2 className="text-xl font-black text-slate-900 mb-1">🚛 Top Movers Near You</h2>
+        <p className="text-sm text-slate-500">Tap a mover to select them</p>
+      </div>
+      {movers.map((m, i) => (
+        <button key={i} onClick={() => setSelected(i)}
+          className={`w-full text-left rounded-2xl border-2 shadow-sm p-4 space-y-2 transition-all ${
+            selected === i ? "border-orange-400 bg-orange-50" : "border-slate-200 bg-white"
+          }`}>
+          <div className="flex items-start justify-between">
+            <p className="font-black text-slate-900 text-base">{m.name}</p>
+            <div className="flex items-center gap-1 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">
+              <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
+              <span className="text-xs font-bold text-amber-700">{m.rating}</span>
+              <span className="text-[10px] text-amber-500">({m.reviews})</span>
             </div>
           </div>
-        ))}
-        <button
-          onClick={() => onNext({ findMover: "Yes", movers })}
-          className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-orange-200 active:scale-[0.98] transition-all"
-        >
-          Continue <ChevronRight className="w-4 h-4" />
+          <p className="text-sm text-slate-500 leading-relaxed">{m.description}</p>
+          <div className="flex items-center gap-2 pt-1">
+            <Phone className="w-3.5 h-3.5 text-orange-500" />
+            <span className="text-sm font-semibold text-orange-600">{m.phone}</span>
+          </div>
         </button>
-        <button onClick={() => onNext({ findMover: "Maybe Later" })} className="w-full text-center text-xs text-slate-400 font-semibold py-2">
-          Skip for now
-        </button>
-      </div>
-    );
-  }
+      ))}
+      <button
+        onClick={() => onNext({ findMover: "Yes", selectedMover: movers[selected] })}
+        disabled={selected === null}
+        className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-orange-200 active:scale-[0.98] transition-all disabled:opacity-40"
+      >
+        Continue <ChevronRight className="w-4 h-4" />
+      </button>
+      <button onClick={() => onNext({ findMover: "Maybe Later" })} className="w-full text-center text-xs text-slate-400 font-semibold py-2">Skip for now</button>
+    </div>
+  );
 
   return (
     <div className="space-y-6">
@@ -232,6 +233,7 @@ function FindMoverStep({ onNext, userAddress }) {
 function JunkRemovalStep({ onNext, userAddress }) {
   const [loading, setLoading] = useState(false);
   const [providers, setProviders] = useState(null);
+  const [selected, setSelected] = useState(null);
 
   const fetchProviders = async () => {
     setLoading(true);
@@ -266,10 +268,13 @@ function JunkRemovalStep({ onNext, userAddress }) {
     <div className="space-y-4">
       <div className="text-center py-2">
         <h2 className="text-xl font-black text-slate-900 mb-1">🗑️ Junk Removal Near You</h2>
-        <p className="text-sm text-slate-500">AI-curated based on your location</p>
+        <p className="text-sm text-slate-500">Tap a provider to select them</p>
       </div>
       {providers.map((p, i) => (
-        <div key={i} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-2">
+        <button key={i} onClick={() => setSelected(i)}
+          className={`w-full text-left rounded-2xl border-2 shadow-sm p-4 space-y-2 transition-all ${
+            selected === i ? "border-orange-400 bg-orange-50" : "border-slate-200 bg-white"
+          }`}>
           <div className="flex items-start justify-between">
             <p className="font-black text-slate-900 text-base">{p.name}</p>
             <div className="flex items-center gap-1 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">
@@ -280,9 +285,9 @@ function JunkRemovalStep({ onNext, userAddress }) {
           </div>
           <p className="text-sm text-slate-500">{p.description}</p>
           <div className="flex items-center gap-2 pt-1"><Phone className="w-3.5 h-3.5 text-orange-500" /><span className="text-sm font-semibold text-orange-600">{p.phone}</span></div>
-        </div>
+        </button>
       ))}
-      <button onClick={() => onNext({ junkRemoval: "Yes", junkProviders: providers })} className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-orange-200 active:scale-[0.98] transition-all">Continue <ChevronRight className="w-4 h-4" /></button>
+      <button onClick={() => onNext({ junkRemoval: "Yes", selectedJunkProvider: providers[selected] })} disabled={selected === null} className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-orange-200 active:scale-[0.98] transition-all disabled:opacity-40">Continue <ChevronRight className="w-4 h-4" /></button>
       <button onClick={() => onNext({ junkRemoval: "Maybe Later" })} className="w-full text-center text-xs text-slate-400 font-semibold py-2">Skip for now</button>
     </div>
   );
@@ -308,6 +313,7 @@ function JunkRemovalStep({ onNext, userAddress }) {
 function DonationStep({ onNext, prefilledAddress }) {
   const [loading, setLoading] = useState(false);
   const [providers, setProviders] = useState(null);
+  const [selected, setSelected] = useState(null);
   const address = prefilledAddress || "";
 
   const fetchProviders = async () => {
@@ -343,10 +349,13 @@ function DonationStep({ onNext, prefilledAddress }) {
     <div className="space-y-4">
       <div className="text-center py-2">
         <h2 className="text-xl font-black text-slate-900 mb-1">♻️ Donation Centers Near You</h2>
-        <p className="text-sm text-slate-500">AI-curated based on your location</p>
+        <p className="text-sm text-slate-500">Tap a center to select them</p>
       </div>
       {providers.map((p, i) => (
-        <div key={i} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-2">
+        <button key={i} onClick={() => setSelected(i)}
+          className={`w-full text-left rounded-2xl border-2 shadow-sm p-4 space-y-2 transition-all ${
+            selected === i ? "border-orange-400 bg-orange-50" : "border-slate-200 bg-white"
+          }`}>
           <div className="flex items-start justify-between">
             <p className="font-black text-slate-900 text-base">{p.name}</p>
             <div className="flex items-center gap-1 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">
@@ -357,9 +366,9 @@ function DonationStep({ onNext, prefilledAddress }) {
           </div>
           <p className="text-sm text-slate-500">{p.description}</p>
           <div className="flex items-center gap-2 pt-1"><Phone className="w-3.5 h-3.5 text-orange-500" /><span className="text-sm font-semibold text-orange-600">{p.phone}</span></div>
-        </div>
+        </button>
       ))}
-      <button onClick={() => onNext({ donation: "Yes", donationProviders: providers })} className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-orange-200 active:scale-[0.98] transition-all">Finish Setup <ChevronRight className="w-4 h-4" /></button>
+      <button onClick={() => onNext({ donation: "Yes", selectedDonationCenter: providers[selected] })} disabled={selected === null} className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-orange-200 active:scale-[0.98] transition-all disabled:opacity-40">Finish Setup <ChevronRight className="w-4 h-4" /></button>
       <button onClick={() => onNext({ donation: "Maybe Later" })} className="w-full text-center text-xs text-slate-400 font-semibold py-2">Skip for now</button>
     </div>
   );
