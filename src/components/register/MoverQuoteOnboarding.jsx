@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { PUBLIC_DEMO_MODE } from "@/lib/featureFlags";
 import {
   ChevronRight, ChevronLeft, CheckCircle2, Sparkles,
-  MapPin, DollarSign, Star, AlertTriangle, Plus, Minus, ChevronDown, ChevronUp, Clock
+  MapPin, DollarSign, Star, AlertTriangle, Plus, Minus, ChevronDown, ChevronUp, Clock, Navigation
 } from "lucide-react";
 import RiskRadar from "@/components/register/RiskRadar";
 
@@ -713,12 +713,26 @@ function Step6Summary({ state, quote, onFinish }) {
                 {sim.weatherNote && <p className="text-[10px] text-amber-700 font-semibold">🌧️ {sim.weatherNote}</p>}
               </div>
             )}
-            <p className="text-[10px] text-slate-400 mt-3 italic">This simulation updates automatically as your move date approaches.</p>
+            {enrichedState.fromAddress && (
+              <div className="flex items-center gap-1.5 mt-3 bg-orange-50 border border-orange-100 rounded-xl px-3 py-2">
+                <Navigation className="w-3 h-3 text-orange-500 flex-shrink-0" />
+                <p className="text-[10px] text-orange-600 font-semibold">
+                  Powered by real-time data for {enrichedState.fromAddress.split(",").slice(-2, -1)[0]?.trim() || "your area"}
+                </p>
+              </div>
+            )}
+            <p className="text-[10px] text-slate-400 mt-2 italic">This simulation updates automatically as your move date approaches.</p>
           </Card>
         )}
 
         {activeTab === "risks" && (
-          <RiskRadar moveDate={enrichedState.moveDate} moveStartTime={enrichedState.moveStartTime} miles={enrichedState.miles} />
+          <RiskRadar
+            moveDate={enrichedState.moveDate}
+            moveStartTime={enrichedState.moveStartTime}
+            miles={enrichedState.miles}
+            fromAddress={enrichedState.fromAddress}
+            toAddress={enrichedState.toAddress}
+          />
         )}
 
         <PrimaryBtn onClick={generateSummary}>
