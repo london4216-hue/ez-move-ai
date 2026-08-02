@@ -1,0 +1,33 @@
+{
+  "name": "SavedProvider",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "role": {
+      "type": "string",
+      "description": "e.g. Movers, Estate Sale, Painters"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "rating": {
+      "type": "string"
+    },
+    "week": {
+      "type": "number"
+    },
+    "checklist_item": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "user_id",
+    "name",
+    "role"
+  ]
+}

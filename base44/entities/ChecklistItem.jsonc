@@ -1,0 +1,61 @@
+{
+  "name": "ChecklistItem",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "week": {
+      "type": "number"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "completed": {
+      "type": "boolean",
+      "default": false
+    },
+    "skipped": {
+      "type": "boolean",
+      "default": false
+    },
+    "category": {
+      "type": "string"
+    },
+    "ai_search_query": {
+      "type": "string",
+      "description": "Query to use for AI local service finder"
+    },
+    "ai_results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "rating": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "sort_order": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "user_id",
+    "week",
+    "title"
+  ]
+}

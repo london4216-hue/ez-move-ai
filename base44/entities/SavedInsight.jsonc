@@ -1,0 +1,55 @@
+{
+  "name": "SavedInsight",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "User who saved the insight"
+    },
+    "tool_id": {
+      "type": "string",
+      "description": "AI tool identifier (e.g., neighborhood, food, quote)"
+    },
+    "tool_name": {
+      "type": "string",
+      "description": "Display name of the tool (e.g., Neighborhood Research)"
+    },
+    "tool_emoji": {
+      "type": "string",
+      "description": "Emoji for visual identification"
+    },
+    "content": {
+      "type": "string",
+      "description": "The saved AI result content"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "neighborhood",
+        "food",
+        "quote",
+        "supplies",
+        "timeline",
+        "documents",
+        "budget"
+      ],
+      "description": "Category for organization"
+    },
+    "saved_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the insight was saved"
+    },
+    "notes": {
+      "type": "string",
+      "description": "User's personal notes about this place or insight"
+    }
+  },
+  "required": [
+    "user_id",
+    "tool_id",
+    "tool_name",
+    "content",
+    "category"
+  ]
+}

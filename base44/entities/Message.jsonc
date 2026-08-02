@@ -1,0 +1,30 @@
+{
+  "name": "Message",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "sender_name": {
+      "type": "string"
+    },
+    "sender_role": {
+      "type": "string"
+    },
+    "content": {
+      "type": "string"
+    },
+    "is_read": {
+      "type": "boolean",
+      "default": false
+    },
+    "sender_avatar": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "user_id",
+    "sender_name",
+    "content"
+  ]
+}

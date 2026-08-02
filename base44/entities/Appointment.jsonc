@@ -1,0 +1,80 @@
+{
+  "name": "Appointment",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "provider_name": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "time": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "scheduled",
+        "tentative",
+        "completed",
+        "cancelled"
+      ],
+      "default": "tentative"
+    },
+    "reminder_times": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "number",
+            "description": "Number of hours before task"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "email",
+              "in_app"
+            ],
+            "default": "email"
+          }
+        }
+      },
+      "description": "Array of reminder settings (e.g., {value: 24, type: 'email'} for 1 day before)"
+    },
+    "reminders_sent": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "hours_before": {
+            "type": "number"
+          },
+          "sent_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "description": "Track which reminders have been sent"
+    }
+  },
+  "required": [
+    "user_id",
+    "title",
+    "date"
+  ]
+}
